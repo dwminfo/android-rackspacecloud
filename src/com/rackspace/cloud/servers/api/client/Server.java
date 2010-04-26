@@ -101,6 +101,26 @@ public class Server extends Entity {
 	public void setPrivateIpAddresses(String[] privateIpAddresses) {
 		this.privateIpAddresses = privateIpAddresses;
 	}
+	/**
+	 * @return the flavor
+	 */
+	public Flavor getFlavor() {
+		Flavor flavor = Flavor.getFlavors().get(flavorId);
+		if (flavor == null) {
+			flavor = new Flavor();
+		}
+		return flavor;
+	}
 	
+	/**
+	 * @return the image
+	 */
+	public Image getImage() {
+		Image image = Image.getImages().get(imageId);
+		if (image == null) {
+			image = new Image();
+		}
+		return image;
+	}
 	
 }

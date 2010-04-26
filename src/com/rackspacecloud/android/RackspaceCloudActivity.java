@@ -1,6 +1,14 @@
 package com.rackspacecloud.android;
 
+import java.util.ArrayList;
+import java.util.TreeMap;
+
 import com.rackspace.cloud.servers.api.client.Account;
+import com.rackspace.cloud.servers.api.client.Flavor;
+import com.rackspace.cloud.servers.api.client.FlavorManager;
+import com.rackspace.cloud.servers.api.client.Image;
+import com.rackspace.cloud.servers.api.client.ImageManager;
+import com.rackspace.cloud.servers.api.client.ServerManager;
 import com.rackspace.cloud.servers.api.client.http.Authentication;
 
 import android.app.Activity;
@@ -124,11 +132,61 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 		@Override
 		protected void onPostExecute(Boolean result) {
 			if (result.booleanValue()) {
-				startActivity(tabViewIntent);
+				//startActivity(tabViewIntent);
+	        	new LoadImagesTask().execute((Void[]) null);				
 			} else {
 				showAlert("Login Failure", "Authentication failed.  Please check your User Name and API Key.");
 			}
+			//hideActivityIndicators();
+		}
+    }
+
+    private class LoadFlavorsTask extends AsyncTask<Void, Void, ArrayList<Flavor>> {
+    	
+		@Override
+		protected ArrayList<Flavor> doInBackground(Void... arg0) {
+			return (new FlavorManager()).createList(true);
+		}
+    	
+		@Override
+		protected void onPostExecute(ArrayList<Flavor> result) {
+			if (result != null && result.size() > 0) {
+				TreeMap<String, Flavor> flavorMap = new TreeMap<String, Flavor>();
+				for (int i = 0; i < result.size(); i++) {
+					Flavor flavor = result.get(i);
+					flavorMap.put(flavor.getId(), flavor);
+				}
+				Flavor.setFlavors(flavorMap);
+				startActivity(tabViewIntent);
+			} else {
+				showAlert("Login Failure", "There was a problem loading server flavors.  Please try again.");
+			}
 			hideActivityIndicators();
+		}
+    }
+
+    private class LoadImagesTask extends AsyncTask<Void, Void, ArrayList<Image>> {
+    	
+		@Override
+		protected ArrayList<Image> doInBackground(Void... arg0) {
+			return (new ImageManager()).createList(true);
+		}
+    	
+		@Override
+		protected void onPostExecute(ArrayList<Image> result) {
+			if (result != null && result.size() > 0) {
+				TreeMap<String, Image> imageMap = new TreeMap<String, Image>();
+				for (int i = 0; i < result.size(); i++) {
+					Image image = result.get(i);
+					imageMap.put(image.getId(), image);
+				}
+				Image.setImages(imageMap);
+				new LoadFlavorsTask().execute((Void[]) null);
+				//startActivity(tabViewIntent);
+			} else {
+				showAlert("Login Failure", "There was a problem loading server images.  Please try again.");
+			}
+			//hideActivityIndicators();
 		}
     }
 

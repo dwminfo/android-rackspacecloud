@@ -5,15 +5,16 @@ package com.rackspacecloud.android;
 
 import java.util.ArrayList;
 
-import com.rackspace.cloud.servers.api.client.EntityList;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
-import com.rackspace.cloud.servers.api.client.http.Authentication;
 
 import android.app.ListActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -101,17 +102,11 @@ public class ListServersActivity extends ListActivity {
 		}
     }
     
-    
-    //public void setList() {
-    	//guiThread.post(new RefreshSlicesListTask(this));
-    //}
-        
-    /*
     @Override 
     public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.slices_list_menu, menu);
+		inflater.inflate(R.menu.servers_list_menu, menu);
 		return true;
 	} 
     
@@ -119,23 +114,28 @@ public class ListServersActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.settings:
-			startActivity(new Intent(this, SettingsActivity.class));
+			//startActivity(new Intent(this, SettingsActivity.class));
 			return true;
 			// More items go here (if any) ...
 		case R.id.refresh:
+			loadServers();
+			/*
 			Slicehost.setSlices(null);
 			initThreading();
 	        guiThread.post(updateTask);        
 	        displayLoadingCell();
+	        */
 	        return true;
+	    /*
 		case R.id.dns_menu_add_zone:
 			startActivity(new Intent(this, AddZoneActivity.class));
 			return true;
 			// More items go here (if any) ...
+			 * */
 		}
 		return false;
 	} 
-	*/
+	//*/
     
 	class ServerAdapter extends ArrayAdapter<Server> {
 		ServerAdapter() {
@@ -152,14 +152,11 @@ public class ListServersActivity extends ListActivity {
 			label.setText(server.getName());
 			
 			TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
-			sublabel.setText(server.getFlavorId() + " - " + server.getImageId());
+			sublabel.setText(server.getFlavor().getName() + " - " + server.getImage().getName());
 			
 			ImageView icon = (ImageView) row.findViewById(R.id.icon);
-			if (position == 0) {
-				icon.setImageResource(R.drawable.ubuntu_icon);
-			} else {
-				icon.setImageResource(R.drawable.centos_icon);
-			}
+			icon.setImageResource(server.getImage().iconResourceId());
+
 			return(row);
 		}
 	}
