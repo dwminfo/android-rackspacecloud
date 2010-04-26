@@ -9,6 +9,7 @@ import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -113,25 +114,12 @@ public class ListServersActivity extends ListActivity {
     @Override 
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.settings:
-			//startActivity(new Intent(this, SettingsActivity.class));
+		case R.id.add_server:
+			startActivity(new Intent(this, AddServerActivity.class));
 			return true;
-			// More items go here (if any) ...
 		case R.id.refresh:
 			loadServers();
-			/*
-			Slicehost.setSlices(null);
-			initThreading();
-	        guiThread.post(updateTask);        
-	        displayLoadingCell();
-	        */
 	        return true;
-	    /*
-		case R.id.dns_menu_add_zone:
-			startActivity(new Intent(this, AddZoneActivity.class));
-			return true;
-			// More items go here (if any) ...
-			 * */
 		}
 		return false;
 	} 
