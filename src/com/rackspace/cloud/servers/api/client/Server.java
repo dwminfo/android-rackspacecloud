@@ -123,4 +123,11 @@ public class Server extends Entity {
 		return image;
 	}
 	
+	public String toXML() {
+		String xml = "";
+		xml = "<server xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" name=\"" + getName() 
+			+ "\" imageId=\"" + imageId + "\" flavorId=\"" + flavorId + "\"></server>";
+		return xml;
+	}
+	
 }

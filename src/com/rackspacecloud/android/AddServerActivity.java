@@ -3,15 +3,21 @@
  */
 package com.rackspacecloud.android;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Image;
+import com.rackspace.cloud.servers.api.client.Server;
+import com.rackspace.cloud.servers.api.client.ServerManager;
+// import com.rackspacecloud.android.RackspaceCloudActivity.LoadFlavorsTask;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,20 +29,24 @@ import android.widget.AdapterView.OnItemSelectedListener;
  * @author mike
  *
  */
-public class AddServerActivity extends Activity implements OnItemSelectedListener {
+public class AddServerActivity extends Activity implements OnItemSelectedListener, OnClickListener {
 
 	private Image[] images;
 	private Flavor[] flavors;
 	private String selectedImageId;
 	private String selectedFlavorId;
+	private EditText serverName;
 	private Spinner imageSpinner;
 	private Spinner flavorSpinner;
+	private Server server;
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.createserver);
+        serverName = (EditText) findViewById(R.id.server_name);
+        ((Button) findViewById(R.id.save_button)).setOnClickListener(this);
         loadImageSpinner();
         loadFlavorSpinner();
     }
@@ -96,5 +106,31 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void onClick(View arg0) {
+		// TODO Auto-generated method stub
+		server = new Server();
+		server.setName(serverName.getText().toString());
+		server.setImageId(selectedImageId);
+		server.setFlavorId(selectedFlavorId);
+		new SaveServerTask().execute((Void[]) null);
+	}
+	
+    private class SaveServerTask extends AsyncTask<Void, Void, Void> {
+    	
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			(new ServerManager()).create(server);
+			return null;
+		}
+    	
+		@Override
+		protected void onPostExecute(Void result) {
+			//setServerList(result);
+			//this.
+			System.out.println("done");
+		}
+    }
 	
 }

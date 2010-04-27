@@ -3,12 +3,9 @@
  */
 package com.rackspace.cloud.servers.api.client;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -16,23 +13,19 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import android.net.ParseException;
-
+import com.rackspace.cloud.servers.api.client.http.HttpHelper;
 import com.rackspace.cloud.servers.api.client.parsers.ServersXMLParser;
-//import com.slicehost.android.models.SlicesXMLParser;
 
 /**
  * @author mike
@@ -44,8 +37,57 @@ public class EntityManager {
 	// CRUD Operations
 	//
 	
-	public void create(Entity e) {
+	public void create(Server entity) {
 		
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers");
+				
+		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity(entity.toXML());
+		} catch (UnsupportedEncodingException e) {
+			System.out.println("HTTPHelp : UnsupportedEncodingException : " + e);
+			// TODO: handle?
+		}
+		post.setEntity(tmp);
+		
+		try {			
+			HttpResponse resp = httpclient.execute(post);
+		    System.out.println(resp.getStatusLine().toString());
+		    //System.out.println("body:\n\n" + getResponseBody(resp));
+		    
+		    BasicResponseHandler responseHandler = new BasicResponseHandler();
+		    String body = responseHandler.handleResponse(resp);
+		    System.out.println("body:\n\n" + body);
+		    
+		    if (resp.getStatusLine().getStatusCode() == 200 || resp.getStatusLine().getStatusCode() == 203) {		    	
+		    	ServersXMLParser serversXMLParser = new ServersXMLParser();
+		    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+		    	XMLReader xmlReader = saxParser.getXMLReader();
+		    	xmlReader.setContentHandler(serversXMLParser);
+		    	//xmlReader.parse(new InputSource(new StringReader(body)));		    	
+		    	//servers = serversXMLParser.getServers();		    	
+		    }
+		} catch (ClientProtocolException cpe) {
+			// TODO Auto-generated catch block
+			cpe.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			//return false;
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 	}
 	
 	public void remove(Entity e) {
