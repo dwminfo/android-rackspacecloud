@@ -40,6 +40,10 @@ public class ListServersActivity extends ListActivity {
 	
     protected void onListItemClick(ListView l, View v, int position, long id) {	
     	//startActivity(new Intent(this, ViewSliceActivity.class));
+    	Intent viewIntent = new Intent(this, ViewServerActivity.class);
+    	viewIntent.putExtra("server", servers[position]);
+		startActivity(viewIntent);
+
     }
     
     private void loadServers() {

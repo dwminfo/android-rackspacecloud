@@ -37,6 +37,8 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	
 	private Intent tabViewIntent;
 	
+	// TODO: be sure to handle timeouts or failures
+	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {

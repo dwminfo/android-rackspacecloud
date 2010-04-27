@@ -25,86 +25,106 @@ Actions
 Soft Reboot / Hard Reboot
  -->
 
+<!-- Server Name -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:layout_marginLeft="22dip" 
     android:text="Server Name"
     />
-<EditText android:id="@+id/server_name"
+<TextView android:id="@+id/view_server_name"
     android:layout_height="wrap_content"
     android:layout_width="fill_parent"
     android:layout_marginLeft="22dip"
     android:layout_marginRight="30dip"
     android:scrollHorizontally="true"
-    android:autoText="false"
-    android:capitalize="none"
     android:gravity="fill_horizontal"
-    android:singleLine="true"
-    android:inputType="textNoSuggestions"
-    android:imeOptions="actionNext"
-    android:textAppearance="?android:attr/textAppearanceMedium" 
+    android:textStyle="bold"
+    android:textSize="20.0sp"
+    android:textColor="#fff"
     />
-<!--           
+    
+<!-- Operating System -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:layout_marginLeft="22dip" 
-    android:text="@string/apikey"
+    android:text="Operating System"
     />
-<EditText android:id="@+id/login_apikey"
+<TextView android:id="@+id/view_server_os"
     android:layout_height="wrap_content"
     android:layout_width="fill_parent"
     android:layout_marginLeft="22dip"
     android:layout_marginRight="30dip"
     android:scrollHorizontally="true"
-    android:autoText="false"
-    android:capitalize="none"
     android:gravity="fill_horizontal"
-    android:singleLine="true"
-    android:imeOptions="actionGo"
-    android:inputType="textNoSuggestions|textPassword"
-    android:textAppearance="?android:attr/textAppearanceMedium" 
+    android:textStyle="bold"
+    android:textSize="20.0sp"
+    android:textColor="#fff"
     />
 
-<Spinner xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/flavor_spinner"
-    />
---> 
-
+<!-- Memory -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:layout_marginLeft="22dip" 
-    android:text="Image"
+    android:text="Memory"
     />
-<Spinner xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/image_spinner"
+<TextView android:id="@+id/view_server_memory"
     android:layout_height="wrap_content"
-    android:layout_width="fill_parent" 
-    android:drawSelectorOnTop="true"
+    android:layout_width="fill_parent"
     android:layout_marginLeft="22dip"
     android:layout_marginRight="30dip"
+    android:scrollHorizontally="true"
+    android:gravity="fill_horizontal"
+    android:textStyle="bold"
+    android:textSize="20.0sp"
+    android:textColor="#fff"
     />
 
+<!-- Disk -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:layout_marginLeft="22dip" 
-    android:text="Flavor"
+    android:text="Disk"
     />
-<Spinner xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/flavor_spinner"
+<TextView android:id="@+id/view_server_disk"
     android:layout_height="wrap_content"
-    android:layout_width="fill_parent" 
-    android:drawSelectorOnTop="true"
+    android:layout_width="fill_parent"
     android:layout_marginLeft="22dip"
     android:layout_marginRight="30dip"
+    android:scrollHorizontally="true"
+    android:gravity="fill_horizontal"
+    android:textStyle="bold"
+    android:textSize="20.0sp"
+    android:textColor="#fff"
     />
 
+<!-- Status -->
+<TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="22dip" 
+    android:text="Status"
+    />
+<TextView android:id="@+id/view_server_status"
+    android:layout_height="wrap_content"
+    android:layout_width="fill_parent"
+    android:layout_marginLeft="22dip"
+    android:layout_marginRight="30dip"
+    android:scrollHorizontally="true"
+    android:gravity="fill_horizontal"
+    android:textStyle="bold"
+    android:textSize="20.0sp"
+    android:textColor="#fff"
+    />
+    
+    
+    
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/save_button"
-    android:text="Save"
+    android:id="@+id/view_server_soft_reboot_button"
+    android:text="Soft Reboot"
     android:layout_width="100dip"
     android:layout_height="wrap_content"
     android:layout_gravity="left"
@@ -129,6 +149,17 @@ Soft Reboot / Hard Reboot
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:text="Saving..."
     />
+
+<ImageView
+    android:id="@+id/view_server_os_logo"
+    android:layout_width="700dip"
+    android:layout_height="700dip"
+    android:layout_marginTop="-300dip"
+    android:adjustViewBounds="true"
+    android:layout_gravity="left"
+    android:src="@drawable/ubuntu_large"
+    />
+
 </LinearLayout>
 
 <!--

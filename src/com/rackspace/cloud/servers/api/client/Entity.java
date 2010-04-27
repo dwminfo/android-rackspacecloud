@@ -3,11 +3,13 @@
  */
 package com.rackspace.cloud.servers.api.client;
 
+import java.io.Serializable;
+
 /**
  * @author mike
  *
  */
-public class Entity {
+public class Entity implements Serializable {
 	
 	private String id;
 	private String name;

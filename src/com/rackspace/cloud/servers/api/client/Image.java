@@ -74,6 +74,58 @@ public class Image extends Entity {
 		return iconResourceId;
 	}
 	
+	public int logoResourceId() {
+		int logoResourceId = R.drawable.cloudservers_large; // default if unknown
+		
+		if ("2".equals(getId())) {
+			logoResourceId = R.drawable.centos_large;
+		} else if ("3".equals(getId())) {
+			logoResourceId = R.drawable.gentoo_large;
+		} else if ("4".equals(getId())) {
+			logoResourceId = R.drawable.debian_large;
+		} else if ("5".equals(getId())) {
+			logoResourceId = R.drawable.fedora_large;
+		} else if ("7".equals(getId())) {
+			logoResourceId = R.drawable.centos_large;
+		} else if ("8".equals(getId())) {
+			logoResourceId = R.drawable.ubuntu_large;
+		} else if ("9".equals(getId())) {
+			logoResourceId = R.drawable.arch_large;
+		} else if ("10".equals(getId())) {
+			logoResourceId = R.drawable.ubuntu_large;
+		} else if ("11".equals(getId())) {
+			logoResourceId = R.drawable.ubuntu_large;
+		} else if ("12".equals(getId())) {
+			logoResourceId = R.drawable.redhat_large;
+		} else if ("13".equals(getId())) {
+			logoResourceId = R.drawable.fedora_large;
+		} else if ("4056".equals(getId())) {
+			logoResourceId = R.drawable.fedora_large;
+		} else if ("14362".equals(getId())) {
+			logoResourceId = R.drawable.ubuntu_large;
+		} else if ("23".equals(getId())) {
+			logoResourceId = R.drawable.windows_large;
+		} else if ("24".equals(getId())) {
+			logoResourceId = R.drawable.windows_large;
+		} else if ("28".equals(getId())) {
+			logoResourceId = R.drawable.windows_large;
+		} else if ("29".equals(getId())) {
+			logoResourceId = R.drawable.windows_large;
+		} else if ("31".equals(getId())) {
+			logoResourceId = R.drawable.windows_large;
+		} else if ("14".equals(getId())) {
+			logoResourceId = R.drawable.redhat_large;
+		} else if ("17".equals(getId())) {
+			logoResourceId = R.drawable.fedora_large;
+		} else if ("19".equals(getId())) {
+			logoResourceId = R.drawable.gentoo_large;
+		} else if ("187811".equals(getId())) {
+			logoResourceId = R.drawable.centos_large;
+		}
+		
+		return logoResourceId;
+	}
+	
 	/**
 	 * @return the status
 	 */
