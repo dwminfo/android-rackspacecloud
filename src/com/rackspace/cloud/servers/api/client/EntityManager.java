@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,11 +21,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.RequestExpectContinue;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import com.rackspace.cloud.servers.api.client.http.HttpHelper;
 import com.rackspace.cloud.servers.api.client.parsers.ServersXMLParser;
 
 /**
@@ -54,22 +55,14 @@ public class EntityManager {
 		}
 		post.setEntity(tmp);
 		
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
 		try {			
 			HttpResponse resp = httpclient.execute(post);
 		    System.out.println(resp.getStatusLine().toString());
-		    //System.out.println("body:\n\n" + getResponseBody(resp));
-		    
-		    BasicResponseHandler responseHandler = new BasicResponseHandler();
-		    String body = responseHandler.handleResponse(resp);
-		    System.out.println("body:\n\n" + body);
 		    
 		    if (resp.getStatusLine().getStatusCode() == 200 || resp.getStatusLine().getStatusCode() == 203) {		    	
-		    	ServersXMLParser serversXMLParser = new ServersXMLParser();
-		    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-		    	XMLReader xmlReader = saxParser.getXMLReader();
-		    	xmlReader.setContentHandler(serversXMLParser);
-		    	//xmlReader.parse(new InputSource(new StringReader(body)));		    	
-		    	//servers = serversXMLParser.getServers();		    	
+		    	// TODO: handle success and failure
 		    }
 		} catch (ClientProtocolException cpe) {
 			// TODO Auto-generated catch block
@@ -78,12 +71,6 @@ public class EntityManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			//return false;
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (FactoryConfigurationError e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -131,8 +118,13 @@ public class EntityManager {
 	//public EntityList createList(boolean detail) {
 	public ArrayList createList(boolean detail) {
 		
+		// cache busting
+		Calendar calendar = Calendar.getInstance();
+		java.util.Date now = calendar.getTime();
+		java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());		
+		
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/detail.xml?now=cache_time2");
+		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/detail.xml?now=" + currentTimestamp.getTime());
 		ArrayList<Server> servers = new ArrayList<Server>();
 		
 		get.addHeader("X-Auth-Token", Account.getAuthToken());
