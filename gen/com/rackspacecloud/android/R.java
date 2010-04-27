@@ -64,13 +64,13 @@ public final class R {
         public static final int tab1=0x7f060014;
         public static final int tab2=0x7f060015;
         public static final int tabhost=0x7f060013;
-        public static final int view_server_disk=0x7f06001a;
-        public static final int view_server_memory=0x7f060019;
-        public static final int view_server_name=0x7f060017;
-        public static final int view_server_os=0x7f060018;
-        public static final int view_server_os_logo=0x7f060016;
-        public static final int view_server_soft_reboot_button=0x7f06001c;
-        public static final int view_server_status=0x7f06001b;
+        public static final int view_server_disk=0x7f06001b;
+        public static final int view_server_layout=0x7f060016;
+        public static final int view_server_memory=0x7f06001a;
+        public static final int view_server_name=0x7f060018;
+        public static final int view_server_os=0x7f060019;
+        public static final int view_server_os_logo=0x7f060017;
+        public static final int view_server_status=0x7f06001c;
     }
     public static final class layout {
         public static final int createserver=0x7f030000;

@@ -6,12 +6,14 @@ package com.rackspacecloud.android;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -71,8 +73,31 @@ public class ViewServerActivity extends Activity {
     	status.setText(server.getStatus());
     	
     	// public IPs
+    	int layoutIndex = 12; // public IPs start here
+    	LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
+    	String publicIps[] = server.getPublicIpAddresses();
+    	for (int i = 0; i < publicIps.length; i++) {
+        	TextView tv = new TextView(this.getBaseContext());
+        	tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+        	tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+        	tv.setTextSize(os.getTextSize());
+        	tv.setTextColor(Color.WHITE);
+        	tv.setText(publicIps[i]);
+        	layout.addView(tv, layoutIndex++);
+    	}
     	
     	// private IPs
+    	layoutIndex++; // skip over the Private IPs label
+    	String privateIps[] = server.getPrivateIpAddresses();
+    	for (int i = 0; i < privateIps.length; i++) {
+        	TextView tv = new TextView(this.getBaseContext());
+        	tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+        	tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+        	tv.setTextSize(os.getTextSize());
+        	tv.setTextColor(Color.WHITE);
+        	tv.setText(privateIps[i]);
+        	layout.addView(tv, layoutIndex++);
+    	}
     	
     	// actions
     	// Button softReboot = (Button) findViewById(R.id.view_server_soft_reboot_button);

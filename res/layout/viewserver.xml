@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/view_server_layout"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -37,7 +38,7 @@ Soft Reboot / Hard Reboot
     />
 
 
-<!-- Server Name -->
+<!-- Server Name - Setting top margin to -700 so it will sit over the OS logo image -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
@@ -133,8 +134,23 @@ Soft Reboot / Hard Reboot
     android:textColor="#fff"
     />
     
+<!-- Public IP Addresses -->
+<TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="22dip" 
+    android:text="Public IP Addresses"
+    />
     
-    
+<!-- Private IP Addresses -->
+<TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="22dip" 
+    android:text="Private IP Addresses"
+    />
+   
+<!-- 
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/view_server_soft_reboot_button"
     android:text="Soft Reboot"
@@ -144,6 +160,17 @@ Soft Reboot / Hard Reboot
     android:layout_marginLeft="20dip"
     android:layout_marginTop="10dip"
     />
+
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/view_server_hard_reboot_button"
+    android:text="Hard Reboot"
+    android:layout_width="100dip"
+    android:layout_height="wrap_content"
+    android:layout_gravity="left"
+    android:layout_marginLeft="20dip"
+    android:layout_marginTop="10dip"
+    />
+-->
 
 </LinearLayout>
 
