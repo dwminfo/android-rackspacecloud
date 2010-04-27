@@ -23,13 +23,26 @@ Actions
 -Delete Server
 
 Soft Reboot / Hard Reboot
+    android:layout_marginTop="-300dip"
+
  -->
+
+<ImageView
+    android:id="@+id/view_server_os_logo"
+    android:layout_width="700dip"
+    android:layout_height="700dip"
+    android:adjustViewBounds="true"
+    android:layout_gravity="left"
+    android:src="@drawable/ubuntu_large"
+    />
+
 
 <!-- Server Name -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:layout_marginLeft="22dip" 
+    android:layout_marginTop="-700dip"
     android:text="Server Name"
     />
 <TextView android:id="@+id/view_server_name"
@@ -130,34 +143,6 @@ Soft Reboot / Hard Reboot
     android:layout_gravity="left"
     android:layout_marginLeft="20dip"
     android:layout_marginTop="10dip"
-    />
-
-<ProgressBar android:id="@+id/save_server_progress_bar" 
-    android:layout_width="30dip" 
-    android:layout_height="30dip"
-    android:layout_marginLeft="130dip"
-    android:layout_marginTop="-42dip"
-    android:visibility="invisible"
-    />
-    
-<TextView android:id="@+id/saving_server_label"
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="172dip"
-    android:layout_marginTop="-28dip"
-    android:visibility="invisible"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:text="Saving..."
-    />
-
-<ImageView
-    android:id="@+id/view_server_os_logo"
-    android:layout_width="700dip"
-    android:layout_height="700dip"
-    android:layout_marginTop="-300dip"
-    android:adjustViewBounds="true"
-    android:layout_gravity="left"
-    android:src="@drawable/ubuntu_large"
     />
 
 </LinearLayout>

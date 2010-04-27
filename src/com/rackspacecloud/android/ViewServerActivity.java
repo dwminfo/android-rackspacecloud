@@ -26,6 +26,9 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
  *
  */
 public class ViewServerActivity extends Activity {
+	
+	// TODO: handle rotation on all views
+	
 	private Image[] images;
 	private Flavor[] flavors;
 	private String selectedImageId;
