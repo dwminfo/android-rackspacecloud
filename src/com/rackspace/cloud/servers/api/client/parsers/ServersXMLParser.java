@@ -96,42 +96,8 @@ public class ServersXMLParser extends DefaultHandler {
 			}
 			
 			server.setPublicIpAddresses(publicIpAddresses);
-			server.setPrivateIpAddresses(privateIpAddresses);
-			
-		/*
-		} else if ("id".equals(name)) {
-			slice.setId(currentData.toString());
-		} else if ("name".equals(name)) {
-			slice.setName(currentData.toString());
-		} else if ("flavor-id".equals(name)) {
-			slice.setFlavorId(currentData.toString());
-		} else if ("flavor-name".equals(name)) {
-			slice.setFlavorName(currentData.toString());
-		} else if ("image-id".equals(name)) {
-			slice.setImageId(currentData.toString());
-		} else if ("image-name".equals(name)) {
-			slice.setImageName(currentData.toString());
-		} else if ("backup-id".equals(name)) {
-			slice.setBackupId(currentData.toString());
-		} else if ("status".equals(currentData.toString())) {
-			slice.setStatus(currentData.toString());
-		} else if ("progress".equals(currentData.toString())) {
-			slice.setProgress(currentData.toString());
-		} else if ("bw-in".equals(name)) {
-			slice.setBwIn(currentData.toString());
-		} else if ("bw-out".equals(name)) {
-			slice.setBwOut(currentData.toString());
-		} else if ("addresses".equals(name)) {
-			slice.setAddresses(addresses);
-		} else if ("address".equals(name)) {
-			addresses.add(currentData.toString());
-		} else if ("ip-address".equals(name)) {
-			slice.setIpAddress(currentData.toString());
-		} else if ("root-password".equals(name)) {
-			slice.setRootPassword(currentData.toString());
-		*/
+			server.setPrivateIpAddresses(privateIpAddresses);			
 		}
-		
 	}
 
 	public void characters(char ch[], int start, int length) {

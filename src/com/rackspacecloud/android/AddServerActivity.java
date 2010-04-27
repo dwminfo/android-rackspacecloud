@@ -13,6 +13,8 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
 // import com.rackspacecloud.android.RackspaceCloudActivity.LoadFlavorsTask;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,7 +24,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 /**
@@ -110,25 +114,58 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 	@Override
 	public void onClick(View arg0) {
 		// TODO Auto-generated method stub
-		server = new Server();
-		server.setName(serverName.getText().toString());
-		server.setImageId(selectedImageId);
-		server.setFlavorId(selectedFlavorId);
-		new SaveServerTask().execute((Void[]) null);
+		if ("".equals(serverName.getText().toString())) {
+			showAlert("Required Fields Missing", "Server name is required.");
+		} else {
+			showActivityIndicators();
+			server = new Server();
+			server.setName(serverName.getText().toString());
+			server.setImageId(selectedImageId);
+			server.setFlavorId(selectedFlavorId);
+			new SaveServerTask().execute((Void[]) null);
+		}
 	}
 	
-    private class SaveServerTask extends AsyncTask<Void, Void, Void> {
+	// TODO: extract to a util class?
+    private void showAlert(String title, String message) {
+		AlertDialog alert = new AlertDialog.Builder(this).create();
+		alert.setTitle(title);
+		alert.setMessage(message);
+		alert.setButton("OK", new DialogInterface.OnClickListener() {
+	      public void onClick(DialogInterface dialog, int which) {
+	        return;
+	    } }); 
+		alert.show();
+    }
+	
+    private void setActivityIndicatorsVisibility(int visibility) {
+        ProgressBar pb = (ProgressBar) findViewById(R.id.save_server_progress_bar);
+    	TextView tv = (TextView) findViewById(R.id.saving_server_label);
+        pb.setVisibility(visibility);
+        tv.setVisibility(visibility);
+    }
+
+    private void showActivityIndicators() {
+    	setActivityIndicatorsVisibility(View.VISIBLE);
+    }
+    
+    private void hideActivityIndicators() {
+    	setActivityIndicatorsVisibility(View.INVISIBLE);
+    }
+        
+    private class SaveServerTask extends AsyncTask<Void, Void, Server> {
     	
 		@Override
-		protected Void doInBackground(Void... arg0) {
+		protected Server doInBackground(Void... arg0) {
 			(new ServerManager()).create(server);
-			return null;
+			return server;
 		}
     	
 		@Override
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(Server result) {
 			//setServerList(result);
 			//this.
+			hideActivityIndicators();
 			System.out.println("done");
 		}
     }

@@ -41,7 +41,7 @@ public class EntityManager {
 	public void create(Server entity) {
 		
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers");
+		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers.xml");
 				
 		post.addHeader("X-Auth-Token", Account.getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
@@ -61,8 +61,19 @@ public class EntityManager {
 			HttpResponse resp = httpclient.execute(post);
 		    System.out.println(resp.getStatusLine().toString());
 		    
-		    if (resp.getStatusLine().getStatusCode() == 200 || resp.getStatusLine().getStatusCode() == 203) {		    	
+		    if (resp.getStatusLine().getStatusCode() == 202) {		    	
 		    	// TODO: handle success and failure
+		    	
+			    BasicResponseHandler responseHandler = new BasicResponseHandler();
+			    String body = responseHandler.handleResponse(resp);
+		    	
+		    	ServersXMLParser serversXMLParser = new ServersXMLParser();
+		    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+		    	XMLReader xmlReader = saxParser.getXMLReader();
+		    	xmlReader.setContentHandler(serversXMLParser);
+		    	xmlReader.parse(new InputSource(new StringReader(body)));		    	
+		    	entity = serversXMLParser.getServer();		    	
+		    	
 		    }
 		} catch (ClientProtocolException cpe) {
 			// TODO Auto-generated catch block
@@ -72,6 +83,12 @@ public class EntityManager {
 			e.printStackTrace();
 			//return false;
 		} catch (FactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
