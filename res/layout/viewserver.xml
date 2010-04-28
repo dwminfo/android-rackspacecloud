@@ -150,27 +150,94 @@ Soft Reboot / Hard Reboot
     android:text="Private IP Addresses"
     />
    
-<!-- 
-<Button xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/view_server_soft_reboot_button"
-    android:text="Soft Reboot"
-    android:layout_width="100dip"
-    android:layout_height="wrap_content"
-    android:layout_gravity="left"
-    android:layout_marginLeft="20dip"
-    android:layout_marginTop="10dip"
-    />
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:orientation="horizontal"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_marginTop="10dip"
+	    >
+		<Button xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:id="@+id/view_server_soft_reboot_button"
+		    android:text="Soft Reboot"
+		    android:layout_width="130dip"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="left"
+		    android:layout_marginLeft="20dip"
+		    android:layout_marginTop="10dip"
+		    />
+		
+		<Button xmlns:android="http://schemas.android.com/apk/res/android"
+		    android:id="@+id/view_server_hard_reboot_button"
+		    android:text="Hard Reboot"
+		    android:layout_width="130dip"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="left"
+		    android:layout_marginLeft="10dip"
+		    android:layout_marginTop="10dip"
+		    />
+	</LinearLayout>
 
-<Button xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/view_server_hard_reboot_button"
-    android:text="Hard Reboot"
-    android:layout_width="100dip"
-    android:layout_height="wrap_content"
-    android:layout_gravity="left"
-    android:layout_marginLeft="20dip"
-    android:layout_marginTop="10dip"
-    />
--->
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10dip"
+        />
+
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10dip"
+        >
+        <Button xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/view_server_resize_button"
+            android:text="Resize Server"
+            android:layout_width="130dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="20dip"
+            android:layout_marginTop="10dip"
+            />
+        
+        <Button xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/view_server_rebuild_button"
+            android:text="Hard Reboot"
+            android:layout_width="130dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="10dip"
+            android:layout_marginTop="10dip"
+            />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="10dip"
+        >
+        <Button xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/view_server_change_password_button"
+            android:text="Soft Reboot"
+            android:layout_width="130dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="20dip"
+            android:layout_marginTop="10dip"
+            />
+        
+        <Button xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/view_server_delete_button"
+            android:text="Hard Reboot"
+            android:layout_width="130dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="10dip"
+            android:layout_marginTop="10dip"
+            />
+    </LinearLayout>
 
 </LinearLayout>
 

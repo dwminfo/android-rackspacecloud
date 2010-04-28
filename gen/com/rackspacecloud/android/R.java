@@ -40,7 +40,7 @@ public final class R {
         public static final int windows_large=0x7f02001a;
     }
     public static final class id {
-        public static final int add_server=0x7f06001d;
+        public static final int add_server=0x7f060023;
         public static final int button=0x7f06000e;
         public static final int flavor_spinner=0x7f060002;
         public static final int icon=0x7f060006;
@@ -55,7 +55,7 @@ public final class R {
         public static final int login_username=0x7f06000c;
         public static final int no_servers_label=0x7f060011;
         public static final int no_servers_sublabel=0x7f060012;
-        public static final int refresh=0x7f06001e;
+        public static final int refresh=0x7f060024;
         public static final int save_button=0x7f060003;
         public static final int save_server_progress_bar=0x7f060004;
         public static final int saving_server_label=0x7f060005;
@@ -64,12 +64,18 @@ public final class R {
         public static final int tab1=0x7f060014;
         public static final int tab2=0x7f060015;
         public static final int tabhost=0x7f060013;
+        public static final int view_server_change_password_button=0x7f060021;
+        public static final int view_server_delete_button=0x7f060022;
         public static final int view_server_disk=0x7f06001b;
+        public static final int view_server_hard_reboot_button=0x7f06001e;
         public static final int view_server_layout=0x7f060016;
         public static final int view_server_memory=0x7f06001a;
         public static final int view_server_name=0x7f060018;
         public static final int view_server_os=0x7f060019;
         public static final int view_server_os_logo=0x7f060017;
+        public static final int view_server_rebuild_button=0x7f060020;
+        public static final int view_server_resize_button=0x7f06001f;
+        public static final int view_server_soft_reboot_button=0x7f06001d;
         public static final int view_server_status=0x7f06001c;
     }
     public static final class layout {
