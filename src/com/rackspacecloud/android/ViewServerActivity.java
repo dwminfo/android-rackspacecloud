@@ -3,23 +3,22 @@
  */
 package com.rackspacecloud.android;
 
+import org.apache.http.HttpResponse;
+
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.rackspace.cloud.servers.api.client.Flavor;
-import com.rackspace.cloud.servers.api.client.Image;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 
@@ -31,13 +30,6 @@ public class ViewServerActivity extends Activity {
 	
 	// TODO: handle rotation on all views
 	
-	private Image[] images;
-	private Flavor[] flavors;
-	private String selectedImageId;
-	private String selectedFlavorId;
-	private EditText serverName;
-	private Spinner imageSpinner;
-	private Spinner flavorSpinner;
 	private Server server;
 	
     /** Called when the activity is first created. */
@@ -48,6 +40,8 @@ public class ViewServerActivity extends Activity {
         setContentView(R.layout.viewserver);
         
         loadServerData();
+        
+        setupButtons();
         
         
         //serverName = (EditText) findViewById(R.id.server_name);
@@ -99,12 +93,41 @@ public class ViewServerActivity extends Activity {
         	layout.addView(tv, layoutIndex++);
     	}
     	
-    	// actions
-    	// Button softReboot = (Button) findViewById(R.id.view_server_soft_reboot_button);
-    	
     	ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
     	osLogo.setAlpha(100);
     	osLogo.setImageResource(server.getImage().logoResourceId());
+    }
+    
+    private void setupButton(int resourceId, OnClickListener onClickListener) {
+		Button button = (Button) findViewById(resourceId);
+		button.setOnClickListener(onClickListener);
+    }
+    
+    private void setupButtons() {
+    	setupButton(R.id.view_server_soft_reboot_button, new OnClickListener() {
+            public void onClick(View v) {
+                showDialog(R.id.view_server_soft_reboot_button);
+            }
+        });
+    	
+    	setupButton(R.id.view_server_hard_reboot_button, new OnClickListener() {
+            public void onClick(View v) {
+                showDialog(R.id.view_server_hard_reboot_button);
+            }
+    	});
+
+    	setupButton(R.id.view_server_change_password_button, new OnClickListener() {
+            public void onClick(View v) {
+                showDialog(R.id.view_server_change_password_button);
+            }
+    	});
+
+    	setupButton(R.id.view_server_delete_button, new OnClickListener() {
+            public void onClick(View v) {
+                showDialog(R.id.view_server_delete_button);
+            }
+    	});
+    	
     }
     
     /*
@@ -136,22 +159,6 @@ public class ViewServerActivity extends Activity {
 		alert.show();
     }
 	
-    private void setActivityIndicatorsVisibility(int visibility) {
-        ProgressBar pb = (ProgressBar) findViewById(R.id.save_server_progress_bar);
-    	TextView tv = (TextView) findViewById(R.id.saving_server_label);
-        pb.setVisibility(visibility);
-        tv.setVisibility(visibility);
-    }
-
-    private void showActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.VISIBLE);
-    }
-    
-    private void hideActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.INVISIBLE);
-    }
-        
-    
     /**
 	 * @return the server
 	 */
@@ -166,21 +173,189 @@ public class ViewServerActivity extends Activity {
 		this.server = server;
 	}
 
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+        case R.id.view_server_soft_reboot_button:
+            return new AlertDialog.Builder(ViewServerActivity.this)
+        	.setIcon(R.drawable.alert_dialog_icon)
+        	.setTitle("Soft Reboot")
+        	.setMessage("Are you sure you want to perform a soft reboot?")
+        	.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked OK so do some stuff
+        			new SoftRebootServerTask().execute((Void[]) null);
+        		}
+        	})
+        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked Cancel so do some stuff
+        		}
+        	})
+        	.create();
+        case R.id.view_server_hard_reboot_button:
+            return new AlertDialog.Builder(ViewServerActivity.this)
+        	.setIcon(R.drawable.alert_dialog_icon)
+        	.setTitle("Hard Reboot")
+        	.setMessage("Are you sure you want to perform a hard reboot?")
+        	.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked OK so do some stuff
+        			new HardRebootServerTask().execute((Void[]) null);
+        		}
+        	})
+        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked Cancel so do some stuff
+        		}
+        	})
+        	.create();
+        case R.id.view_server_change_password_button:
+            return new AlertDialog.Builder(ViewServerActivity.this)
+        	.setIcon(R.drawable.alert_dialog_icon)
+        	.setTitle("Change Password")
+        	.setMessage("Are you sure you want to perform a hard reboot?")
+        	.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked OK so do some stuff
+        		}
+        	})
+        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked Cancel so do some stuff
+        		}
+        	})
+        	.create();
+        case R.id.view_server_delete_button:
+            return new AlertDialog.Builder(ViewServerActivity.this)
+        	.setIcon(R.drawable.alert_dialog_icon)
+        	.setTitle("Delete Server")
+        	.setMessage("Are you sure you want to delete this server?  This operation cannot be undone and all backups will be deleted.")
+        	.setPositiveButton("Delete Server", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked OK so do some stuff
+        			new DeleteServerTask().execute((Void[]) null);
+        		}
+        	})
+        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked Cancel so do some stuff
+        		}
+        	})
+        	.create();
+        }
+        return null;
+    }
 
-	private class SaveServerTask extends AsyncTask<Void, Void, Server> {
+    // HTTP request tasks
+    
+	private class PollServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
 		@Override
-		protected Server doInBackground(Void... arg0) {
-			(new ServerManager()).create(server);
-			return server;
+		protected HttpResponse doInBackground(Void... arg0) {
+			return (new ServerManager()).reboot(server, ServerManager.SOFT_REBOOT);
 		}
     	
 		@Override
-		protected void onPostExecute(Server result) {
+		protected void onPostExecute(HttpResponse response) {
 			//setServerList(result);
 			//this.
-			hideActivityIndicators();
+			//hideActivityIndicators();
+			//response.getStatusLine().getStatusCode()
 			System.out.println("done");
+			
+			int statusCode = response.getStatusLine().getStatusCode();
+			
+			if (statusCode == 202) {
+				// all good
+			} else {
+				// TODO: friendlier error handling
+				showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+			}
+			
+		}
+    }
+
+    
+	private class SoftRebootServerTask extends AsyncTask<Void, Void, HttpResponse> {
+    	
+		@Override
+		protected HttpResponse doInBackground(Void... arg0) {
+			return (new ServerManager()).reboot(server, ServerManager.SOFT_REBOOT);
+		}
+    	
+		@Override
+		protected void onPostExecute(HttpResponse response) {
+			//setServerList(result);
+			//this.
+			//hideActivityIndicators();
+			//response.getStatusLine().getStatusCode()
+			System.out.println("done");
+			
+			int statusCode = response.getStatusLine().getStatusCode();
+			
+			if (statusCode == 202) {
+				// all good
+			} else {
+				// TODO: friendlier error handling
+				showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+			}
+			
+		}
+    }
+
+	private class HardRebootServerTask extends AsyncTask<Void, Void, HttpResponse> {
+    	
+		@Override
+		protected HttpResponse doInBackground(Void... arg0) {
+			return (new ServerManager()).reboot(server, ServerManager.HARD_REBOOT);
+		}
+    	
+		@Override
+		protected void onPostExecute(HttpResponse response) {
+			//setServerList(result);
+			//this.
+			//hideActivityIndicators();
+			//response.getStatusLine().getStatusCode()
+			System.out.println("done");
+			
+			int statusCode = response.getStatusLine().getStatusCode();
+			
+			if (statusCode == 202) {
+				// all good
+			} else {
+				// TODO: friendlier error handling
+				showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+			}
+			
+		}
+    }
+
+	private class DeleteServerTask extends AsyncTask<Void, Void, HttpResponse> {
+    	
+		@Override
+		protected HttpResponse doInBackground(Void... arg0) {
+			return (new ServerManager()).delete(server);
+		}
+    	
+		@Override
+		protected void onPostExecute(HttpResponse response) {
+			//setServerList(result);
+			//this.
+			//hideActivityIndicators();
+			//response.getStatusLine().getStatusCode()
+			System.out.println("done");
+			
+			int statusCode = response.getStatusLine().getStatusCode();
+			
+			if (statusCode == 202) {
+				setResult(Activity.RESULT_OK);
+				finish();
+			} else {
+				// TODO: friendlier error handling
+				showAlert("Error", "There was a problem deleting your server: " + response.getStatusLine());
+			}
+			
 		}
     }
 }

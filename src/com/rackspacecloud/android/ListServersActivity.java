@@ -39,10 +39,9 @@ public class ListServersActivity extends ListActivity {
 
 	
     protected void onListItemClick(ListView l, View v, int position, long id) {	
-    	//startActivity(new Intent(this, ViewSliceActivity.class));
     	Intent viewIntent = new Intent(this, ViewServerActivity.class);
     	viewIntent.putExtra("server", servers[position]);
-		startActivity(viewIntent);
+		startActivityForResult(viewIntent, 55); // arbitrary number; never used again
 
     }
     
@@ -119,7 +118,7 @@ public class ListServersActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.add_server:
-			startActivity(new Intent(this, AddServerActivity.class));
+			startActivityForResult(new Intent(this, AddServerActivity.class), 56); // arbitrary number; never used again
 			return true;
 		case R.id.refresh:
 			loadServers();
@@ -153,4 +152,13 @@ public class ListServersActivity extends ListActivity {
 		}
 	}
     
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	  super.onActivityResult(requestCode, resultCode, data);
+	  
+	  if (resultCode == RESULT_OK) {	  
+		  // a sub-activity kicked back, so we want to refresh the server list
+		  loadServers();
+	  }
+	}	
 }

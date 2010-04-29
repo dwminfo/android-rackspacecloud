@@ -106,8 +106,46 @@ public class EntityManager {
 		
 	}
 	
-	public Entity find(long id) {
-		return null;
+	public Server find(long id) {
+		Server server = null;
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/" + id + ".xml" + cacheBuster());
+		
+		get.addHeader("X-Auth-Token", Account.getAuthToken());
+		
+		try {			
+			HttpResponse resp = httpclient.execute(get);		    
+		    BasicResponseHandler responseHandler = new BasicResponseHandler();
+		    String body = responseHandler.handleResponse(resp);
+		    
+		    if (resp.getStatusLine().getStatusCode() == 200 || resp.getStatusLine().getStatusCode() == 203) {		    	
+		    	ServersXMLParser serversXMLParser = new ServersXMLParser();
+		    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+		    	XMLReader xmlReader = saxParser.getXMLReader();
+		    	xmlReader.setContentHandler(serversXMLParser);
+		    	xmlReader.parse(new InputSource(new StringReader(body)));		    	
+		    	server = serversXMLParser.getServer();		    	
+		    }
+		} catch (ClientProtocolException cpe) {
+			// TODO Auto-generated catch block
+			cpe.printStackTrace();
+			//return false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			//return false;
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return server;
 	}
 	
 	//
@@ -129,31 +167,29 @@ public class EntityManager {
 		
 	}
 	
+	private String cacheBuster() {
+		Calendar calendar = Calendar.getInstance();
+		java.util.Date now = calendar.getTime();
+		java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());		
+		return "?now=" + currentTimestamp.getTime();
+	}
+	
 	//
 	// Lists
 	//
 	//public EntityList createList(boolean detail) {
 	public ArrayList createList(boolean detail) {
 		
-		// cache busting
-		Calendar calendar = Calendar.getInstance();
-		java.util.Date now = calendar.getTime();
-		java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());		
-		
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/detail.xml?now=" + currentTimestamp.getTime());
+		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/detail.xml" + cacheBuster());
 		ArrayList<Server> servers = new ArrayList<Server>();
 		
 		get.addHeader("X-Auth-Token", Account.getAuthToken());
 		
 		try {			
-			HttpResponse resp = httpclient.execute(get);
-		    System.out.println(resp.getStatusLine().toString());
-		    //System.out.println("body:\n\n" + getResponseBody(resp));
-		    
+			HttpResponse resp = httpclient.execute(get);		    
 		    BasicResponseHandler responseHandler = new BasicResponseHandler();
 		    String body = responseHandler.handleResponse(resp);
-		    System.out.println("body:\n\n" + body);
 		    
 		    if (resp.getStatusLine().getStatusCode() == 200 || resp.getStatusLine().getStatusCode() == 203) {		    	
 		    	ServersXMLParser serversXMLParser = new ServersXMLParser();

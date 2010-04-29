@@ -167,6 +167,8 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 			//this.
 			hideActivityIndicators();
 			System.out.println("done");
+			setResult(Activity.RESULT_OK);
+			finish();			
 		}
     }
 	
