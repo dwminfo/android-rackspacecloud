@@ -70,6 +70,41 @@ public class ServerManager extends EntityManager {
 		return resp;
 	}
 
+	public HttpResponse resize(Server server, int flavorId) {
+		HttpResponse resp = null;
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
+				
+		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<resize xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" flavorId=\"" + flavorId + "\"/>");
+		} catch (UnsupportedEncodingException e) {
+			System.out.println("HTTPHelp : UnsupportedEncodingException : " + e);
+			// TODO: handle?
+		}
+		post.setEntity(tmp);
+
+		try {			
+			resp = httpclient.execute(post);
+		} catch (ClientProtocolException cpe) {
+			// TODO Auto-generated catch block
+			cpe.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			//return false;
+		} catch (FactoryConfigurationError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		return resp;
+	}
+
+
 	public HttpResponse delete(Server server) {
 		HttpResponse resp = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();

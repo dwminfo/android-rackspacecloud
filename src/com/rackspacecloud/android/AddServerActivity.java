@@ -3,19 +3,11 @@
  */
 package com.rackspacecloud.android;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-
-import com.rackspace.cloud.servers.api.client.Flavor;
-import com.rackspace.cloud.servers.api.client.Image;
-import com.rackspace.cloud.servers.api.client.Server;
-import com.rackspace.cloud.servers.api.client.ServerManager;
-// import com.rackspacecloud.android.RackspaceCloudActivity.LoadFlavorsTask;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -28,6 +20,11 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
+
+import com.rackspace.cloud.servers.api.client.Flavor;
+import com.rackspace.cloud.servers.api.client.Image;
+import com.rackspace.cloud.servers.api.client.Server;
+import com.rackspace.cloud.servers.api.client.ServerManager;
 
 /**
  * @author mike

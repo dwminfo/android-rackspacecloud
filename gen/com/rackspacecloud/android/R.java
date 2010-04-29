@@ -65,7 +65,6 @@ public final class R {
         public static final int tab1=0x7f060014;
         public static final int tab2=0x7f060015;
         public static final int tabhost=0x7f060013;
-        public static final int view_server_change_password_button=0x7f06001f;
         public static final int view_server_delete_button=0x7f060020;
         public static final int view_server_disk=0x7f06001b;
         public static final int view_server_hard_reboot_button=0x7f06001e;
@@ -74,6 +73,7 @@ public final class R {
         public static final int view_server_name=0x7f060018;
         public static final int view_server_os=0x7f060019;
         public static final int view_server_os_logo=0x7f060017;
+        public static final int view_server_resize_button=0x7f06001f;
         public static final int view_server_soft_reboot_button=0x7f06001d;
         public static final int view_server_status=0x7f06001c;
     }

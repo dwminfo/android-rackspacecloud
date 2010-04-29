@@ -36,13 +36,13 @@ public class ListServersActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         loadServers();        
     }
-
 	
-    protected void onListItemClick(ListView l, View v, int position, long id) {	
-    	Intent viewIntent = new Intent(this, ViewServerActivity.class);
-    	viewIntent.putExtra("server", servers[position]);
-		startActivityForResult(viewIntent, 55); // arbitrary number; never used again
-
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+    	if (servers != null && servers.length > 0) {
+	    	Intent viewIntent = new Intent(this, ViewServerActivity.class);
+	    	viewIntent.putExtra("server", servers[position]);
+			startActivityForResult(viewIntent, 55); // arbitrary number; never used again
+    	}
     }
     
     private void loadServers() {

@@ -222,8 +222,8 @@ Soft Reboot / Hard Reboot
         android:layout_marginTop="10dip"
         >
         <Button xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/view_server_change_password_button"
-            android:text="Reset Password"
+            android:id="@+id/view_server_resize_button"
+            android:text="Resize Server"
             android:layout_width="130dip"
             android:layout_height="wrap_content"
             android:layout_gravity="left"

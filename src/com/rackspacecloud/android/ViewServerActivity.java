@@ -3,6 +3,8 @@
  */
 package com.rackspacecloud.android;
 
+import java.util.Iterator;
+
 import org.apache.http.HttpResponse;
 
 import android.app.Activity;
@@ -14,11 +16,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 
@@ -31,6 +36,10 @@ public class ViewServerActivity extends Activity {
 	// TODO: handle rotation on all views
 	
 	private Server server;
+	private boolean ipAddressesLoaded; // to prevent polling from loading tons of duplicates
+	private Flavor[] flavors;
+	private String[] flavorNames;
+	private String selectedFlavorId;
 	
     /** Called when the activity is first created. */
     @Override
@@ -42,7 +51,7 @@ public class ViewServerActivity extends Activity {
         loadServerData();
         
         setupButtons();
-        
+        loadFlavors();
         
         //serverName = (EditText) findViewById(R.id.server_name);
         //((Button) findViewById(R.id.save_button)).setOnClickListener(this);
@@ -64,40 +73,66 @@ public class ViewServerActivity extends Activity {
     	disk.setText(server.getFlavor().getDisk() + " GB");
     	
     	TextView status = (TextView) findViewById(R.id.view_server_status);
-    	status.setText(server.getStatus());
-    	
-    	// public IPs
-    	int layoutIndex = 12; // public IPs start here
-    	LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
-    	String publicIps[] = server.getPublicIpAddresses();
-    	for (int i = 0; i < publicIps.length; i++) {
-        	TextView tv = new TextView(this.getBaseContext());
-        	tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
-        	tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
-        	tv.setTextSize(os.getTextSize());
-        	tv.setTextColor(Color.WHITE);
-        	tv.setText(publicIps[i]);
-        	layout.addView(tv, layoutIndex++);
+
+    	// show status and possibly the progress, with polling
+    	if (!"ACTIVE".equals(server.getStatus())) {
+        	status.setText(server.getStatus() + " - " + server.getProgress() + "%");
+    		new PollServerTask().execute((Void[]) null);
+    	} else {
+        	status.setText(server.getStatus());
     	}
     	
-    	// private IPs
-    	layoutIndex++; // skip over the Private IPs label
-    	String privateIps[] = server.getPrivateIpAddresses();
-    	for (int i = 0; i < privateIps.length; i++) {
-        	TextView tv = new TextView(this.getBaseContext());
-        	tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
-        	tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
-        	tv.setTextSize(os.getTextSize());
-        	tv.setTextColor(Color.WHITE);
-        	tv.setText(privateIps[i]);
-        	layout.addView(tv, layoutIndex++);
+    	if (!ipAddressesLoaded) {
+	    	// public IPs
+	    	int layoutIndex = 12; // public IPs start here
+	    	LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
+	    	String publicIps[] = server.getPublicIpAddresses();
+	    	for (int i = 0; i < publicIps.length; i++) {
+	        	TextView tv = new TextView(this.getBaseContext());
+	        	tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+	        	tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+	        	tv.setTextSize(os.getTextSize());
+	        	tv.setTextColor(Color.WHITE);
+	        	tv.setText(publicIps[i]);
+	        	layout.addView(tv, layoutIndex++);
+	    	}
+	    	
+	    	// private IPs
+	    	layoutIndex++; // skip over the Private IPs label
+	    	String privateIps[] = server.getPrivateIpAddresses();
+	    	for (int i = 0; i < privateIps.length; i++) {
+	        	TextView tv = new TextView(this.getBaseContext());
+	        	tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+	        	tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+	        	tv.setTextSize(os.getTextSize());
+	        	tv.setTextColor(Color.WHITE);
+	        	tv.setText(privateIps[i]);
+	        	layout.addView(tv, layoutIndex++);
+	    	}
+	    	
+	    	ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
+	    	osLogo.setAlpha(100);
+	    	osLogo.setImageResource(server.getImage().logoResourceId());
+	    	
+	    	ipAddressesLoaded = true;
     	}
-    	
-    	ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
-    	osLogo.setAlpha(100);
-    	osLogo.setImageResource(server.getImage().logoResourceId());
     }
     
+    private void loadFlavors() {
+		flavorNames = new String[Flavor.getFlavors().size()]; 
+		flavors = new Flavor[Flavor.getFlavors().size()];
+
+		Iterator<Flavor> iter = Flavor.getFlavors().values().iterator();
+		int i = 0;
+		while (iter.hasNext()) {
+			Flavor flavor = iter.next();
+			flavors[i] = flavor;
+			flavorNames[i] = flavor.getName() + ", " + flavor.getDisk() + " GB disk";
+			i++;
+		}
+		selectedFlavorId = flavors[0].getId();
+    }
+
     private void setupButton(int resourceId, OnClickListener onClickListener) {
 		Button button = (Button) findViewById(resourceId);
 		button.setOnClickListener(onClickListener);
@@ -116,9 +151,9 @@ public class ViewServerActivity extends Activity {
             }
     	});
 
-    	setupButton(R.id.view_server_change_password_button, new OnClickListener() {
+    	setupButton(R.id.view_server_resize_button, new OnClickListener() {
             public void onClick(View v) {
-                showDialog(R.id.view_server_change_password_button);
+                showDialog(R.id.view_server_resize_button);
             }
     	});
 
@@ -130,23 +165,6 @@ public class ViewServerActivity extends Activity {
     	
     }
     
-    /*
-	@Override
-	public void onClick(View arg0) {
-		// TODO Auto-generated method stub
-		if ("".equals(serverName.getText().toString())) {
-			showAlert("Required Fields Missing", "Server name is required.");
-		} else {
-			showActivityIndicators();
-			server = new Server();
-			server.setName(serverName.getText().toString());
-			server.setImageId(selectedImageId);
-			server.setFlavorId(selectedFlavorId);
-			new SaveServerTask().execute((Void[]) null);
-		}
-	}
-	*/
-	
 	// TODO: extract to a util class?
     private void showAlert(String title, String message) {
 		AlertDialog alert = new AlertDialog.Builder(this).create();
@@ -210,16 +228,11 @@ public class ViewServerActivity extends Activity {
         		}
         	})
         	.create();
-        case R.id.view_server_change_password_button:
+        case R.id.view_server_resize_button:
             return new AlertDialog.Builder(ViewServerActivity.this)
+            .setItems(flavorNames, new ResizeClickListener())
         	.setIcon(R.drawable.alert_dialog_icon)
-        	.setTitle("Change Password")
-        	.setMessage("Are you sure you want to perform a hard reboot?")
-        	.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked OK so do some stuff
-        		}
-        	})
+        	.setTitle("Resize Server")
         	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
         			// User clicked Cancel so do some stuff
@@ -247,32 +260,29 @@ public class ViewServerActivity extends Activity {
         return null;
     }
 
+    private class ResizeClickListener implements android.content.DialogInterface.OnClickListener {
+
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			selectedFlavorId = which + "";
+			new ResizeServerTask().execute((Void[]) null);
+		}
+    	
+    }
+    
     // HTTP request tasks
     
-	private class PollServerTask extends AsyncTask<Void, Void, HttpResponse> {
+	private class PollServerTask extends AsyncTask<Void, Void, Server> {
     	
 		@Override
-		protected HttpResponse doInBackground(Void... arg0) {
-			return (new ServerManager()).reboot(server, ServerManager.SOFT_REBOOT);
+		protected Server doInBackground(Void... arg0) {
+			return (new ServerManager()).find(Integer.parseInt(server.getId()));
 		}
     	
 		@Override
-		protected void onPostExecute(HttpResponse response) {
-			//setServerList(result);
-			//this.
-			//hideActivityIndicators();
-			//response.getStatusLine().getStatusCode()
-			System.out.println("done");
-			
-			int statusCode = response.getStatusLine().getStatusCode();
-			
-			if (statusCode == 202) {
-				// all good
-			} else {
-				// TODO: friendlier error handling
-				showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
-			}
-			
+		protected void onPostExecute(Server result) {
+			server = result;
+			loadServerData();
 		}
     }
 
@@ -331,6 +341,26 @@ public class ViewServerActivity extends Activity {
 		}
     }
 
+	private class ResizeServerTask extends AsyncTask<Void, Void, HttpResponse> {
+    	
+		@Override
+		protected HttpResponse doInBackground(Void... arg0) {
+			return (new ServerManager()).resize(server, Integer.parseInt(selectedFlavorId));
+		}
+    	
+		@Override
+		protected void onPostExecute(HttpResponse response) {
+			int statusCode = response.getStatusLine().getStatusCode();			
+			if (statusCode == 202) {
+				new PollServerTask().execute((Void[]) null);
+			} else {
+				// TODO: friendlier error handling
+				showAlert("Error", "There was a problem deleting your server: " + response.getStatusLine());
+			}
+			
+		}
+    }
+	
 	private class DeleteServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
 		@Override
