@@ -25,21 +25,13 @@ public class ServersXMLParser extends DefaultHandler {
 	private StringBuffer currentData;
 
 	public void startDocument() {
-		System.out.println("Start document");
 	}
 
 	public void endDocument() {
-		System.out.println("End document");
 	}
 
 	public void startElement(String uri, String name, String qName, Attributes atts) {
 
-		if ("".equals(uri)) {
-			System.out.println("Start element: " + qName);
-		} else {
-			System.out.println("Start element: {" + uri + "}" + name);
-		}
-		
 		currentData = new StringBuffer();
 		if ("servers".equals(name)) {
 			servers = new ArrayList<Server>();
@@ -71,12 +63,6 @@ public class ServersXMLParser extends DefaultHandler {
 	}
 
 	public void endElement(String uri, String name, String qName) {
-		if ("".equals(uri)) {
-			System.out.println("End element: " + qName);
-		} else {
-			System.out.println("End element:   {" + uri + "}" + name);
-		}
-		
 		if ("servers".equals(name)) {
 			
 		} else if ("server".equals(name)) {

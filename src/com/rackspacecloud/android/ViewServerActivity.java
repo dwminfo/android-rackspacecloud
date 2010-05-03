@@ -38,15 +38,12 @@ import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
-import com.rackspacecloud.android.ListServersActivity.ServerAdapter;
 
 /**
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class ViewServerActivity extends Activity {
-	
-	// TODO: handle rotation on all views
 	
 	private Server server;
 	private boolean ipAddressesLoaded; // to prevent polling from loading tons of duplicates

@@ -39,12 +39,8 @@ public class FlavorManager extends EntityManager {
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);
-		    System.out.println(resp.getStatusLine().toString());
-		    //System.out.println("body:\n\n" + getResponseBody(resp));
-		    
 		    BasicResponseHandler responseHandler = new BasicResponseHandler();
 		    String body = responseHandler.handleResponse(resp);
-		    System.out.println("body:\n\n" + body);
 		    
 		    if (resp.getStatusLine().getStatusCode() == 200 || resp.getStatusLine().getStatusCode() == 203) {		    	
 		    	

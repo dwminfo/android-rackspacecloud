@@ -60,7 +60,6 @@ public class ServerManager extends EntityManager {
 
 		try {			
 			HttpResponse resp = httpclient.execute(post);
-		    System.out.println(resp.getStatusLine().toString());
 		    BasicResponseHandler responseHandler = new BasicResponseHandler();
 		    String body = responseHandler.handleResponse(resp);
 		    

@@ -20,11 +20,9 @@ public class ImagesXMLParser extends DefaultHandler {
 	private StringBuffer currentData;
 
 	public void startDocument() {
-		System.out.println("Start document");
 	}
 
 	public void endDocument() {
-		System.out.println("End document");
 	}
 
 	public void startElement(String uri, String name, String qName, Attributes atts) {
