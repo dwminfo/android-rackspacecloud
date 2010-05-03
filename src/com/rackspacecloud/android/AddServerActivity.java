@@ -129,6 +129,7 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 	        return;
 	    } }); 
 		alert.show();
+		hideActivityIndicators();
     }
 	
     private void setActivityIndicatorsVisibility(int visibility) {
