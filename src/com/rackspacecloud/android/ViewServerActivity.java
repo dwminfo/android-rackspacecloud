@@ -38,6 +38,7 @@ import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
+import com.rackspacecloud.android.ListServersActivity.ServerAdapter;
 
 /**
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
@@ -52,6 +53,7 @@ public class ViewServerActivity extends Activity {
 	private Flavor[] flavors;
 	private String[] flavorNames;
 	private String selectedFlavorId;
+	private boolean imageLoaded;
 	
     /** Called when the activity is first created. */
     @Override
@@ -59,11 +61,38 @@ public class ViewServerActivity extends Activity {
         super.onCreate(savedInstanceState);
         server = (Server) this.getIntent().getExtras().get("server");
         setContentView(R.layout.viewserver);
+        restoreState(savedInstanceState);
+    }
+    
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putSerializable("server", server);
+		outState.putBoolean("imageLoaded", imageLoaded);
+	}
+
+    private void restoreState(Bundle state) {
+    	if (state != null && state.containsKey("server")) {
+    		server = (Server) state.getSerializable("server");
+    		imageLoaded = state.getBoolean("imageLoaded");
+    	}
         loadServerData();
         setupButtons();
         loadFlavors();
     }
 
+    private void loadImage() {
+    	// hate to do this, but devices run out of memory after a few rotations
+    	// because the background images are so large
+    	if (!imageLoaded) {
+        	ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
+        	osLogo.setAlpha(100);
+	    	osLogo.setImageResource(server.getImage().logoResourceId());
+	    	imageLoaded = true;
+    	}
+
+    }
+    
     private void loadServerData() {
     	TextView name = (TextView) findViewById(R.id.view_server_name);
     	name.setText(server.getName());
@@ -114,11 +143,8 @@ public class ViewServerActivity extends Activity {
 	        	tv.setText(privateIps[i]);
 	        	layout.addView(tv, layoutIndex++);
 	    	}
-	    	
-	    	ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
-	    	osLogo.setAlpha(100);
-	    	osLogo.setImageResource(server.getImage().logoResourceId());
-	    	
+
+	    	loadImage();
 	    	ipAddressesLoaded = true;
     	}
     }

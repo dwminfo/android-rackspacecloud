@@ -35,6 +35,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	private static final String OPT_API_KEY_DEF = "";
 	
 	private Intent tabViewIntent;
+	private boolean authenticating;
 		
     /** Called when the activity is first created. */
     @Override
@@ -44,6 +45,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
         ((Button) findViewById(R.id.button)).setOnClickListener(this);
         ((EditText) findViewById(R.id.login_apikey)).setOnEditorActionListener(this);
         loadLoginPreferences();
+        restoreState(savedInstanceState);
         
         // use the TabViewActivity when Cloud Files is added
         // tabViewIntent = new Intent(this, TabViewActivity.class);
@@ -51,6 +53,20 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
         tabViewIntent = new Intent(this, ListServersActivity.class);
     }
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putBoolean("authenticating", authenticating);
+	}
+
+    private void restoreState(Bundle state) {
+    	if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
+    		showActivityIndicators();
+    	} else {
+    		hideActivityIndicators();
+    	}
+    }
+    
     public void login() {
     	if (hasValidInput()) {
         	showActivityIndicators();
@@ -130,18 +146,19 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     	
 		@Override
 		protected Boolean doInBackground(Void... arg0) {
+			authenticating = true;
 			return new Boolean(Authentication.authenticate());
 		}
     	
 		@Override
 		protected void onPostExecute(Boolean result) {
+			authenticating = false;
 			if (result.booleanValue()) {
 				//startActivity(tabViewIntent);
 	        	new LoadImagesTask().execute((Void[]) null);				
 			} else {
 				showAlert("Login Failure", "Authentication failed.  Please check your User Name and API Key.");
 			}
-			//hideActivityIndicators();
 		}
     }
 

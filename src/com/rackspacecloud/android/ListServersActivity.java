@@ -37,9 +37,29 @@ public class ListServersActivity extends ListActivity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadServers();        
+        restoreState(savedInstanceState);
     }
 	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putSerializable("servers", servers);
+	}
+
+    private void restoreState(Bundle state) {
+    	if (state != null && state.containsKey("servers")) {
+    		servers = (Server[]) state.getSerializable("servers");
+    		if (servers.length == 0) {
+    			displayNoServersCell();
+    		} else {
+    			getListView().setDividerHeight(1); // restore divider lines 
+    			setListAdapter(new ServerAdapter());
+    		}
+    	} else {
+            loadServers();        
+    	}
+    }
+    
     protected void onListItemClick(ListView l, View v, int position, long id) {
     	if (servers != null && servers.length > 0) {
 	    	Intent viewIntent = new Intent(this, ViewServerActivity.class);

@@ -37,7 +37,6 @@ Soft Reboot / Hard Reboot
     android:layout_height="700dip"
     android:adjustViewBounds="true"
     android:layout_gravity="left"
-    android:src="@drawable/ubuntu_large"
     />
 
 
