@@ -46,16 +46,9 @@ public class ViewServerActivity extends Activity {
         super.onCreate(savedInstanceState);
         server = (Server) this.getIntent().getExtras().get("server");
         setContentView(R.layout.viewserver);
-        
         loadServerData();
-        
         setupButtons();
         loadFlavors();
-        
-        //serverName = (EditText) findViewById(R.id.server_name);
-        //((Button) findViewById(R.id.save_button)).setOnClickListener(this);
-        //loadImageSpinner();
-        //loadFlavorSpinner();
     }
 
     private void loadServerData() {

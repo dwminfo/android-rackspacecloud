@@ -65,6 +65,8 @@ public class Image extends Entity {
 			iconResourceId = R.drawable.gentoo_icon;
 		} else if ("187811".equals(getId())) {
 			iconResourceId = R.drawable.centos_icon;
+		} else if ("49".equals(getId())) {
+			iconResourceId = R.drawable.ubuntu_icon;
 		}
 		
 		return iconResourceId;
@@ -117,6 +119,8 @@ public class Image extends Entity {
 			logoResourceId = R.drawable.gentoo_large;
 		} else if ("187811".equals(getId())) {
 			logoResourceId = R.drawable.centos_large;
+		} else if ("49".equals(getId())) {
+			logoResourceId = R.drawable.ubuntu_large;
 		}
 		
 		return logoResourceId;
