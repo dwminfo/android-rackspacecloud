@@ -3,14 +3,6 @@ package com.rackspacecloud.android;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import com.rackspace.cloud.servers.api.client.Account;
-import com.rackspace.cloud.servers.api.client.Flavor;
-import com.rackspace.cloud.servers.api.client.FlavorManager;
-import com.rackspace.cloud.servers.api.client.Image;
-import com.rackspace.cloud.servers.api.client.ImageManager;
-import com.rackspace.cloud.servers.api.client.ServerManager;
-import com.rackspace.cloud.servers.api.client.http.Authentication;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -27,6 +19,13 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+
+import com.rackspace.cloud.servers.api.client.Account;
+import com.rackspace.cloud.servers.api.client.Flavor;
+import com.rackspace.cloud.servers.api.client.FlavorManager;
+import com.rackspace.cloud.servers.api.client.Image;
+import com.rackspace.cloud.servers.api.client.ImageManager;
+import com.rackspace.cloud.servers.api.client.http.Authentication;
 
 public class RackspaceCloudActivity extends Activity implements View.OnClickListener, OnEditorActionListener {
 	
@@ -47,7 +46,11 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
         ((Button) findViewById(R.id.button)).setOnClickListener(this);
         ((EditText) findViewById(R.id.login_apikey)).setOnEditorActionListener(this);
         loadLoginPreferences();
-        tabViewIntent = new Intent(this, TabViewActivity.class);
+        
+        // use the TabViewActivity when Cloud Files is added
+        // tabViewIntent = new Intent(this, TabViewActivity.class);
+        
+        tabViewIntent = new Intent(this, ListServersActivity.class);
     }
 
     public void login() {
@@ -101,6 +104,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	        return;
 	    } }); 
 		alert.show();
+		hideActivityIndicators();
     }
     
     private boolean hasValidInput() {

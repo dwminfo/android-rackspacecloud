@@ -16,13 +16,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
@@ -276,7 +275,14 @@ public class ViewServerActivity extends Activity {
     	
 		@Override
 		protected Server doInBackground(Void... arg0) {
-			return (new ServerManager()).find(Integer.parseInt(server.getId()));
+			try {
+				server = (new ServerManager()).find(Integer.parseInt(server.getId()));
+			} catch (NumberFormatException e) {
+				// we're polling, so need to show exceptions
+			} catch (CloudServersException e) {
+				// we're polling, so need to show exceptions
+			}
+			return server;
 		}
     	
 		@Override
@@ -289,73 +295,93 @@ public class ViewServerActivity extends Activity {
     
 	private class SoftRebootServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
+		private CloudServersException exception;
+		
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
-			return (new ServerManager()).reboot(server, ServerManager.SOFT_REBOOT);
+			HttpResponse resp = null;
+			try {
+				resp = (new ServerManager()).reboot(server, ServerManager.SOFT_REBOOT);
+			} catch (CloudServersException e) {
+				exception = e;
+			}
+			return resp;
 		}
     	
 		@Override
 		protected void onPostExecute(HttpResponse response) {
-			//setServerList(result);
-			//this.
-			//hideActivityIndicators();
-			//response.getStatusLine().getStatusCode()
-			System.out.println("done");
-			
-			int statusCode = response.getStatusLine().getStatusCode();
-			
-			if (statusCode == 202) {
-				// all good
-			} else {
-				// TODO: friendlier error handling
-				showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+
+			if (response != null) {
+				int statusCode = response.getStatusLine().getStatusCode();				
+				if (statusCode != 202) {
+					// TODO: parse CloudServerException
+					showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+				}
+			} else if (exception != null) {
+				showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());
+				
 			}
-			
 		}
     }
 
 	private class HardRebootServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
+		private CloudServersException exception;
+
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
-			return (new ServerManager()).reboot(server, ServerManager.HARD_REBOOT);
+			HttpResponse resp = null;			
+			try {
+				resp = (new ServerManager()).reboot(server, ServerManager.HARD_REBOOT);
+			} catch (CloudServersException e) {
+				exception = e;
+			}
+			return resp;
 		}
     	
 		@Override
 		protected void onPostExecute(HttpResponse response) {
-			//setServerList(result);
-			//this.
-			//hideActivityIndicators();
-			//response.getStatusLine().getStatusCode()
-			System.out.println("done");
-			
-			int statusCode = response.getStatusLine().getStatusCode();
-			
-			if (statusCode == 202) {
-				// all good
-			} else {
-				// TODO: friendlier error handling
-				showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+			if (response != null) {
+				int statusCode = response.getStatusLine().getStatusCode();			
+				if (statusCode != 202) {
+					// TODO: parse CloudServerException
+					showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+				}
+			} else if (exception != null) {
+				showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());
+				
 			}
-			
 		}
     }
 
 	private class ResizeServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
+		private CloudServersException exception;
+
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
-			return (new ServerManager()).resize(server, Integer.parseInt(selectedFlavorId));
+			HttpResponse resp = null;
+			try {
+				resp = (new ServerManager()).resize(server, Integer.parseInt(selectedFlavorId));
+			} catch (CloudServersException e) {
+				exception = e;
+			}
+			return resp;
 		}
     	
 		@Override
 		protected void onPostExecute(HttpResponse response) {
-			int statusCode = response.getStatusLine().getStatusCode();			
-			if (statusCode == 202) {
-				new PollServerTask().execute((Void[]) null);
-			} else {
-				// TODO: friendlier error handling
-				showAlert("Error", "There was a problem deleting your server: " + response.getStatusLine());
+			if (response != null) {
+				int statusCode = response.getStatusLine().getStatusCode();			
+				if (statusCode == 202) {
+					new PollServerTask().execute((Void[]) null);
+				} else {
+					// TODO: friendlier error handling
+					showAlert("Error", "There was a problem resizing your server: " + response.getStatusLine());
+				}
+			} else if (exception != null) {
+				showAlert("Error", "There was a problem resizing your server: " + exception.getMessage());
+				
 			}
 			
 		}
@@ -363,27 +389,32 @@ public class ViewServerActivity extends Activity {
 	
 	private class DeleteServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
+		private CloudServersException exception;
+
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
-			return (new ServerManager()).delete(server);
+			HttpResponse resp = null;
+			try {
+				resp = (new ServerManager()).delete(server);
+			} catch (CloudServersException e) {
+				exception = e;
+			}
+			return resp;
 		}
     	
 		@Override
 		protected void onPostExecute(HttpResponse response) {
-			//setServerList(result);
-			//this.
-			//hideActivityIndicators();
-			//response.getStatusLine().getStatusCode()
-			System.out.println("done");
-			
-			int statusCode = response.getStatusLine().getStatusCode();
-			
-			if (statusCode == 202) {
-				setResult(Activity.RESULT_OK);
-				finish();
-			} else {
-				// TODO: friendlier error handling
-				showAlert("Error", "There was a problem deleting your server: " + response.getStatusLine());
+			if (response != null) {
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == 202) {
+					setResult(Activity.RESULT_OK);
+					finish();
+				} else {
+					// TODO: friendlier error handling
+					showAlert("Error", "There was a problem deleting your server: " + response.getStatusLine());
+				}
+			} else if (exception != null) {
+				showAlert("Error", "There was a problem deleting your server: " + exception.getMessage());				
 			}
 			
 		}

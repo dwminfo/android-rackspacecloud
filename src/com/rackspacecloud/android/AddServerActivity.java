@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Image;
 import com.rackspace.cloud.servers.api.client.Server;
@@ -154,7 +155,11 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
     	
 		@Override
 		protected Server doInBackground(Void... arg0) {
-			(new ServerManager()).create(server);
+			try {
+				(new ServerManager()).create(server);
+			} catch (CloudServersException e) {
+				showAlert("Error", e.getMessage());
+			}
 			return server;
 		}
     	

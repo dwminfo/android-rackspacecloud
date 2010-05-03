@@ -5,10 +5,9 @@ package com.rackspacecloud.android;
 
 import java.util.ArrayList;
 
-import com.rackspace.cloud.servers.api.client.Server;
-import com.rackspace.cloud.servers.api.client.ServerManager;
-
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,6 +21,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.rackspace.cloud.servers.api.client.CloudServersException;
+import com.rackspace.cloud.servers.api.client.Server;
+import com.rackspace.cloud.servers.api.client.ServerManager;
 
 /**
  * @author mike
@@ -51,6 +54,9 @@ public class ListServersActivity extends ListActivity {
     }
     
     private void setServerList(ArrayList<Server> servers) {
+    	if (servers == null) {
+    		servers = new ArrayList<Server>();
+    	}
     	String[] serverNames = new String[servers.size()];
     	this.servers = new Server[servers.size()];
     	
@@ -93,15 +99,44 @@ public class ListServersActivity extends ListActivity {
         getListView().setItemsCanFocus(false);
     }
     
+    private void showAlert(String title, String message) {
+    	//Can't create handler inside thread that has not called Looper.prepare()
+    	//Looper.prepare();
+    	try {
+		AlertDialog alert = new AlertDialog.Builder(this).create();
+		alert.setTitle(title);
+		alert.setMessage(message);
+		alert.setButton("OK", new DialogInterface.OnClickListener() {
+	      public void onClick(DialogInterface dialog, int which) {
+	        return;
+	    } }); 
+		alert.show();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+    
+    
     private class LoadServersTask extends AsyncTask<Void, Void, ArrayList<Server>> {
+    	
+    	private CloudServersException exception;
     	
 		@Override
 		protected ArrayList<Server> doInBackground(Void... arg0) {
-			return (new ServerManager()).createList(true);
+			ArrayList<Server> servers = null;
+			try {
+				servers = (new ServerManager()).createList(true);
+			} catch (CloudServersException e) {
+				exception = e;				
+			}
+			return servers;
 		}
     	
 		@Override
 		protected void onPostExecute(ArrayList<Server> result) {
+			if (exception != null) {
+				showAlert("Error", exception.getMessage());
+			}
 			setServerList(result);
 		}
     }

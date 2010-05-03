@@ -9,6 +9,7 @@ package com.rackspace.cloud.servers.api.client;
  */
 public class Server extends Entity {
 
+	private static final long serialVersionUID = 5994739895998309675L;
 	private String status;
 	private String progress;
 	private String hostId;
