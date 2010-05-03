@@ -27,7 +27,7 @@ import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class ViewServerActivity extends Activity {
@@ -157,7 +157,6 @@ public class ViewServerActivity extends Activity {
     	
     }
     
-	// TODO: extract to a util class?
     private void showAlert(String title, String message) {
 		AlertDialog alert = new AlertDialog.Builder(this).create();
 		alert.setTitle(title);

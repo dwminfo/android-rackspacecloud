@@ -24,7 +24,7 @@ import org.xml.sax.XMLReader;
 import com.rackspace.cloud.servers.api.client.parsers.FlavorsXMLParser;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class FlavorManager extends EntityManager {
@@ -56,24 +56,16 @@ public class FlavorManager extends EntityManager {
 		    	flavors = flavorsXMLParser.getFlavors();		    	
 		    }
 		} catch (ClientProtocolException cpe) {
-			// TODO Auto-generated catch block
-			cpe.printStackTrace();
-			//return false;
+			// we'll end up with an empty list; that's good enough
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			//return false;
+			// we'll end up with an empty list; that's good enough
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// we'll end up with an empty list; that's good enough
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// we'll end up with an empty list; that's good enough
 		} catch (FactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// we'll end up with an empty list; that's good enough
 		}
-		
 		
 		return flavors;
 	}

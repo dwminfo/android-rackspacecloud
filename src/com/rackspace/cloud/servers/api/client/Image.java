@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import com.rackspacecloud.android.R;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class Image extends Entity {

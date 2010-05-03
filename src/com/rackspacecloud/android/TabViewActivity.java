@@ -9,7 +9,7 @@ import android.widget.TabHost;
 import android.os.Bundle;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class TabViewActivity extends TabActivity {

@@ -11,7 +11,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.rackspace.cloud.servers.api.client.Image;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class ImagesXMLParser extends DefaultHandler {

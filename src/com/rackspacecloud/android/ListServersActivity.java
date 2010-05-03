@@ -27,7 +27,7 @@ import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class ListServersActivity extends ListActivity {
@@ -68,13 +68,10 @@ public class ListServersActivity extends ListActivity {
 			}
 		}
 		
-		// TODO: throws ClassCastException with empty list
 		if (serverNames.length == 0) {
 			displayNoServersCell();
 		} else {
-			
-			getListView().setDividerHeight(1); // restore divider linesan 
-			//setListAdapter(new ArrayAdapter<String>(this, R.layout.listservercell, R.id.label, serverNames));
+			getListView().setDividerHeight(1); // restore divider lines 
 			setListAdapter(new ServerAdapter());
 		}
     }
@@ -86,7 +83,6 @@ public class ListServersActivity extends ListActivity {
         getListView().setTextFilterEnabled(true);
         getListView().setDividerHeight(0); // hide the dividers so it won't look like a list row
         getListView().setItemsCanFocus(false);
-        //getListView().setClickable(false); // TODO: so it will never be highlighted on touch
     }
     
     private void displayNoServersCell() {
@@ -95,7 +91,6 @@ public class ListServersActivity extends ListActivity {
         setListAdapter(new ArrayAdapter<String>(this, R.layout.noserverscell, R.id.no_servers_label, a));
         getListView().setTextFilterEnabled(true);
         getListView().setDividerHeight(0); // hide the dividers so it won't look like a list row
-        //getListView().setClickable(false); // so it will never be highlighted on touch
         getListView().setItemsCanFocus(false);
     }
     

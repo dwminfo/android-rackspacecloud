@@ -24,7 +24,7 @@ import org.xml.sax.XMLReader;
 import com.rackspace.cloud.servers.api.client.parsers.ImagesXMLParser;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class ImageManager extends EntityManager {
@@ -54,26 +54,18 @@ public class ImageManager extends EntityManager {
 		    	xmlReader.setContentHandler(imagesXMLParser);
 		    	xmlReader.parse(new InputSource(new StringReader(body)));		    	
 		    	images = imagesXMLParser.getImages();		    	
-		    }
+		    } 
 		} catch (ClientProtocolException cpe) {
-			// TODO Auto-generated catch block
-			cpe.printStackTrace();
-			//return false;
+			// we'll end up with an empty list; that's good enough
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			//return false;
+			// we'll end up with an empty list; that's good enough
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// we'll end up with an empty list; that's good enough
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// we'll end up with an empty list; that's good enough
 		} catch (FactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// we'll end up with an empty list; that's good enough
 		}
-		
 		
 		return images;
 	}

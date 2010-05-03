@@ -6,7 +6,7 @@ package com.rackspace.cloud.servers.api.client;
 import java.util.Calendar;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class EntityManager {
@@ -67,18 +67,14 @@ public class EntityManager {
 	public ArrayList createList(boolean detail) throws CloudServersException {
 		return null;
 	}
-	*/
-	
 	public EntityList createDeltaList(boolean detail, long changesSince) {
 		return null;
-	}
-	
+	}	
 	public EntityList createList(boolean detail, long offset, long limit) {
 		return null;
 	}
-	
 	public EntityList createDeltaList(boolean detail, long changesSince, long offset, long limit) {
 		return null;
 	}
-
+	*/
 }

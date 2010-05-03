@@ -28,7 +28,7 @@ import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class AddServerActivity extends Activity implements OnItemSelectedListener, OnClickListener {
@@ -95,7 +95,6 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		// TODO Auto-generated method stub
 		if (parent == imageSpinner) {
 			selectedImageId = images[position].getId();
 		} else if (parent == flavorSpinner) {
@@ -105,13 +104,10 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 
 	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void onClick(View arg0) {
-		// TODO Auto-generated method stub
 		if ("".equals(serverName.getText().toString())) {
 			showAlert("Required Fields Missing", "Server name is required.");
 		} else {
@@ -124,7 +120,6 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		}
 	}
 	
-	// TODO: extract to a util class?
     private void showAlert(String title, String message) {
 		AlertDialog alert = new AlertDialog.Builder(this).create();
 		alert.setTitle(title);
@@ -165,10 +160,7 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
     	
 		@Override
 		protected void onPostExecute(Server result) {
-			//setServerList(result);
-			//this.
 			hideActivityIndicators();
-			System.out.println("done");
 			setResult(Activity.RESULT_OK);
 			finish();			
 		}

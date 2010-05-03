@@ -30,7 +30,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
 import com.rackspace.cloud.servers.api.client.parsers.ServersXMLParser;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class ServerManager extends EntityManager {
@@ -65,15 +65,12 @@ public class ServerManager extends EntityManager {
 		    String body = responseHandler.handleResponse(resp);
 		    
 		    if (resp.getStatusLine().getStatusCode() == 202) {		    	
-		    	// TODO: handle success and failure
-		    	
 		    	ServersXMLParser serversXMLParser = new ServersXMLParser();
 		    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 		    	XMLReader xmlReader = saxParser.getXMLReader();
 		    	xmlReader.setContentHandler(serversXMLParser);
 		    	xmlReader.parse(new InputSource(new StringReader(body)));		    	
 		    	entity = serversXMLParser.getServer();		    	
-		    	
 		    } else {
 		    	CloudServersFaultXMLParser parser = new CloudServersFaultXMLParser();
 		    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();

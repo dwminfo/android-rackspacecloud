@@ -6,7 +6,7 @@ package com.rackspace.cloud.servers.api.client;
 import java.io.Serializable;
 
 /**
- * @author mike
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class Entity implements Serializable {

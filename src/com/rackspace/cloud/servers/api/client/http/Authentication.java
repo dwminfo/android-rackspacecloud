@@ -13,7 +13,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import com.rackspace.cloud.servers.api.client.Account;
 
 /**
- * @author Mike Mayo mike@overhrd.com
+ * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class Authentication {
@@ -39,12 +39,8 @@ public class Authentication {
 		    	return false;
 		    }
 		} catch (ClientProtocolException cpe) {
-			// TODO Auto-generated catch block
-			cpe.printStackTrace();
 			return false;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			return false;
 		}
 	}
