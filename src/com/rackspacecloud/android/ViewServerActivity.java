@@ -3,9 +3,21 @@
  */
 package com.rackspacecloud.android;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Iterator;
 
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -25,6 +37,7 @@ import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
+import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
 /**
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
@@ -261,6 +274,36 @@ public class ViewServerActivity extends Activity {
     	
     }
     
+    private CloudServersException parseCloudServersException(HttpResponse response) {
+		CloudServersException cse = new CloudServersException();
+		try {
+		    BasicResponseHandler responseHandler = new BasicResponseHandler();
+		    String body = responseHandler.handleResponse(response);
+	    	CloudServersFaultXMLParser parser = new CloudServersFaultXMLParser();
+	    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+	    	XMLReader xmlReader = saxParser.getXMLReader();
+	    	xmlReader.setContentHandler(parser);
+	    	xmlReader.parse(new InputSource(new StringReader(body)));		    	
+	    	cse = parser.getException();		    	
+		} catch (ClientProtocolException e) {
+			cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+		} catch (IOException e) {
+			cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+		} catch (ParserConfigurationException e) {
+			cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+		} catch (SAXException e) {
+			cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+		} catch (FactoryConfigurationError e) {
+			cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+		}
+		return cse;
+    }
+    
     // HTTP request tasks
     
 	private class PollServerTask extends AsyncTask<Void, Void, Server> {
@@ -306,8 +349,12 @@ public class ViewServerActivity extends Activity {
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();				
 				if (statusCode != 202) {
-					// TODO: parse CloudServerException
-					showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+					CloudServersException cse = parseCloudServersException(response);
+					if ("".equals(cse.getMessage())) {
+						showAlert("Error", "There was a problem rebooting your server.");
+					} else {
+						showAlert("Error", "There was a problem rebooting your server: " + cse.getMessage());
+					}
 				}
 			} else if (exception != null) {
 				showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());
@@ -336,8 +383,12 @@ public class ViewServerActivity extends Activity {
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();			
 				if (statusCode != 202) {
-					// TODO: parse CloudServerException
-					showAlert("Error", "There was a problem rebooting your server: " + response.getStatusLine());
+					CloudServersException cse = parseCloudServersException(response);
+					if ("".equals(cse.getMessage())) {
+						showAlert("Error", "There was a problem rebooting your server.");
+					} else {
+						showAlert("Error", "There was a problem rebooting your server: " + cse.getMessage());
+					}
 				}
 			} else if (exception != null) {
 				showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());
@@ -367,9 +418,13 @@ public class ViewServerActivity extends Activity {
 				int statusCode = response.getStatusLine().getStatusCode();			
 				if (statusCode == 202) {
 					new PollServerTask().execute((Void[]) null);
-				} else {
-					// TODO: friendlier error handling
-					showAlert("Error", "There was a problem resizing your server: " + response.getStatusLine());
+				} else {					
+					CloudServersException cse = parseCloudServersException(response);
+					if ("".equals(cse.getMessage())) {
+						showAlert("Error", "There was a problem deleting your server.");
+					} else {
+						showAlert("Error", "There was a problem deleting your server: " + cse.getMessage());
+					}					
 				}
 			} else if (exception != null) {
 				showAlert("Error", "There was a problem resizing your server: " + exception.getMessage());
@@ -402,13 +457,16 @@ public class ViewServerActivity extends Activity {
 					setResult(Activity.RESULT_OK);
 					finish();
 				} else {
-					// TODO: friendlier error handling
-					showAlert("Error", "There was a problem deleting your server: " + response.getStatusLine());
+					CloudServersException cse = parseCloudServersException(response);
+					if ("".equals(cse.getMessage())) {
+						showAlert("Error", "There was a problem deleting your server.");
+					} else {
+						showAlert("Error", "There was a problem deleting your server: " + cse.getMessage());
+					}
 				}
 			} else if (exception != null) {
 				showAlert("Error", "There was a problem deleting your server: " + exception.getMessage());				
-			}
-			
+			}			
 		}
     }
 }

@@ -42,7 +42,7 @@ public class ServerManager extends EntityManager {
 		
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers.xml");
-				
+		
 		post.addHeader("X-Auth-Token", Account.getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 

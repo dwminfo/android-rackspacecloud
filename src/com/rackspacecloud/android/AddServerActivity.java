@@ -148,21 +148,27 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
         
     private class SaveServerTask extends AsyncTask<Void, Void, Server> {
     	
+		private CloudServersException exception;
+    	
 		@Override
 		protected Server doInBackground(Void... arg0) {
 			try {
 				(new ServerManager()).create(server);
 			} catch (CloudServersException e) {
-				showAlert("Error", e.getMessage());
+				exception = e;
 			}
 			return server;
 		}
     	
 		@Override
 		protected void onPostExecute(Server result) {
-			hideActivityIndicators();
-			setResult(Activity.RESULT_OK);
-			finish();			
+			if (exception != null) {
+				showAlert("Error", "There was a problem creating your server: " + exception.getMessage());
+			} else {
+				hideActivityIndicators();
+				setResult(Activity.RESULT_OK);
+				finish();
+			}
 		}
     }
 	

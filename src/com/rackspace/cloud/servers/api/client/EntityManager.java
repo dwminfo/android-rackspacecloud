@@ -51,7 +51,7 @@ public class EntityManager {
 	public void wait(Entity e, long timeout) {
 	
 	}
-	
+	/*
 	public void notify(Entity e, ChangeListener ch) {
 		
 	}
@@ -59,6 +59,7 @@ public class EntityManager {
 	public void stopNotify(Entity e, ChangeListener ch) {
 		
 	}
+	*/
 	
 	//
 	// Lists
