@@ -32,6 +32,7 @@ public class Authentication {
 		    	Account.setAuthToken(resp.getFirstHeader("X-Auth-Token").getValue());
 		    	Account.setServerUrl(resp.getFirstHeader("X-Server-Management-Url").getValue());
 		    	Account.setStorageUrl(resp.getFirstHeader("X-Storage-Url").getValue());
+		    	Account.setStorageToken(resp.getFirstHeader("X-Storage-Token").getValue());
 		    	Account.setCdnManagementUrl(resp.getFirstHeader("X-Cdn-Management-Url").getValue());
 		    	return true;
 		    } else {
