@@ -93,7 +93,6 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		flavorSpinner.setAdapter(flavorAdapter);
     }
 
-	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		if (parent == imageSpinner) {
 			selectedImageId = images[position].getId();
@@ -102,11 +101,9 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		}
 	}
 
-	@Override
 	public void onNothingSelected(AdapterView<?> parent) {
 	}
 
-	@Override
 	public void onClick(View arg0) {
 		if ("".equals(serverName.getText().toString())) {
 			showAlert("Required Fields Missing", "Server name is required.");

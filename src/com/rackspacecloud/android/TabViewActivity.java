@@ -26,7 +26,7 @@ public class TabViewActivity extends TabActivity {
 		tabs.addTab(spec);
 
 		spec = tabs.newTabSpec("tab2");
-		spec.setContent(new Intent(this, ListServersActivity.class));
+		spec.setContent(new Intent(this, ListContainerActivity.class));
 		spec.setIndicator("Cloud Files", getResources().getDrawable(R.drawable.cloudfiles));
 		tabs.addTab(spec);
 

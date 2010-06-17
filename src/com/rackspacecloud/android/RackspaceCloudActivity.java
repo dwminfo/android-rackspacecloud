@@ -50,7 +50,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
         // use the TabViewActivity when Cloud Files is added
         // tabViewIntent = new Intent(this, TabViewActivity.class);
         
-        tabViewIntent = new Intent(this, ListServersActivity.class);
+        tabViewIntent = new Intent(this, TabViewActivity.class);
     }
 
 	@Override
@@ -81,7 +81,6 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     	login();
     }
     
-	@Override
 	public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
 		login();
 		return false;

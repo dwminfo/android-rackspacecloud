@@ -289,7 +289,6 @@ public class ViewServerActivity extends Activity {
 
     private class ResizeClickListener implements android.content.DialogInterface.OnClickListener {
 
-		@Override
 		public void onClick(DialogInterface dialog, int which) {
 			selectedFlavorId = which + "";
 			new ResizeServerTask().execute((Void[]) null);
