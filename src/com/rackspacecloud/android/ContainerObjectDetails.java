@@ -44,10 +44,10 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
 public class ContainerObjectDetails extends Activity {
 	
 	private static final int deleteObject = 0;
-	public static String containerName = null;
 	private ContainerObjects objects;
 	private String containerNames;
 	private String cdnURL;
+	private String cdnEnabled;
 	public String LOG = "ViewObject";
 	
     /** Called when the activity is first created. */
@@ -57,6 +57,9 @@ public class ContainerObjectDetails extends Activity {
         objects = (ContainerObjects) this.getIntent().getExtras().get("container");
         containerNames =  (String) this.getIntent().getExtras().get("containerNames");
         cdnURL = (String) this.getIntent().getExtras().get("cdnUrl");
+        cdnEnabled = (String) this.getIntent().getExtras().get("isCdnEnabled");
+        Log.v(LOG, cdnEnabled);
+        
         setContentView(R.layout.viewobject);
         restoreState(savedInstanceState);
         
@@ -97,8 +100,10 @@ public class ContainerObjectDetails extends Activity {
     	TextView lastmod = (TextView) findViewById(R.id.view_file_modification);
     	lastmod.setText(objects.getLastMod().toString());
     	
+    	if ( cdnEnabled.equals("true"))  {
     	TextView cdnUrl = (TextView) findViewById(R.id.view_file_cdnurl);
     	cdnUrl.setText( cdnURL + "/" + objects.getCName());
+    	}
     	
     }
     private void showAlert(String title, String message) {
@@ -210,8 +215,8 @@ public class ContainerObjectDetails extends Activity {
 	    			protected HttpResponse doInBackground(Void... arg0) {
 	    				HttpResponse resp = null;
 	    				try {
-	    					resp = (new ContainerObjectManager()).deleteObject(containerName, objects.getCName() );
-	    					Log.v(LOG, "container name " + objects.getCName() + " " + containerName);
+	    					resp = (new ContainerObjectManager()).deleteObject(containerNames, objects.getCName() );
+	    					Log.v(LOG, "container name " + objects.getCName() + " " + containerNames);
 	    				} catch (CloudServersException e) {
 	    					exception = e;
 	    				}

@@ -9,7 +9,7 @@
     android:layout_height="fill_parent"
     >
 <ImageView
-    android:id="@+id/view_object_os_logo"
+    android:id="@+id/view_object_logo"
     android:layout_width="700dip"
     android:layout_height="700dip"
     android:adjustViewBounds="true"
@@ -36,6 +36,7 @@
     android:textStyle="bold"
     android:textSize="20.0sp"
     android:textColor="#fff"
+    android:layout_marginBottom="15dip"
     />
     
 <!-- File Size in Bytes -->
@@ -56,6 +57,7 @@
     android:textStyle="bold"
     android:textSize="20.0sp"
     android:textColor="#fff"
+    android:layout_marginBottom="15dip"
     />
 
 <!-- Hash Code -->
@@ -75,7 +77,8 @@
     android:gravity="fill_horizontal"
     android:textStyle="bold"
     android:textSize="20.0sp"
-    android:textColor="#fff"
+    android:textColor="#fff"    
+    android:layout_marginBottom="15dip"
     />
     
     <!-- Content Type -->
@@ -96,6 +99,7 @@
     android:textStyle="bold"
     android:textSize="20.0sp"
     android:textColor="#fff"
+    android:layout_marginBottom="15dip"
     />
 
 <!-- Last Modification  -->
@@ -116,6 +120,7 @@
     android:textStyle="bold"
     android:textSize="20.0sp"
     android:textColor="#fff"
+    android:layout_marginBottom="15dip"
     />
  
 

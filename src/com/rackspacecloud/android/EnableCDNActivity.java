@@ -141,7 +141,7 @@ public void onNothingSelected(AdapterView<?> parent) {
 	        case R.id.enable_button:
 	            return new AlertDialog.Builder(EnableCDNActivity.this)
 	        	.setIcon(R.drawable.alert_dialog_icon)
-	        	.setTitle("Soft Reboot")
+	        	.setTitle("Enable CDN")
 	        	.setMessage("Are you sure you want to enable CDN on this container?")
 	        	.setPositiveButton("Enable CDN", new DialogInterface.OnClickListener() {
 	        		public void onClick(DialogInterface dialog, int whichButton) {

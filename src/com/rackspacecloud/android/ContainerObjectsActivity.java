@@ -51,15 +51,20 @@ public class ContainerObjectsActivity extends ListActivity {
 	
 
 	private static final int deleteContainer = 0;
-	private static final int enableCdn = 0;
 	private ContainerObjects[] files;
 	private static Container container;
 	public String LOG = "viewFilesActivity";
+	private String cdnEnabledIs;
 		
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         container = (Container) this.getIntent().getExtras().get("container");
+        if (container.isCdnEnabled()== true){
+        	cdnEnabledIs = "true";
+        }else{
+        	cdnEnabledIs = "false";
+        }
         restoreState(savedInstanceState);
             }
 	
@@ -91,6 +96,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	    	viewIntent.putExtra("container", files[position]);
 	    	viewIntent.putExtra("cdnUrl", container.getCdnUrl());
 	    	viewIntent.putExtra("containerNames", container.getName());
+	    	viewIntent.putExtra("isCdnEnabled", cdnEnabledIs);
 	    	startActivityForResult(viewIntent, 55); // arbitrary number; never used again
     	}
     }
@@ -109,7 +115,7 @@ public class ContainerObjectsActivity extends ListActivity {
     	String[] fileNames = new String[files.size()];
     	this.files = new ContainerObjects[files.size()];
     	
-		if (files != null) {
+		if (files != null) { 
 			for (int i = 0; i < files.size(); i++) {
 				ContainerObjects file= files.get(i);
 				this.files[i] = file;

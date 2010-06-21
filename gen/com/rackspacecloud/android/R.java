@@ -94,7 +94,7 @@ public final class R {
         public static final int view_file_cdnurl=0x7f070029;
         public static final int view_file_hash=0x7f070026;
         public static final int view_file_modification=0x7f070028;
-        public static final int view_object_os_logo=0x7f070023;
+        public static final int view_object_logo=0x7f070023;
         public static final int view_server_delete_button=0x7f070033;
         public static final int view_server_disk=0x7f07002e;
         public static final int view_server_hard_reboot_button=0x7f070031;
