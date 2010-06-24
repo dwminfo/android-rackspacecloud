@@ -46,16 +46,16 @@ public final class R {
         public static final int windows_large=0x7f02001b;
     }
     public static final class id {
-        public static final int add_container=0x7f070034;
-        public static final int add_server=0x7f070037;
+        public static final int add_container=0x7f070032;
+        public static final int add_server=0x7f070035;
         public static final int button=0x7f070016;
         public static final int cdn_spinner=0x7f070009;
         public static final int container_name=0x7f070000;
-        public static final int delete_container=0x7f070038;
-        public static final int delete_object=0x7f070036;
+        public static final int delete_container=0x7f070036;
+        public static final int delete_object=0x7f070034;
         public static final int disable_button=0x7f07000d;
         public static final int enable_button=0x7f07000c;
-        public static final int enable_cdn=0x7f070039;
+        public static final int enable_cdn=0x7f070037;
         public static final int flavor_spinner=0x7f070006;
         public static final int icon=0x7f070010;
         public static final int image_spinner=0x7f070005;
@@ -74,7 +74,7 @@ public final class R {
         public static final int no_files_sublabel=0x7f07001c;
         public static final int no_servers_label=0x7f07001d;
         public static final int no_servers_sublabel=0x7f07001e;
-        public static final int refresh=0x7f070035;
+        public static final int refresh=0x7f070033;
         public static final int save_button=0x7f070001;
         public static final int save_container_progress_bar=0x7f070002;
         public static final int save_server_progress_bar=0x7f070007;
@@ -86,24 +86,22 @@ public final class R {
         public static final int tab2=0x7f070021;
         public static final int tabhost=0x7f07001f;
         public static final int ttl_spinner=0x7f07000a;
-        public static final int view_container_name=0x7f070024;
-        public static final int view_content_type=0x7f070027;
-        public static final int view_file_bytes=0x7f070025;
-        public static final int view_file_cdnurl=0x7f070029;
-        public static final int view_file_hash=0x7f070026;
-        public static final int view_file_modification=0x7f070028;
-        public static final int view_object_logo=0x7f070023;
-        public static final int view_server_delete_button=0x7f070033;
-        public static final int view_server_disk=0x7f07002e;
-        public static final int view_server_hard_reboot_button=0x7f070031;
+        public static final int view_container_name=0x7f070023;
+        public static final int view_content_type=0x7f070025;
+        public static final int view_file_bytes=0x7f070024;
+        public static final int view_file_cdnurl=0x7f070027;
+        public static final int view_file_modification=0x7f070026;
+        public static final int view_server_delete_button=0x7f070031;
+        public static final int view_server_disk=0x7f07002c;
+        public static final int view_server_hard_reboot_button=0x7f07002f;
         public static final int view_server_layout=0x7f070022;
-        public static final int view_server_memory=0x7f07002d;
-        public static final int view_server_name=0x7f07002b;
-        public static final int view_server_os=0x7f07002c;
-        public static final int view_server_os_logo=0x7f07002a;
-        public static final int view_server_resize_button=0x7f070032;
-        public static final int view_server_soft_reboot_button=0x7f070030;
-        public static final int view_server_status=0x7f07002f;
+        public static final int view_server_memory=0x7f07002b;
+        public static final int view_server_name=0x7f070029;
+        public static final int view_server_os=0x7f07002a;
+        public static final int view_server_os_logo=0x7f070028;
+        public static final int view_server_resize_button=0x7f070030;
+        public static final int view_server_soft_reboot_button=0x7f07002e;
+        public static final int view_server_status=0x7f07002d;
     }
     public static final class layout {
         public static final int createcontainer=0x7f030000;

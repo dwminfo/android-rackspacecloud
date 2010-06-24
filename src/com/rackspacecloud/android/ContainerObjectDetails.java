@@ -47,16 +47,20 @@ public class ContainerObjectDetails extends Activity {
 	private String cdnURL;
 	private String cdnEnabled;
 	public String LOG = "ViewObject";
+	private int bConver = 1048576;
+	private int kbConver = 1024;
+	private double megaBytes;
+	private double kiloBytes;
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
         objects = (ContainerObjects) this.getIntent().getExtras().get("container");
         containerNames =  (String) this.getIntent().getExtras().get("containerNames");
         cdnURL = (String) this.getIntent().getExtras().get("cdnUrl");
         cdnEnabled = (String) this.getIntent().getExtras().get("isCdnEnabled");
-        Log.v(LOG, cdnEnabled);
         
         setContentView(R.layout.viewobject);
         restoreState(savedInstanceState);
@@ -67,18 +71,13 @@ public class ContainerObjectDetails extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("container", objects);
-		//outState.putBoolean("imageLoaded", imageLoaded);
 	}
 
     private void restoreState(Bundle state) {
     	if (state != null && state.containsKey("container")) {
     		objects = (ContainerObjects) state.getSerializable("container");
-    		Log.v(LOG, "we restored ViewObject");
-    		//imageLoaded = state.getBoolean("imageLoaded");
     	}
-        loadObjectData();
-        Log.v(LOG, "were loading objectData");
-       
+        loadObjectData();       
     }
    
      
@@ -86,11 +85,18 @@ public class ContainerObjectDetails extends Activity {
     	TextView name = (TextView) findViewById(R.id.view_container_name);
     	name.setText(objects.getCName().toString());
     	    	
-    	TextView bytes = (TextView) findViewById(R.id.view_file_bytes);
-    	bytes.setText(objects.getBytes().toString()+" Bytes");
-    	    	
-    	TextView hash = (TextView) findViewById(R.id.view_file_hash);
-    	hash.setText(objects.getHash().toString());
+    	if (objects.getBytes() >= bConver) {
+			megaBytes = Math.abs(objects.getBytes()/bConver + 0.2);
+				TextView sublabel = (TextView) findViewById(R.id.view_file_bytes);
+				sublabel.setText(megaBytes + " MB");
+		} else if (objects.getBytes() >= kbConver){
+			kiloBytes = Math.abs(objects.getBytes()/kbConver + 0.2);
+				TextView sublabel = (TextView) findViewById(R.id.view_file_bytes);
+				sublabel.setText(kiloBytes + " KB");
+		} else {
+				TextView sublabel = (TextView) findViewById(R.id.view_file_bytes);
+				sublabel.setText(objects.getBytes() + " B");
+		}		
     	
     	TextView cType = (TextView) findViewById(R.id.view_content_type);
     	cType.setText(objects.getContentType().toString());

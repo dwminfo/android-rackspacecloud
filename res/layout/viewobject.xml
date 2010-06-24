@@ -8,21 +8,13 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-<ImageView
-    android:id="@+id/view_object_logo"
-    android:layout_width="700dip"
-    android:layout_height="700dip"
-    android:adjustViewBounds="true"
-    android:layout_gravity="left"
-    />
-
 
 <!-- Container Name - Setting top margin to -700 so it will sit over the OS logo image -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:layout_marginLeft="22dip" 
-    android:layout_marginTop="-700dip"
+    android:layout_marginTop="20dip"
     android:text="Container Name"
     android:singleLine="false"
     />
@@ -39,12 +31,12 @@
     android:layout_marginBottom="15dip"
     />
     
-<!-- File Size in Bytes -->
+<!-- File Size  -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"
     android:layout_marginLeft="22dip" 
-    android:text="File Size in Bytes"
+    android:text="File Size "
     android:singleLine="false"
     />
 <TextView android:id="@+id/view_file_bytes"
@@ -59,29 +51,8 @@
     android:textColor="#fff"
     android:layout_marginBottom="15dip"
     />
-
-<!-- Hash Code -->
-<TextView  
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="22dip" 
-    android:text="Hash"
-    android:singleLine="false"
-    />
-<TextView android:id="@+id/view_file_hash"
-    android:layout_height="wrap_content"
-    android:layout_width="fill_parent"
-    android:layout_marginLeft="22dip"
-    android:layout_marginRight="30dip"
-    android:scrollHorizontally="true"
-    android:gravity="fill_horizontal"
-    android:textStyle="bold"
-    android:textSize="20.0sp"
-    android:textColor="#fff"    
-    android:layout_marginBottom="15dip"
-    />
     
-    <!-- Content Type -->
+<!-- Content Type -->
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content"

@@ -12,9 +12,8 @@ public class ContainerObjects extends Entity {
 	private String object;
 	private String hash;
 	private String lastMod;
-	private String bytes;
+	private int bytes;
 	private String cname;
-	private String cName;
 	private String contentType;
 
 	/**
@@ -72,27 +71,32 @@ public class ContainerObjects extends Entity {
 	public void setCName(String cname) {
 		this.cname = cname;
 	}
-	public String getBytes() {
+	/**
+	 * 
+	 * @return the objects size
+	 */
+	public int getBytes() {
 		return bytes;
 	}
 	/**
 	 * 
-	 * @param bytes
+	 * @param the bytes the object is set to
 	 */
-	public void setBytes(String bytes) {
+	public void setBytes(int bytes) {
 		this.bytes = bytes;
 	}
-	public void setCname(String cName) {
-		this.cName = cName;
-		
-	}
-	public String getCname(){
-		return cName;
-	}
+	/**
+	 * 
+	 * @param contentType the object is set to
+	 */
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 		
 	}
+	/**
+	 * 
+	 * @return the objects content type
+	 */
 	public String getContentType(){
 		return contentType;
 	}

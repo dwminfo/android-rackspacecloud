@@ -55,6 +55,10 @@ public class ContainerObjectsActivity extends ListActivity {
 	private static Container container;
 	public String LOG = "viewFilesActivity";
 	private String cdnEnabledIs;
+	public Object megaBytes;
+	public Object kiloBytes;
+	public int bConver = 1048576;
+	public int kbConver = 1024;
 		
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -205,8 +209,20 @@ public class ContainerObjectsActivity extends ListActivity {
 			TextView label = (TextView) row.findViewById(R.id.label);
 			label.setText(file.getCName());
 			
-			TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
-			sublabel.setText(file.getBytes()+ "  Bytes");	
+
+			if (file.getBytes() >= bConver) {
+				megaBytes = Math.abs(container.getBytes()/bConver + 0.2);
+					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
+					sublabel.setText(megaBytes + " MB");
+			} else if (file.getBytes() >= kbConver){
+				kiloBytes = Math.abs(container.getBytes()/kbConver + 0.2);
+					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
+					sublabel.setText(kiloBytes + " KB");
+			} else {
+					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
+					sublabel.setText( container.getBytes() + " B");
+			}
+				
 			return(row);
 		}
 	}   

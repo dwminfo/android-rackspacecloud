@@ -199,7 +199,6 @@ public class ListContainerActivity extends ListActivity {
 					if (container.getName().equals(cdnContainer.getName())){
 						container.setCdnEnabled(true);
 						container.setCdnUrl(cdnContainer.getCdnUrl());
-						//container.setLogRetention(cdnContainer.getLogRetention());
 						container.setTtl(cdnContainer.getTtl());
 					}
 				}
@@ -245,6 +244,7 @@ public class ListContainerActivity extends ListActivity {
 			TextView label = (TextView) row.findViewById(R.id.label);
 			label.setText(container.getName()); 
 			
+		
 			if (container.getBytes() >= bConver) {
 				megaBytes = Math.abs(container.getBytes()/bConver + 0.2);
 					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);

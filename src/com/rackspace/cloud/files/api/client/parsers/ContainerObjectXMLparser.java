@@ -19,12 +19,7 @@ public class ContainerObjectXMLparser extends DefaultHandler {
 	private ArrayList<ContainerObjects> files;
 
 	private StringBuffer currentData;
-	private boolean find_Title = false;
-	private boolean find_Hash = false;
-	private boolean find_Bytes = false;
-	private boolean find_lastMod = false;
 	public String LOG = "ViewFilesXMLparser";
-	private boolean find_contentType = false;
    
 	public void startDocument() {
 		Log.v(LOG, "startDocument");
@@ -38,27 +33,16 @@ public class ContainerObjectXMLparser extends DefaultHandler {
 
 		currentData = new StringBuffer();
 		if ("container".equals(name)) {
-			files = new ArrayList<ContainerObjects>();
-					
-				
+			files = new ArrayList<ContainerObjects>();				
 		} else if ("object".equals(name)) {
 			object = new ContainerObjects();
-		}else if ("name".equals(name)){
-			this.find_Title = true;
-		}else if ("content_type".equals(name)){
-			this.find_contentType  = true;
-		}else if ("hash".equals(name)){
-			this.find_Hash = true;
-		}else if ("bytes".equals(name)){
-			this.find_Bytes = true;
-		}else if ("last_modified".equals(name)) {
-			this.find_lastMod=true;
-				
+		}
 	}
-			
-}	
 
 	public void endElement(String uri, String name, String qName) {
+
+		String value = currentData.toString().trim();
+		
 		if ("container".equals(name)) {	
 			
 		} else if ("object".equals(name)) {
@@ -66,33 +50,23 @@ public class ContainerObjectXMLparser extends DefaultHandler {
 				files.add(object);
 			}
 		}else if ("name".equals(name)){
-			this.find_Title = false;
+			object.setCName(value);
 		}else if ("content_type".equals(name)){
-			this.find_contentType = false;
+			object.setContentType(value);
 		}else if ("hash".equals(name)){
-			this.find_Hash = false;
+			object.setHash(value);
 		}else if ("bytes".equals(name)){
-			this.find_Bytes = false;
+			object.setBytes(Integer.parseInt(value));
 		}else if ("last_modified".equals(name)){
-			this.find_lastMod = false;
+			object.setLastMod(value);
 		
 					
 		}
 	}
 
+
 	public void characters(char ch[], int start, int length) {
-		
-		 if(this.find_Title){
-			object.setCName(new String(ch, start, length));
-		 } else if (this.find_contentType){
-			 object.setContentType(new String(ch, start, length));
-		 } else if (this.find_Hash) {
-			 object.setHash(new String(ch, start, length));
-		 } else if (this.find_Bytes) {
-			 object.setBytes(new String(ch, start, length));
-		 } else if (this.find_lastMod){
-			 object.setLastMod(new String(ch, start, length));
-		 }
+				
 		System.out.print("Characters:    \"");
 		
 		for (int i = start; i < start + length; i++) {
