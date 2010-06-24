@@ -1,14 +1,13 @@
 package com.rackspace.cloud.files.api.client.parsers;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import com.rackspace.cloud.files.api.client.ContainerObjects;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
 import android.util.Log;
+
+import com.rackspace.cloud.files.api.client.ContainerObjects;
 /** 
  * 
  * @author Phillip Toohill

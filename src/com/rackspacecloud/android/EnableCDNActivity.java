@@ -182,7 +182,8 @@ public void onNothingSelected(AdapterView<?> parent) {
         tv.setVisibility(visibility);
     }
 
-    private void showActivityIndicators() {
+    @SuppressWarnings("unused")
+	private void showActivityIndicators() {
     	setActivityIndicatorsVisibility(View.VISIBLE);
     }
     

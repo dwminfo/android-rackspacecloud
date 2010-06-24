@@ -34,6 +34,10 @@ public class ListContainerActivity extends ListActivity {
 	public Container container;
 	public Container cdnContainer;
 	public String[] containerNames;
+	public Object megaBytes;
+	public Object kiloBytes;
+	public int bConver = 1048576;
+	public int kbConver = 1024;
 	protected static final int DELETE_ID = 0;
 	
 	@Override
@@ -101,7 +105,7 @@ public class ListContainerActivity extends ListActivity {
     private void displayNoServersCell() {
     	String a[] = new String[1];
     	a[0] = "No Files";
-        setListAdapter(new ArrayAdapter<String>(this, R.layout.nofilescell, R.id.no_files_label, a));
+        setListAdapter(new ArrayAdapter<String>(this, R.layout.nocontainerscell, R.id.no_containers_label, a));
         getListView().setTextFilterEnabled(true);
         getListView().setDividerHeight(0); // hide the dividers so it won't look like a list row
         getListView().setItemsCanFocus(false);
@@ -241,14 +245,18 @@ public class ListContainerActivity extends ListActivity {
 			TextView label = (TextView) row.findViewById(R.id.label);
 			label.setText(container.getName()); 
 			
-			TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
-			sublabel.setText(container.getCount()+" Objects");
-			
-			TextView sublabel1 = (TextView) row.findViewById(R.id.sublabel1);
-			sublabel1.setText("  CDN: " + container.isCdnEnabled());
-			
-			TextView sublabel2 = (TextView) row.findViewById(R.id.sublabel2);
-			sublabel2.setText("TTL:" + container.getTtl());
+			if (container.getBytes() >= bConver) {
+				megaBytes = Math.abs(container.getBytes()/bConver + 0.2);
+					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
+					sublabel.setText(container.getCount()+" Objects " + megaBytes + " MB");
+			} else if (container.getBytes() >= kbConver){
+				kiloBytes = Math.abs(container.getBytes()/kbConver + 0.2);
+					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
+					sublabel.setText(container.getCount()+" Objects " + kiloBytes + " KB");
+			} else {
+					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
+					sublabel.setText(container.getCount()+" Objects " + container.getBytes() + " B");
+			}
 			
 			return(row);
 		}

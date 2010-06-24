@@ -143,7 +143,7 @@ public class ContainerObjectsActivity extends ListActivity {
     private void displayNoServersCell() {
     	String a[] = new String[1];
     	a[0] = "No Files";
-        setListAdapter(new ArrayAdapter<String>(this, R.layout.noviewfilescell, R.id.no_files_label, a));
+        setListAdapter(new ArrayAdapter<String>(this, R.layout.noobjectscell, R.id.no_files_label, a));
         getListView().setTextFilterEnabled(true);
         getListView().setDividerHeight(0); // hide the dividers so it won't look like a list row
         getListView().setItemsCanFocus(false);

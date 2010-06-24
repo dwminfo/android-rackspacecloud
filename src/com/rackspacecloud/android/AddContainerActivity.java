@@ -27,10 +27,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.rackspace.cloud.files.api.client.Container;
 import com.rackspace.cloud.files.api.client.ContainerManager;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
-import com.rackspace.cloud.servers.api.client.ServerManager;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 /** 
  * 
@@ -41,7 +39,6 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 
 	
 	private EditText fileName;	
-	private Container container;
 	
     /** Called when the activity is first created. */
     @Override

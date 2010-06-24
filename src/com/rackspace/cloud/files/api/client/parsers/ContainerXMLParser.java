@@ -1,7 +1,6 @@
 package com.rackspace.cloud.files.api.client.parsers;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;

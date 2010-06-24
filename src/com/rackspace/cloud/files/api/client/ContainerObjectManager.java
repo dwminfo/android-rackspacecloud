@@ -26,9 +26,7 @@ import com.rackspace.cloud.files.api.client.parsers.ContainerObjectXMLparser;
 import com.rackspace.cloud.servers.api.client.Account;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.EntityManager;
-import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
-import com.rackspacecloud.android.ContainerObjectsActivity;
 
 /** 
  * 

@@ -5,7 +5,7 @@
     android:layout_height="264dip"
     >
     
-    <TextView android:id="@+id/no_files_label"
+    <TextView android:id="@+id/no_containers_label"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="125px"
@@ -15,7 +15,7 @@
         
         android:textSize="24sp" />
 
-    <TextView android:id="@+id/no_files_sublabel"
+    <TextView android:id="@+id/no_containers_sublabel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10px"

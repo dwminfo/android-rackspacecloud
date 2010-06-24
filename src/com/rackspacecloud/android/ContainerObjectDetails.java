@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.rackspace.cloud.files.api.client.Container;
 import com.rackspace.cloud.files.api.client.ContainerObjectManager;
 import com.rackspace.cloud.files.api.client.ContainerObjects;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
