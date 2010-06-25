@@ -19,12 +19,16 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.rackspace.cloud.files.api.client.ContainerObjectManager;
@@ -39,7 +43,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  *
  */
 
-public class ContainerObjectDetails extends Activity {
+public class ContainerObjectsDetails extends Activity {
 	
 	private static final int deleteObject = 0;
 	private ContainerObjects objects;
@@ -51,6 +55,7 @@ public class ContainerObjectDetails extends Activity {
 	private int kbConver = 1024;
 	private double megaBytes;
 	private double kiloBytes;
+	public Button previewButton;
 	
     /** Called when the activity is first created. */
     @Override
@@ -61,8 +66,8 @@ public class ContainerObjectDetails extends Activity {
         containerNames =  (String) this.getIntent().getExtras().get("containerNames");
         cdnURL = (String) this.getIntent().getExtras().get("cdnUrl");
         cdnEnabled = (String) this.getIntent().getExtras().get("isCdnEnabled");
-        
-        setContentView(R.layout.viewobject);
+
+        setContentView(R.layout.viewobject);       
         restoreState(savedInstanceState);
         
     }
@@ -77,10 +82,20 @@ public class ContainerObjectDetails extends Activity {
     	if (state != null && state.containsKey("container")) {
     		objects = (ContainerObjects) state.getSerializable("container");
     	}
-        loadObjectData();       
+        loadObjectData();
+        
+        if ( cdnEnabled.equals("true"))  {
+        	this.previewButton = (Button) findViewById(R.id.preview_button);
+        	previewButton.setOnClickListener(new MyOnClickListener());
+        } else {
+        	this.previewButton = (Button) findViewById(R.id.preview_button);
+        	previewButton.setVisibility(View.GONE);
+      }
+        
     }
    
-     
+    
+
     private void loadObjectData() {
     	TextView name = (TextView) findViewById(R.id.view_container_name);
     	name.setText(objects.getCName().toString());
@@ -103,13 +118,19 @@ public class ContainerObjectDetails extends Activity {
     	    	
     	TextView lastmod = (TextView) findViewById(R.id.view_file_modification);
     	lastmod.setText(objects.getLastMod().toString());
-    	
-    	if ( cdnEnabled.equals("true"))  {
-    	TextView cdnUrl = (TextView) findViewById(R.id.view_file_cdnurl);
-    	cdnUrl.setText( cdnURL + "/" + objects.getCName());
-    	}
-    	
+    	  
+    	    	
     }
+    
+    private class MyOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+        	Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(cdnURL + "/" + objects.getCName()));
+        	startActivity(viewIntent);  
+
+        }
+    }
+    
     private void showAlert(String title, String message) {
 		AlertDialog alert = new AlertDialog.Builder(this).create();
 		alert.setTitle(title);
@@ -146,7 +167,7 @@ public class ContainerObjectDetails extends Activity {
     protected Dialog onCreateDialog(int id ) {
     	switch (id) {
 			case deleteObject:
-            return new AlertDialog.Builder(ContainerObjectDetails.this)
+            return new AlertDialog.Builder(ContainerObjectsDetails.this)
         	.setIcon(R.drawable.alert_dialog_icon)
         	.setTitle("Delete File")
         	.setMessage("Are you sure you want to delete this file?")

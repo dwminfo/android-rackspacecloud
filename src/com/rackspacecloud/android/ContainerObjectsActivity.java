@@ -96,7 +96,7 @@ public class ContainerObjectsActivity extends ListActivity {
     
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		if (files != null && files.length > 0) {    		
-    		Intent viewIntent = new Intent(this, ContainerObjectDetails.class);
+    		Intent viewIntent = new Intent(this, ContainerObjectsDetails.class);
 	    	viewIntent.putExtra("container", files[position]);
 	    	viewIntent.putExtra("cdnUrl", container.getCdnUrl());
 	    	viewIntent.putExtra("containerNames", container.getName());

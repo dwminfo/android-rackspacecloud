@@ -74,6 +74,7 @@ public final class R {
         public static final int no_files_sublabel=0x7f07001c;
         public static final int no_servers_label=0x7f07001d;
         public static final int no_servers_sublabel=0x7f07001e;
+        public static final int preview_button=0x7f070027;
         public static final int refresh=0x7f070033;
         public static final int save_button=0x7f070001;
         public static final int save_container_progress_bar=0x7f070002;
@@ -89,7 +90,6 @@ public final class R {
         public static final int view_container_name=0x7f070023;
         public static final int view_content_type=0x7f070025;
         public static final int view_file_bytes=0x7f070024;
-        public static final int view_file_cdnurl=0x7f070027;
         public static final int view_file_modification=0x7f070026;
         public static final int view_server_delete_button=0x7f070031;
         public static final int view_server_disk=0x7f07002c;

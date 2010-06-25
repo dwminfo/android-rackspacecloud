@@ -93,27 +93,15 @@
     android:textColor="#fff"
     android:layout_marginBottom="15dip"
     />
- 
-
-<!-- CDN URL  -->
-<TextView  
-    android:layout_width="fill_parent" 
+ <!-- Preview Button --> 
+    <Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/preview_button"
+    android:text="Preview File"
+    android:layout_width="100dip"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="22dip" 
-    android:text="CDN Download Link"
-    android:singleLine="false"
-    />
-<TextView android:id="@+id/view_file_cdnurl"
-    android:layout_height="wrap_content"
-    android:layout_width="fill_parent"
-    android:layout_marginLeft="22dip"
-    android:layout_marginRight="30dip"
-    android:scrollHorizontally="true"
-    android:gravity="fill_horizontal"
-    android:textStyle="bold"
-    android:textSize="20.0sp"
-    android:textColor="#fff"
-    android:autoLink="all"
+    android:layout_gravity="left"
+    android:layout_marginLeft="20dip"
+    android:layout_marginTop="10dip"
     />
 	</LinearLayout>
 
