@@ -43,7 +43,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  *
  */
 
-public class ContainerObjectsDetails extends Activity {
+public class ContainerObjectDetails extends Activity {
 	
 	private static final int deleteObject = 0;
 	private ContainerObjects objects;
@@ -66,6 +66,7 @@ public class ContainerObjectsDetails extends Activity {
         containerNames =  (String) this.getIntent().getExtras().get("containerNames");
         cdnURL = (String) this.getIntent().getExtras().get("cdnUrl");
         cdnEnabled = (String) this.getIntent().getExtras().get("isCdnEnabled");
+        
 
         setContentView(R.layout.viewobject);       
         restoreState(savedInstanceState);
@@ -167,7 +168,7 @@ public class ContainerObjectsDetails extends Activity {
     protected Dialog onCreateDialog(int id ) {
     	switch (id) {
 			case deleteObject:
-            return new AlertDialog.Builder(ContainerObjectsDetails.this)
+            return new AlertDialog.Builder(ContainerObjectDetails.this)
         	.setIcon(R.drawable.alert_dialog_icon)
         	.setTitle("Delete File")
         	.setMessage("Are you sure you want to delete this file?")
