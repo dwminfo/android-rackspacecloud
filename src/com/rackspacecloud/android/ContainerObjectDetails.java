@@ -2,6 +2,9 @@ package com.rackspacecloud.android;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
@@ -98,9 +101,11 @@ public class ContainerObjectDetails extends Activity {
     
 
     private void loadObjectData() {
+    	//Object Name
     	TextView name = (TextView) findViewById(R.id.view_container_name);
     	name.setText(objects.getCName().toString());
-    	    	
+    	
+    	//File size
     	if (objects.getBytes() >= bConver) {
 			megaBytes = Math.abs(objects.getBytes()/bConver + 0.2);
 				TextView sublabel = (TextView) findViewById(R.id.view_file_bytes);
@@ -112,14 +117,32 @@ public class ContainerObjectDetails extends Activity {
 		} else {
 				TextView sublabel = (TextView) findViewById(R.id.view_file_bytes);
 				sublabel.setText(objects.getBytes() + " B");
-		}		
+		}	
     	
+    	//Content Type
     	TextView cType = (TextView) findViewById(R.id.view_content_type);
     	cType.setText(objects.getContentType().toString());
-    	    	
+        
+    	//Last Modification date
+        String strDate = objects.getLastMod();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.ssssss");
+        Date dateStr = null;
+			try {
+				dateStr = formatter.parse(strDate);
+			} catch (ParseException e1) {
+				e1.printStackTrace();
+			}
+        String formattedDate = formatter.format(dateStr);
+        Date date1 = null;
+			try {
+				date1 = formatter.parse(formattedDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}      
+        formatter = new SimpleDateFormat("MMM-dd-yyyy");
+        formattedDate = formatter.format(date1);
     	TextView lastmod = (TextView) findViewById(R.id.view_file_modification);
-    	lastmod.setText(objects.getLastMod().toString());
-    	  
+    	lastmod.setText(formattedDate);    	  
     	    	
     }
     

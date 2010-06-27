@@ -211,16 +211,16 @@ public class ContainerObjectsActivity extends ListActivity {
 			
 
 			if (file.getBytes() >= bConver) {
-				megaBytes = Math.abs(container.getBytes()/bConver + 0.2);
+				megaBytes = Math.abs(file.getBytes()/bConver + 0.2);
 					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
 					sublabel.setText(megaBytes + " MB");
 			} else if (file.getBytes() >= kbConver){
-				kiloBytes = Math.abs(container.getBytes()/kbConver + 0.2);
+				kiloBytes = Math.abs(file.getBytes()/kbConver + 0.2);
 					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
 					sublabel.setText(kiloBytes + " KB");
 			} else {
 					TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
-					sublabel.setText( container.getBytes() + " B");
+					sublabel.setText( file.getBytes() + " B");
 			}
 				
 			return(row);
