@@ -86,6 +86,7 @@ public class ContainerXMLParser extends DefaultHandler {
 				break;
 			}
 		}
+		System.out.print("\"\n");
 
 		for (int i = start; i < (start + length); i++) {
 			currentData.append(ch[i]);

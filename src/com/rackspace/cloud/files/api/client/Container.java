@@ -4,17 +4,17 @@ import com.rackspace.cloud.servers.api.client.Entity;
 
 /**
  * @author Phillip Toohill dead2hill@gmail.com
- *
+ * 
  */
 public class Container extends Entity {
 
 	private static final long serialVersionUID = 5994739895998309675L;
-	
-	// Regular attributes 
+
+	// Regular attributes
 	private String name;
 	private int count;
 	private int bytes;
-	
+
 	// CDN attributes
 	private boolean cdnEnabled;
 	private int Ttl;
@@ -23,8 +23,8 @@ public class Container extends Entity {
 
 	public String toXML() {
 		String xml = "";
-		xml = "<container xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" name=\"" + getName() 
-			+ "\"></server>";
+		xml = "<container xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" name=\""
+				+ getName() + "\"></server>";
 		return xml;
 	}
 
@@ -36,7 +36,8 @@ public class Container extends Entity {
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param name
+	 *            the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -50,7 +51,8 @@ public class Container extends Entity {
 	}
 
 	/**
-	 * @param count the count to set
+	 * @param count
+	 *            the count to set
 	 */
 	public void setCount(int count) {
 		this.count = count;
@@ -64,7 +66,8 @@ public class Container extends Entity {
 	}
 
 	/**
-	 * @param bytes the bytes to set
+	 * @param bytes
+	 *            the bytes to set
 	 */
 	public void setBytes(int bytes) {
 		this.bytes = bytes;
@@ -78,7 +81,8 @@ public class Container extends Entity {
 	}
 
 	/**
-	 * @param cdnEnabled the cdnEnabled to set
+	 * @param cdnEnabled
+	 *            the cdnEnabled to set
 	 */
 	public void setCdnEnabled(boolean cdnEnabled) {
 		this.cdnEnabled = cdnEnabled;
@@ -92,7 +96,8 @@ public class Container extends Entity {
 	}
 
 	/**
-	 * @param ttl the ttl to set
+	 * @param ttl
+	 *            the ttl to set
 	 */
 	public void setTtl(int ttl) {
 		Ttl = ttl;
@@ -106,7 +111,8 @@ public class Container extends Entity {
 	}
 
 	/**
-	 * @param cdnUrl the cdnUrl to set
+	 * @param cdnUrl
+	 *            the cdnUrl to set
 	 */
 	public void setCdnUrl(String cdnUrl) {
 		this.cdnUrl = cdnUrl;
@@ -120,12 +126,11 @@ public class Container extends Entity {
 	}
 
 	/**
-	 * @param logRetention the logRetention to set
+	 * @param logRetention
+	 *            the logRetention to set
 	 */
 	public void setLogRetention(boolean logRetention) {
 		this.logRetention = logRetention;
 	}
 
-	
-}   
-
+}

@@ -63,6 +63,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		container = (Container) this.getIntent().getExtras().get("container");
+		Log.v(LOG, "CDNEnabled:" + container.isCdnEnabled());
 		if (container.isCdnEnabled() == true) {
 			cdnEnabledIs = "true";
 		} else {
@@ -302,8 +303,9 @@ public class ContainerObjectsActivity extends ListActivity {
 		}
 		if (requestCode == 56) {
 			if (resultCode == RESULT_OK) {
-			Intent viewIntent1 = new Intent(this, ListContainerActivity.class);
-			startActivityForResult(viewIntent1, 56);
+				Intent viewIntent1 = new Intent(this,
+						ListContainerActivity.class);
+				startActivityForResult(viewIntent1, 56);
 			}
 		}
 	}

@@ -201,7 +201,7 @@ public class ListContainerActivity extends ListActivity {
 				for (int t = 0; t < cdnContainers.size(); t++) {
 					Container cdnContainer = cdnContainers.get(t);
 					if (container.getName().equals(cdnContainer.getName())) {
-						container.setCdnEnabled(true);
+						container.setCdnEnabled(cdnContainer.isCdnEnabled());
 						container.setCdnUrl(cdnContainer.getCdnUrl());
 						container.setTtl(cdnContainer.getTtl());
 					}
@@ -246,6 +246,7 @@ public class ListContainerActivity extends ListActivity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 
 			Container container = containers[position];
+
 			LayoutInflater inflater = getLayoutInflater();
 			View row = inflater.inflate(R.layout.listcontainerscell, parent,
 					false);
