@@ -8,10 +8,11 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.util.Log;
 
 import com.rackspace.cloud.files.api.client.ContainerObjects;
-/** 
+
+/**
  * 
  * @author Phillip Toohill
- *
+ * 
  */
 public class ContainerObjectXMLparser extends DefaultHandler {
 
@@ -20,7 +21,7 @@ public class ContainerObjectXMLparser extends DefaultHandler {
 
 	private StringBuffer currentData;
 	public String LOG = "ViewFilesXMLparser";
-   
+
 	public void startDocument() {
 		Log.v(LOG, "startDocument");
 	}
@@ -29,11 +30,12 @@ public class ContainerObjectXMLparser extends DefaultHandler {
 		Log.v(LOG, "endDocument = true");
 	}
 
-	public void startElement(String uri, String name, String qName, Attributes atts) {
+	public void startElement(String uri, String name, String qName,
+			Attributes atts) {
 
 		currentData = new StringBuffer();
 		if ("container".equals(name)) {
-			files = new ArrayList<ContainerObjects>();				
+			files = new ArrayList<ContainerObjects>();
 		} else if ("object".equals(name)) {
 			object = new ContainerObjects();
 		}
@@ -42,33 +44,31 @@ public class ContainerObjectXMLparser extends DefaultHandler {
 	public void endElement(String uri, String name, String qName) {
 
 		String value = currentData.toString().trim();
-		
-		if ("container".equals(name)) {	
-			
+
+		if ("container".equals(name)) {
+
 		} else if ("object".equals(name)) {
 			if (files != null) {
 				files.add(object);
 			}
-		}else if ("name".equals(name)){
+		} else if ("name".equals(name)) {
 			object.setCName(value);
-		}else if ("content_type".equals(name)){
+		} else if ("content_type".equals(name)) {
 			object.setContentType(value);
-		}else if ("hash".equals(name)){
+		} else if ("hash".equals(name)) {
 			object.setHash(value);
-		}else if ("bytes".equals(name)){
+		} else if ("bytes".equals(name)) {
 			object.setBytes(Integer.parseInt(value));
-		}else if ("last_modified".equals(name)){
+		} else if ("last_modified".equals(name)) {
 			object.setLastMod(value);
-		
-					
+
 		}
 	}
 
-
 	public void characters(char ch[], int start, int length) {
-				
+
 		System.out.print("Characters:    \"");
-		
+
 		for (int i = start; i < start + length; i++) {
 			switch (ch[i]) {
 			case '\\':
@@ -92,12 +92,12 @@ public class ContainerObjectXMLparser extends DefaultHandler {
 			}
 		}
 		System.out.print("\"\n");
-		 //String strCharacters = new String(ch, start, length);
+		// String strCharacters = new String(ch, start, length);
 		for (int i = start; i < (start + length); i++) {
 			currentData.append(ch[i]);
 		}
 	}
-		 
+
 	public ContainerObjects getObject() {
 		return object;
 	}
@@ -114,11 +114,11 @@ public class ContainerObjectXMLparser extends DefaultHandler {
 	}
 
 	/**
-	 * @param files the servers to set
+	 * @param files
+	 *            the servers to set
 	 */
 	public void setFiles(ArrayList<ContainerObjects> files) {
 		this.files = files;
 	}
 
-	
 }
