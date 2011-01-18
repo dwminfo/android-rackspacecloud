@@ -11,6 +11,9 @@ public class Preferences extends PreferenceActivity{
     // Identical to the value specified in res/values/strings.xml.
     public static final String PREF_KEY_RESULTS_TYPE = "countries_type";
 
+    // The key to the Auth Server preference.
+    public static final String PREF_KEY_AUTH_SERVER = "authServerPref";
+
     // The values of the preferences for the type of results to show (us/uk).
     // Identical to the values specified in res/values/strings.xml.
     public static final int COUNTRY_US = 0;
@@ -19,10 +22,11 @@ public class Preferences extends PreferenceActivity{
     //Define auth server here
     public static final String COUNTRY_US_AUTH_SERVER = "https://auth.api.rackspacecloud.com/v1.0";
     public static final String COUNTRY_UK_AUTH_SERVER = "https://lon.auth.api.rackspacecloud.com/v1.0";
+
     
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         getPreferenceManager().setSharedPreferencesName(SHARED_PREFERENCES_NAME);
-		addPreferencesFromResource(R.xml.preferences);
+		addPreferencesFromResource(R.layout.preferences);
 	}
 }

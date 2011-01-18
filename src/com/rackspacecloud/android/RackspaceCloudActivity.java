@@ -132,10 +132,17 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
                 String.valueOf(Preferences.COUNTRY_US));
         int resultTypeInt = Integer.parseInt(resultType);
         
+        
         //Default Auth Server
         String authServer = Preferences.COUNTRY_US_AUTH_SERVER; 
         if (resultTypeInt == Preferences.COUNTRY_UK)
         	authServer = Preferences.COUNTRY_UK_AUTH_SERVER;
+        
+        String customAuthServer = prefs.getString(Preferences.PREF_KEY_AUTH_SERVER, "http://");
+        if (!customAuthServer.equals("http://"))
+        	authServer = customAuthServer;
+        
+        Log.d("RackSpace-Cloud", "Using AuthServer: " + authServer);
         
     	String username = ((EditText) findViewById(R.id.login_username)).getText().toString();
     	String apiKey = ((EditText) findViewById(R.id.login_apikey)).getText().toString();
