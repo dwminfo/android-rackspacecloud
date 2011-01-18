@@ -13,6 +13,7 @@ public class Account {
 	private static String username;
 	private static String apiKey;
 	private static String authToken;
+	private static String authServer;
 	private static String serverUrl;
 	private static String storageUrl;
 	private static String storageToken;
@@ -79,6 +80,21 @@ public class Account {
 		Account.authToken = authToken;
 	}
 
+	/**
+	 * @return the authToken
+	 */
+	public static String getAuthServer() {
+		return authServer;
+	}
+
+	/**
+	 * @param authToken the authToken to set
+	 */
+	public static void setAuthServer(String authServer) {
+		Account.authServer = authServer;
+	}
+
+	
 	/**
 	 * @return the username
 	 */

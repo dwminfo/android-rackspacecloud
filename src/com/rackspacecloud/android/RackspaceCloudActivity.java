@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,7 +13,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,7 +37,9 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	private static final String OPT_USERNAME_DEF = "";
 	private static final String OPT_API_KEY = "apiKey";
 	private static final String OPT_API_KEY_DEF = "";
-	
+
+	private static final int SHOW_PREFERENCES = 1;
+
 	private Intent tabViewIntent;
 	private boolean authenticating;
 		
@@ -59,6 +65,27 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 		outState.putBoolean("authenticating", authenticating);
 	}
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, SHOW_PREFERENCES, 0, "Preferences");
+        return true;
+    }
+	
+    public boolean onOptionsItemSelected(MenuItem item) {
+        
+    	switch (item.getItemId()) {
+    		case SHOW_PREFERENCES:
+    			showPreferences();
+    			break;
+			}	
+    	return true;
+    }
+
+    public void showPreferences() {
+        Intent settingsActivity = new Intent(getBaseContext(),
+                Preferences.class);
+        startActivity(settingsActivity);
+    }
+    
     private void restoreState(Bundle state) {
     	if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
     		showActivityIndicators();
@@ -97,11 +124,25 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     }
     
     private void setLoginPreferences() {
+        SharedPreferences prefs = getSharedPreferences(
+                Preferences.SHARED_PREFERENCES_NAME,
+                Context.MODE_PRIVATE);
+        String resultType = prefs.getString(
+                Preferences.PREF_KEY_RESULTS_TYPE,
+                String.valueOf(Preferences.COUNTRY_US));
+        int resultTypeInt = Integer.parseInt(resultType);
+        
+        //Default Auth Server
+        String authServer = Preferences.COUNTRY_US_AUTH_SERVER; 
+        if (resultTypeInt == Preferences.COUNTRY_UK)
+        	authServer = Preferences.COUNTRY_UK_AUTH_SERVER;
+        
     	String username = ((EditText) findViewById(R.id.login_username)).getText().toString();
     	String apiKey = ((EditText) findViewById(R.id.login_apikey)).getText().toString();
     	Account.setUsername(username);
     	Account.setApiKey(apiKey);
-
+    	Account.setAuthServer(authServer);
+    	
     	Editor e = this.getPreferences(Context.MODE_PRIVATE).edit();
     	e.putString(OPT_USERNAME, username);
     	e.putString(OPT_API_KEY, apiKey);

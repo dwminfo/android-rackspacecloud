@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="Geographical Location">
+	
+		<ListPreference android:key="countries_type"
+			android:title="@string/country" android:entries="@array/country_entries"
+			android:entryValues="@array/country_values" android:dialogTitle="@string/country"
+			android:defaultValue="@string/country_default_value" />
+	</PreferenceCategory>
+	
+</PreferenceScreen>
