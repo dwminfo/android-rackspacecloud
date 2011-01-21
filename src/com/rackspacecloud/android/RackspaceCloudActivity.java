@@ -66,7 +66,8 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	}
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, SHOW_PREFERENCES, 0, "Preferences");
+    	MenuItem settings = menu.add(0, SHOW_PREFERENCES, 0, R.string.preference_name);
+    	settings.setIcon(android.R.drawable.ic_menu_preferences);
         return true;
     }
 	
