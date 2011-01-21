@@ -13,12 +13,17 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
+import android.text.method.SingleLineTransformationMethod;
+import android.text.method.TextKeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -48,8 +53,25 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        final CheckBox show_clear = (CheckBox) findViewById(R.id.show_clear);
+        final EditText loginApiKey = (EditText) findViewById(R.id.login_apikey);
+
+        show_clear.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+		        if (((CheckBox) v).isChecked()) {
+		        	loginApiKey.setTransformationMethod(new SingleLineTransformationMethod());
+		        } else {
+		        	loginApiKey.setTransformationMethod(new PasswordTransformationMethod());	
+		        }
+		        loginApiKey.requestFocus();
+		    }	
+		});
+        
         ((Button) findViewById(R.id.button)).setOnClickListener(this);
-        ((EditText) findViewById(R.id.login_apikey)).setOnEditorActionListener(this);
+        
+		loginApiKey.setOnEditorActionListener(this);
         loadLoginPreferences();
         restoreState(savedInstanceState);
         
