@@ -47,7 +47,7 @@ public class ContainerXMLParser extends DefaultHandler {
 		} else if ("count".equals(name)) {
 			container.setCount(Integer.parseInt(value));
 		} else if ("bytes".equals(name)) {
-			container.setBytes(Integer.parseInt(value));
+			container.setBytes(Long.parseLong(value));
 		} else if ("cdn_enabled".equals(name)) {
 			container.setCdnEnabled("True".equals(value));
 		} else if ("ttl".equals(name)) {
