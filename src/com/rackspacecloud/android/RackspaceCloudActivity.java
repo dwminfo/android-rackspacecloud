@@ -27,6 +27,7 @@ import com.rackspace.cloud.servers.api.client.Image;
 import com.rackspace.cloud.servers.api.client.ImageManager;
 import com.rackspace.cloud.servers.api.client.http.Authentication;
 
+
 public class RackspaceCloudActivity extends Activity implements View.OnClickListener, OnEditorActionListener {
 	
 	private static final String OPT_USERNAME = "username";
