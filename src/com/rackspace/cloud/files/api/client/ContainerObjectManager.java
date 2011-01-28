@@ -14,12 +14,12 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.rackspace.cloud.files.api.client.parsers.ContainerObjectXMLparser;
@@ -36,14 +36,16 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
 public class ContainerObjectManager extends EntityManager {
 
 	public String LOG = "ContainerObjectManager";
+	private Context context;
 	public static final String storageToken = Account.getStorageToken();
 	
-
+	public ContainerObjectManager(Context context) {
+		this.context = context;
+	}
 
 	public ArrayList<ContainerObjects> createList(boolean detail, String passName) throws CloudServersException {
 		
-		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getStorageUrl()+"/"+passName+"?format=xml");
 		ArrayList<ContainerObjects> files = new ArrayList<ContainerObjects>();
 		
@@ -103,7 +105,7 @@ public class ContainerObjectManager extends EntityManager {
 
 	public HttpResponse deleteObject(String Container, String Object) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpDelete deleteObject = new HttpDelete(Account.getStorageUrl() + "/" + Container + "/" + Object);
 		Log.v(LOG, "the container (deleteObject) vairble "+Container+" "+Object);
 				

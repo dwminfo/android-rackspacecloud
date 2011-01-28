@@ -18,6 +18,7 @@ import org.xml.sax.XMLReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,12 +46,14 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 	private Spinner ttlSpinner;
 	private Spinner logRetSpinner;
 	private Spinner cdnSpinner;
-
+	private Context context;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.enable_cdn_container);
+		context = getApplicationContext();
 		containerName = (String) this.getIntent().getExtras().get("Cname");
 		setupButtons();
 		loadTtlSpinner();
@@ -241,7 +244,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ContainerManager()).enable(containerName,
+				resp = (new ContainerManager(context)).enable(containerName,
 						selectedTtlId, selectedLogRetId);
 			} catch (CloudServersException e) {
 				exception = e;
@@ -287,7 +290,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ContainerManager()).disable(containerName,
+				resp = (new ContainerManager(context)).disable(containerName,
 						selectedCdnId, selectedTtlId, selectedLogRetId);
 			} catch (CloudServersException e) {
 				exception = e;
