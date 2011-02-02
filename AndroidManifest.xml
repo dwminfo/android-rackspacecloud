@@ -77,6 +77,7 @@
         	</intent-filter>
         </activity>
         
+		<activity android:name=".Preferences" android:label="@string/preference_name"/>
 
     </application>
     <uses-sdk android:minSdkVersion="4" />

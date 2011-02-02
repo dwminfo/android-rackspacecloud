@@ -21,6 +21,7 @@ import org.xml.sax.XMLReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -59,11 +60,14 @@ public class ContainerObjectDetails extends Activity {
 	private double megaBytes;
 	private double kiloBytes;
 	public Button previewButton;
+	public Context context;
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        context = getApplicationContext();
         
         objects = (ContainerObjects) this.getIntent().getExtras().get("container");
         containerNames =  (String) this.getIntent().getExtras().get("containerNames");
@@ -262,9 +266,9 @@ public class ContainerObjectDetails extends Activity {
 
 	    			@Override
 	    			protected HttpResponse doInBackground(Void... arg0) {
-	    				HttpResponse resp = null;
+	    				HttpResponse resp = null;	
 	    				try {
-	    					resp = (new ContainerObjectManager()).deleteObject(containerNames, objects.getCName() );
+	    					resp = (new ContainerObjectManager(context)).deleteObject(containerNames, objects.getCName() );
 	    					Log.v(LOG, "container name " + objects.getCName() + " " + containerNames);
 	    				} catch (CloudServersException e) {
 	    					exception = e;

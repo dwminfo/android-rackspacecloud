@@ -20,7 +20,7 @@ public class Authentication {
 
 	public static boolean authenticate() {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet("https://auth.api.rackspacecloud.com/v1.0");
+		HttpGet get = new HttpGet(Account.getAuthServer());
 		
 		get.addHeader("X-Auth-User", Account.getUsername());
 		get.addHeader("X-Auth-Key", Account.getApiKey());

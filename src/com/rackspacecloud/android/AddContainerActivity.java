@@ -17,6 +17,7 @@ import org.xml.sax.XMLReader;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -38,16 +39,17 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
 public class AddContainerActivity extends Activity implements  OnClickListener {
 
 	
-	private EditText fileName;	
+	private EditText fileName;
+	private Context context;	
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context = getApplicationContext();
         setContentView(R.layout.createcontainer);
         fileName = (EditText) findViewById(R.id.container_name);
         ((Button) findViewById(R.id.save_button)).setOnClickListener(this);
-       
     }
 
       
@@ -125,7 +127,7 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ContainerManager()).create(fileName.getText());
+				resp = (new ContainerManager(context)).create(fileName.getText());
 			} catch (CloudServersException e) {
 				exception = e;
 			}

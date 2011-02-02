@@ -12,9 +12,16 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
+import android.text.method.SingleLineTransformationMethod;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -34,7 +41,9 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	private static final String OPT_USERNAME_DEF = "";
 	private static final String OPT_API_KEY = "apiKey";
 	private static final String OPT_API_KEY_DEF = "";
-	
+
+	private static final int SHOW_PREFERENCES = 1;
+
 	private Intent tabViewIntent;
 	private boolean authenticating;
 		
@@ -43,8 +52,25 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        final CheckBox show_clear = (CheckBox) findViewById(R.id.show_clear);
+        final EditText loginApiKey = (EditText) findViewById(R.id.login_apikey);
+
+        show_clear.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+		        if (((CheckBox) v).isChecked()) {
+		        	loginApiKey.setTransformationMethod(new SingleLineTransformationMethod());
+		        } else {
+		        	loginApiKey.setTransformationMethod(new PasswordTransformationMethod());	
+		        }
+		        loginApiKey.requestFocus();
+		    }	
+		});
+        
         ((Button) findViewById(R.id.button)).setOnClickListener(this);
-        ((EditText) findViewById(R.id.login_apikey)).setOnEditorActionListener(this);
+        
+		loginApiKey.setOnEditorActionListener(this);
         loadLoginPreferences();
         restoreState(savedInstanceState);
         
@@ -60,6 +86,28 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 		outState.putBoolean("authenticating", authenticating);
 	}
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	MenuItem settings = menu.add(0, SHOW_PREFERENCES, 0, R.string.preference_name);
+    	settings.setIcon(android.R.drawable.ic_menu_preferences);
+        return true;
+    }
+	
+    public boolean onOptionsItemSelected(MenuItem item) {
+        
+    	switch (item.getItemId()) {
+    		case SHOW_PREFERENCES:
+    			showPreferences();
+    			break;
+			}	
+    	return true;
+    }
+
+    public void showPreferences() {
+        Intent settingsActivity = new Intent(getBaseContext(),
+                Preferences.class);
+        startActivity(settingsActivity);
+    }
+    
     private void restoreState(Bundle state) {
     	if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
     		showActivityIndicators();
@@ -98,11 +146,32 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     }
     
     private void setLoginPreferences() {
+        SharedPreferences prefs = getSharedPreferences(
+                Preferences.SHARED_PREFERENCES_NAME,
+                Context.MODE_PRIVATE);
+        String resultType = prefs.getString(
+                Preferences.PREF_KEY_RESULTS_TYPE,
+                String.valueOf(Preferences.COUNTRY_US));
+        int resultTypeInt = Integer.parseInt(resultType);
+        
+        
+        //Default Auth Server
+        String authServer = Preferences.COUNTRY_US_AUTH_SERVER; 
+        if (resultTypeInt == Preferences.COUNTRY_UK)
+        	authServer = Preferences.COUNTRY_UK_AUTH_SERVER;
+        
+        String customAuthServer = prefs.getString(Preferences.PREF_KEY_AUTH_SERVER, "http://");
+        if (!customAuthServer.equals("http://"))
+        	authServer = customAuthServer;
+        
+        Log.d("RackSpace-Cloud", "Using AuthServer: " + authServer);
+        
     	String username = ((EditText) findViewById(R.id.login_username)).getText().toString();
     	String apiKey = ((EditText) findViewById(R.id.login_apikey)).getText().toString();
     	Account.setUsername(username);
     	Account.setApiKey(apiKey);
-
+    	Account.setAuthServer(authServer);
+    	
     	Editor e = this.getPreferences(Context.MODE_PRIVATE).edit();
     	e.putString(OPT_USERNAME, username);
     	e.putString(OPT_API_KEY, apiKey);

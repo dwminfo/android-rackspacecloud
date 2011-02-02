@@ -13,7 +13,7 @@ public class Container extends Entity {
 	// Regular attributes
 	private String name;
 	private int count;
-	private int bytes;
+	private long bytes;
 
 	// CDN attributes
 	private boolean cdnEnabled;
@@ -61,16 +61,16 @@ public class Container extends Entity {
 	/**
 	 * @return the bytes
 	 */
-	public int getBytes() {
+	public long getBytes() {
 		return bytes;
 	}
 
 	/**
-	 * @param bytes
+	 * @param l
 	 *            the bytes to set
 	 */
-	public void setBytes(int bytes) {
-		this.bytes = bytes;
+	public void setBytes(long l) {
+		this.bytes = l;
 	}
 
 	/**

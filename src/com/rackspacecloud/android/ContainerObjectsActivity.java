@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -58,12 +59,14 @@ public class ContainerObjectsActivity extends ListActivity {
 	public Object kiloBytes;
 	public int bConver = 1048576;
 	public int kbConver = 1024;
+	private Context context;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		container = (Container) this.getIntent().getExtras().get("container");
 		Log.v(LOG, "CDNEnabled:" + container.isCdnEnabled());
+        context = getApplicationContext();
 		if (container.isCdnEnabled() == true) {
 			cdnEnabledIs = "true";
 		} else {
@@ -185,7 +188,7 @@ public class ContainerObjectsActivity extends ListActivity {
 		protected ArrayList<ContainerObjects> doInBackground(Void... arg0) {
 			ArrayList<ContainerObjects> files = null;
 			try {
-				files = (new ContainerObjectManager()).createList(true,
+				files = (new ContainerObjectManager(context)).createList(true,
 						container.getName());
 			} catch (CloudServersException e) {
 				exception = e;
@@ -350,7 +353,7 @@ public class ContainerObjectsActivity extends ListActivity {
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ContainerManager()).delete(container.getName());
+				resp = (new ContainerManager(context)).delete(container.getName());
 				Log.v(LOG, "container's name " + container.getName());
 			} catch (CloudServersException e) {
 				exception = e;

@@ -16,12 +16,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.content.Context;
 import android.text.Editable;
 import android.util.Log;
 
@@ -36,10 +36,15 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  * 
  */
 public class ContainerManager extends EntityManager {
+	private Context context;
+	
+	public ContainerManager(Context context) {
+		this.context = context;
+	}
 
 	public HttpResponse create(Editable editable) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPut put = new HttpPut(Account.getStorageUrl() + "/" + editable);
 
 		put.addHeader("X-Auth-Token", Account.getAuthToken());
@@ -65,7 +70,7 @@ public class ContainerManager extends EntityManager {
 
 	public ArrayList<Container> createCDNList(boolean detail) throws CloudServersException {
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getCdnManagementUrl()+"?format=xml");
 		ArrayList<Container> cdnContainers = new ArrayList<Container>();
 		
@@ -123,7 +128,7 @@ public class ContainerManager extends EntityManager {
 	public HttpResponse enable(String container, String ttl, String logRet)
 			throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPut put = new HttpPut(Account.getCdnManagementUrl() + "/"
 				+ container);
 
@@ -153,7 +158,7 @@ public class ContainerManager extends EntityManager {
 	public HttpResponse disable(String container, String cdn, String ttl, String logRet)
 	throws CloudServersException {
        HttpResponse resp = null;
-       DefaultHttpClient httpclient = new DefaultHttpClient();
+ 	    CustomHttpClient httpclient = new CustomHttpClient(context);
        	HttpPost post = new HttpPost(Account.getCdnManagementUrl() + "/"
 		+ container);
 
@@ -183,7 +188,7 @@ public class ContainerManager extends EntityManager {
 
 	public HttpResponse delete(String string) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpDelete put = new HttpDelete(Account.getStorageUrl() + "/" + string);
 
 		put.addHeader("X-Auth-Token", Account.getAuthToken());
@@ -210,7 +215,7 @@ public class ContainerManager extends EntityManager {
 	public ArrayList<Container> createList(boolean detail)
 			throws CloudServersException {
 
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getStorageUrl() + "?format=xml");
 		ArrayList<Container> containers = new ArrayList<Container>();
 

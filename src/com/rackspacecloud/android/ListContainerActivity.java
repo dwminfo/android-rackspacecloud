@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -39,10 +40,12 @@ public class ListContainerActivity extends ListActivity {
 	public int bConver = 1048576;
 	public int kbConver = 1024;
 	protected static final int DELETE_ID = 0;
-
+	private Context context;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		context = getApplicationContext();
 		restoreState(savedInstanceState);
 	}
 
@@ -143,7 +146,7 @@ public class ListContainerActivity extends ListActivity {
 			ArrayList<Container> containers = null;
 
 			try {
-				containers = (new ContainerManager()).createList(true);
+				containers = (new ContainerManager(context)).createList(true);
 			} catch (CloudServersException e) {
 				exception = e;
 			}
@@ -180,7 +183,7 @@ public class ListContainerActivity extends ListActivity {
 			ArrayList<Container> cdnContainers = null;
 
 			try {
-				cdnContainers = (new ContainerManager()).createCDNList(true);
+				cdnContainers = (new ContainerManager(context)).createCDNList(true);
 			} catch (CloudServersException e) {
 				exception = e;
 			}

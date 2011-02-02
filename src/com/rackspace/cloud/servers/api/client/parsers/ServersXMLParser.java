@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.util.Log;
+
 import com.rackspace.cloud.servers.api.client.Server;
 
 
@@ -87,30 +89,30 @@ public class ServersXMLParser extends DefaultHandler {
 	}
 
 	public void characters(char ch[], int start, int length) {
-		System.out.print("Characters:    \"");
+		Log.d("Rackspace-Cloud", "Characters:    \"");
 		for (int i = start; i < start + length; i++) {
 			switch (ch[i]) {
 			case '\\':
-				System.out.print("\\\\");
+				Log.d("Rackspace-Cloud", "\\\\");
 				break;
 			case '"':
-				System.out.print("\\\"");
+				Log.d("Rackspace-Cloud", "\\\"");
 				break;
 			case '\n':
-				System.out.print("\\n");
+				Log.d("Rackspace-Cloud", "\\n");
 				break;
 			case '\r':
-				System.out.print("\\r");
+				Log.d("Rackspace-Cloud", "\\r");
 				break;
 			case '\t':
-				System.out.print("\\t");
+				Log.d("Rackspace-Cloud", "\\t");
 				break;
 			default:
-				System.out.print(ch[i]);
+				Log.d("Rackspace-Cloud", String.valueOf(ch[i]));
 				break;
 			}
 		}
-		System.out.print("\"\n");
+		Log.d("Rackspace-Cloud", "\"\n");
 		
 		
 		for (int i = start; i < (start + length); i++) {

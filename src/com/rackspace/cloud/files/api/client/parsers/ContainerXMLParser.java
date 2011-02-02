@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.util.Log;
+
 import com.rackspace.cloud.files.api.client.Container;
 
 /**
@@ -47,7 +49,7 @@ public class ContainerXMLParser extends DefaultHandler {
 		} else if ("count".equals(name)) {
 			container.setCount(Integer.parseInt(value));
 		} else if ("bytes".equals(name)) {
-			container.setBytes(Integer.parseInt(value));
+			container.setBytes(Long.parseLong(value));
 		} else if ("cdn_enabled".equals(name)) {
 			container.setCdnEnabled("True".equals(value));
 		} else if ("ttl".equals(name)) {
@@ -62,31 +64,31 @@ public class ContainerXMLParser extends DefaultHandler {
 
 	public void characters(char ch[], int start, int length) {
 
-		System.out.print("Characters:    \"");
+		Log.d("Rackspace-Cloud", "Characters:    \"");
 
 		for (int i = start; i < start + length; i++) {
 			switch (ch[i]) {
 			case '\\':
-				System.out.print("\\\\");
+				Log.d("Rackspace-Cloud", "\\\\");
 				break;
 			case '"':
-				System.out.print("\\\"");
+				Log.d("Rackspace-Cloud", "\\\"");
 				break;
 			case '\n':
-				System.out.print("\\n");
+				Log.d("Rackspace-Cloud", "\\n");
 				break;
 			case '\r':
-				System.out.print("\\r");
+				Log.d("Rackspace-Cloud", "\\r");
 				break;
 			case '\t':
-				System.out.print("\\t");
+				Log.d("Rackspace-Cloud", "\\t");
 				break;
 			default:
-				System.out.print(ch[i]);
+				Log.d("Rackspace-Cloud", String.valueOf(ch[i]));
 				break;
 			}
 		}
-		System.out.print("\"\n");
+		Log.d("Rackspace-Cloud", "\"\n");
 
 		for (int i = start; i < (start + length); i++) {
 			currentData.append(ch[i]);
