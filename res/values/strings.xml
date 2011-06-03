@@ -20,4 +20,34 @@
 </string-array>
 <string name="country_default_value">0</string>
 <string name="preference_name">Preferences</string>
+<string name="weekly_backup_prompt">Select a weekly backup window</string>
+<string-array name="weeklyBackupValues">
+	<item> Disabled</item>
+	<item> Sunday</item>
+	<item> Monday</item>
+	<item> Tuesday</item>
+	<item> Wednesday</item>
+	<item> Thursday</item>
+	<item> Friday</item>
+	<item> Saturday</item>
+</string-array>
+<string name="daily_backup_prompt">Select a daily backup window</string>
+<string-array name="dailyBackupValues">
+	<item> Disabled</item>
+	<item> 0000-0200</item>
+	<item> 0200-0400</item>
+	<item> 0400-0600</item>
+	<item> 0600-0800</item>
+	<item> 0800-1000</item>
+	<item> 1000-1200</item>
+	<item> 1200-1400</item>
+	<item> 1400-1600</item>
+	<item> 1600-1800</item>
+	<item> 1800-2000</item>
+	<item> 2000-2200</item>
+	<item> 2200-0000</item>
+</string-array>
+<string name="change_password_warning">The root password will be updated and the server will be restarted.  This process will only work
+	if you have a user line for \"root\" in your passwd or shadow file.</string>
+
 </resources>

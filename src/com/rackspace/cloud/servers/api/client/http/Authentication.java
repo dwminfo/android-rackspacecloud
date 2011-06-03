@@ -10,6 +10,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.util.Log;
+
 import com.rackspace.cloud.servers.api.client.Account;
 
 /**
@@ -19,15 +21,16 @@ import com.rackspace.cloud.servers.api.client.Account;
 public class Authentication {
 
 	public static boolean authenticate() {
+		
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet get = new HttpGet(Account.getAuthServer());
-		
+
 		get.addHeader("X-Auth-User", Account.getUsername());
 		get.addHeader("X-Auth-Key", Account.getApiKey());
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);
-		    
+		    			
 		    if (resp.getStatusLine().getStatusCode() == 204) {
 		    	Account.setAuthToken(resp.getFirstHeader("X-Auth-Token").getValue());
 		    	Account.setServerUrl(resp.getFirstHeader("X-Server-Management-Url").getValue());
@@ -36,11 +39,13 @@ public class Authentication {
 		    	Account.setCdnManagementUrl(resp.getFirstHeader("X-Cdn-Management-Url").getValue());
 		    	return true;
 		    } else {
+		    	Log.d("status code", Integer.toString(resp.getStatusLine().getStatusCode()));
 		    	return false;
 		    }
 		} catch (ClientProtocolException cpe) {
 			return false;
 		} catch (IOException e) {
+			Log.v("info", e.toString());
 			return false;
 		}
 	}

@@ -57,7 +57,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
         final EditText loginApiKey = (EditText) findViewById(R.id.login_apikey);
 
         show_clear.setOnClickListener(new OnClickListener() {
-			@Override
+        	@Override 
 			public void onClick(View v) {
 		        if (((CheckBox) v).isChecked()) {
 		        	loginApiKey.setTransformationMethod(new SingleLineTransformationMethod());

@@ -18,6 +18,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -312,5 +313,155 @@ public class ServerManager extends EntityManager {
 		}	
 		return resp;
 	}
+	
+	public HttpResponse rename(Server server, String name) throws CloudServersException{
+		HttpResponse resp = null;
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPut put = new HttpPut(Account.getServerUrl() + "/servers/" + server.getId() + ".xml");
+	
+		put.addHeader("X-Auth-Token", Account.getAuthToken());
+		put.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);  //*******FIND OUT WITH THIS DOES?
+	
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<server xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" name=\"" + name + "\"/>");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		put.setEntity(tmp);
+		
+		try {			
+			resp = httpclient.execute(put);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+	
+	public HttpResponse rebuild(Server server, int imageId) throws CloudServersException {
+		HttpResponse resp = null;
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
+				
+		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<rebuild xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" imageId=\"" + imageId + "\"/>");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		post.setEntity(tmp);
+
+		try {			
+			resp = httpclient.execute(post);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+
+	public HttpResponse backup(Server server, String weeklyValue, String dailyValue, boolean enabled) throws CloudServersException {
+		HttpResponse resp = null;
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/backup_schedule.xml");
+				
+		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<backupSchedule xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" enabled=\"" + enabled + "\" " +
+					"weekly=\"" + weeklyValue + "\" daily=\"" + dailyValue + "\"/>");
+			
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		post.setEntity(tmp);
+
+		try {			
+			resp = httpclient.execute(post);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+	
+	public HttpResponse changePassword(Server server, String password) throws CloudServersException{
+		HttpResponse resp = null;
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+		HttpPut put = new HttpPut(Account.getServerUrl() + "/servers/" + server.getId() + ".xml");
+	
+		put.addHeader("X-Auth-Token", Account.getAuthToken());
+		put.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class); 
+	
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<server xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" adminPass=\"" + password + "\"/>");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		put.setEntity(tmp);
+		
+		try {			
+			resp = httpclient.execute(put);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+	
 }
