@@ -26,6 +26,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.content.Context;
+
+import com.rackspace.cloud.files.api.client.CustomHttpClient;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 import com.rackspace.cloud.servers.api.client.parsers.ServersXMLParser;
 
@@ -38,9 +41,9 @@ public class ServerManager extends EntityManager {
 	public static final String SOFT_REBOOT = "SOFT";
 	public static final String HARD_REBOOT = "HARD";
 	
-	public void create(Server entity) throws CloudServersException {
+	public void create(Server entity, Context context) throws CloudServersException {
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers.xml");
 		
 		post.addHeader("X-Auth-Token", Account.getAuthToken());
@@ -102,9 +105,9 @@ public class ServerManager extends EntityManager {
 		}	
 	}
 
-	public ArrayList<Server> createList(boolean detail) throws CloudServersException {
+	public ArrayList<Server> createList(boolean detail, Context context) throws CloudServersException {
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/detail.xml" + cacheBuster());
 		ArrayList<Server> servers = new ArrayList<Server>();
 		
@@ -157,9 +160,9 @@ public class ServerManager extends EntityManager {
 		return servers;
 	}
 
-	public Server find(long id) throws CloudServersException {
+	public Server find(long id, Context context) throws CloudServersException {
 		Server server = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/" + id + ".xml" + cacheBuster());
 		
 		get.addHeader("X-Auth-Token", Account.getAuthToken());
@@ -210,9 +213,9 @@ public class ServerManager extends EntityManager {
 		return server;
 	}
 
-	public HttpResponse reboot(Server server, String rebootType) throws CloudServersException {
+	public HttpResponse reboot(Server server, String rebootType, Context context) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
 				
 		post.addHeader("X-Auth-Token", Account.getAuthToken());
@@ -248,9 +251,9 @@ public class ServerManager extends EntityManager {
 		return resp;
 	}
 
-	public HttpResponse resize(Server server, int flavorId) throws CloudServersException {
+	public HttpResponse resize(Server server, int flavorId, Context context) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
 				
 		post.addHeader("X-Auth-Token", Account.getAuthToken());
@@ -286,9 +289,9 @@ public class ServerManager extends EntityManager {
 	}
 
 
-	public HttpResponse delete(Server server) throws CloudServersException {
+	public HttpResponse delete(Server server, Context context) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpDelete delete = new HttpDelete(Account.getServerUrl() + "/servers/" + server.getId() + ".xml");
 				
 		delete.addHeader("X-Auth-Token", Account.getAuthToken());

@@ -21,6 +21,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.content.Context;
+
+import com.rackspace.cloud.files.api.client.CustomHttpClient;
 import com.rackspace.cloud.servers.api.client.parsers.FlavorsXMLParser;
 
 /**
@@ -29,9 +32,9 @@ import com.rackspace.cloud.servers.api.client.parsers.FlavorsXMLParser;
  */
 public class FlavorManager extends EntityManager {
 
-	public ArrayList<Flavor> createList(boolean detail) {
+	public ArrayList<Flavor> createList(boolean detail, Context context) {
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getServerUrl() + "/flavors/detail.xml?now=cache_time2");
 		ArrayList<Flavor> flavors = new ArrayList<Flavor>();
 		

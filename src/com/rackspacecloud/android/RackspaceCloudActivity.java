@@ -46,6 +46,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 
 	private Intent tabViewIntent;
 	private boolean authenticating;
+	private Context context;
 		
     /** Called when the activity is first created. */
     @Override
@@ -55,7 +56,9 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
         
         final CheckBox show_clear = (CheckBox) findViewById(R.id.show_clear);
         final EditText loginApiKey = (EditText) findViewById(R.id.login_apikey);
-
+        
+        context = getApplicationContext();
+        
         show_clear.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -216,7 +219,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 		@Override
 		protected Boolean doInBackground(Void... arg0) {
 			authenticating = true;
-			return new Boolean(Authentication.authenticate());
+			return new Boolean(Authentication.authenticate(context));
 		}
     	
 		@Override
@@ -235,7 +238,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     	
 		@Override
 		protected ArrayList<Flavor> doInBackground(Void... arg0) {
-			return (new FlavorManager()).createList(true);
+			return (new FlavorManager()).createList(true, context);
 		}
     	
 		@Override
@@ -259,7 +262,7 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     	
 		@Override
 		protected ArrayList<Image> doInBackground(Void... arg0) {
-			return (new ImageManager()).createList(true);
+			return (new ImageManager()).createList(true, context);
 		}
     	
 		@Override

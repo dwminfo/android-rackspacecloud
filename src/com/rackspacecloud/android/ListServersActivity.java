@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -33,10 +34,12 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
 public class ListServersActivity extends ListActivity {
 
 	private Server[] servers;
+	Context context;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        context = getApplicationContext();
         restoreState(savedInstanceState);
     }
 	
@@ -140,7 +143,7 @@ public class ListServersActivity extends ListActivity {
 		protected ArrayList<Server> doInBackground(Void... arg0) {
 			ArrayList<Server> servers = null;
 			try {
-				servers = (new ServerManager()).createList(true);
+				servers = (new ServerManager()).createList(true, context);
 			} catch (CloudServersException e) {
 				exception = e;				
 			}

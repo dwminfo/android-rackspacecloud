@@ -22,6 +22,7 @@ import org.xml.sax.XMLReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -51,12 +52,14 @@ public class ViewServerActivity extends Activity {
 	private String[] flavorNames;
 	private String selectedFlavorId;
 	private boolean imageLoaded;
+	Context context;
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         server = (Server) this.getIntent().getExtras().get("server");
+        context = getApplicationContext();
         setContentView(R.layout.viewserver);
         restoreState(savedInstanceState);
     }
@@ -333,7 +336,7 @@ public class ViewServerActivity extends Activity {
 		@Override
 		protected Server doInBackground(Void... arg0) {
 			try {
-				server = (new ServerManager()).find(Integer.parseInt(server.getId()));
+				server = (new ServerManager()).find(Integer.parseInt(server.getId()), context);
 			} catch (NumberFormatException e) {
 				// we're polling, so need to show exceptions
 			} catch (CloudServersException e) {
@@ -358,7 +361,7 @@ public class ViewServerActivity extends Activity {
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ServerManager()).reboot(server, ServerManager.SOFT_REBOOT);
+				resp = (new ServerManager()).reboot(server, ServerManager.SOFT_REBOOT, context);
 			} catch (CloudServersException e) {
 				exception = e;
 			}
@@ -393,7 +396,7 @@ public class ViewServerActivity extends Activity {
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;			
 			try {
-				resp = (new ServerManager()).reboot(server, ServerManager.HARD_REBOOT);
+				resp = (new ServerManager()).reboot(server, ServerManager.HARD_REBOOT, context);
 			} catch (CloudServersException e) {
 				exception = e;
 			}
@@ -427,7 +430,7 @@ public class ViewServerActivity extends Activity {
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ServerManager()).resize(server, Integer.parseInt(selectedFlavorId));
+				resp = (new ServerManager()).resize(server, Integer.parseInt(selectedFlavorId), context);
 			} catch (CloudServersException e) {
 				exception = e;
 			}
@@ -464,7 +467,7 @@ public class ViewServerActivity extends Activity {
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ServerManager()).delete(server);
+				resp = (new ServerManager()).delete(server, context);
 			} catch (CloudServersException e) {
 				exception = e;
 			}

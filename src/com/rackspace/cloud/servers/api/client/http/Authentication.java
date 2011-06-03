@@ -10,6 +10,9 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.content.Context;
+
+import com.rackspace.cloud.files.api.client.CustomHttpClient;
 import com.rackspace.cloud.servers.api.client.Account;
 
 /**
@@ -18,8 +21,8 @@ import com.rackspace.cloud.servers.api.client.Account;
  */
 public class Authentication {
 
-	public static boolean authenticate() {
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+	public static boolean authenticate(Context context) {
+		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getAuthServer());
 		
 		get.addHeader("X-Auth-User", Account.getUsername());
