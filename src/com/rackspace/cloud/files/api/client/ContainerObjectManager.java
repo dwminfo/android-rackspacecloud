@@ -37,7 +37,7 @@ public class ContainerObjectManager extends EntityManager {
 
 	public String LOG = "ContainerObjectManager";
 	private Context context;
-	public static final String storageToken = Account.getStorageToken();
+	public static final String storageToken = Account.getAccount().getStorageToken();
 	
 	public ContainerObjectManager(Context context) {
 		this.context = context;
@@ -46,7 +46,7 @@ public class ContainerObjectManager extends EntityManager {
 	public ArrayList<ContainerObjects> createList(boolean detail, String passName) throws CloudServersException {
 		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet get = new HttpGet(Account.getStorageUrl()+"/"+passName+"?format=xml");
+		HttpGet get = new HttpGet(Account.getAccount().getStorageUrl()+"/"+passName+"?format=xml");
 		ArrayList<ContainerObjects> files = new ArrayList<ContainerObjects>();
 		
 		
@@ -106,10 +106,10 @@ public class ContainerObjectManager extends EntityManager {
 	public HttpResponse deleteObject(String Container, String Object) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpDelete deleteObject = new HttpDelete(Account.getStorageUrl() + "/" + Container + "/" + Object);
+		HttpDelete deleteObject = new HttpDelete(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Object);
 		Log.v(LOG, "the container (deleteObject) vairble "+Container+" "+Object);
 				
-		deleteObject.addHeader("X-Auth-Token", Account.getAuthToken());
+		deleteObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
 		try {			

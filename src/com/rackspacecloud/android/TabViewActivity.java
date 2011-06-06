@@ -5,6 +5,7 @@ package com.rackspacecloud.android;
 
 import android.app.TabActivity;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.TabHost;
 import android.os.Bundle;
 
@@ -29,7 +30,8 @@ public class TabViewActivity extends TabActivity {
 		spec.setContent(new Intent(this, ListContainerActivity.class));
 		spec.setIndicator("Cloud Files", getResources().getDrawable(R.drawable.cloudfiles));
 		tabs.addTab(spec);
-
+		
+		Log.d("tabview", "captin we have made it");
 	}
 	
 }

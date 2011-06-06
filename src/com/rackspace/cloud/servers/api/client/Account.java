@@ -4,128 +4,139 @@
 package com.rackspace.cloud.servers.api.client;
 
 
+
 /**
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
 public class Account {
 	
-	private static String username;
-	private static String apiKey;
-	private static String authToken;
-	private static String authServer;
-	private static String serverUrl;
-	private static String storageUrl;
-	private static String storageToken;
-	private static String cdnManagementUrl;
+	private String username;
+	private String apiKey;
+	private String authToken;
+	private String authServer;
+	private String serverUrl;
+	private String storageUrl;
+	private String storageToken;
+	private String cdnManagementUrl;
+	private static Account currentAccount;
+	
+	
+	public static Account getAccount(){
+		return currentAccount;
+	}
+	
+	public static void setAccount(Account account){
+		Account.currentAccount = account;
+	}
 	
 	/**
 	 * @return the serverUrl
 	 */
-	public static String getServerUrl() {
+	public String getServerUrl() {
 		return serverUrl;
 	}
 
 	/**
 	 * @param serverUrl the serverUrl to set
 	 */
-	public static void setServerUrl(String serverUrl) {
-		Account.serverUrl = serverUrl;
+	public void setServerUrl(String serverUrl) {
+		this.serverUrl = serverUrl;
 	}
 
 	/**
 	 * @return the storageUrl
 	 */
-	public static String getStorageUrl() {
+	public String getStorageUrl() {
 		return storageUrl;
 	}
 	/**
 	 * @return the storageToken
 	 */
-	public static String getStorageToken() {
+	public String getStorageToken() {
 		return storageToken;
 	}
 	/**
 	 * @param storageUrl the storageUrl to set
 	 */
-	public static void setStorageUrl(String storageUrl) {
-		Account.storageUrl = storageUrl;
+	public void setStorageUrl(String storageUrl) {
+		this.storageUrl = storageUrl;
 	}
 
 	/**
 	 * @return the cdnManagementUrl
 	 */
-	public static String getCdnManagementUrl() {
+	public String getCdnManagementUrl() {
 		return cdnManagementUrl;
 	}
 
 	/**
 	 * @param cdnManagementUrl the cdnManagementUrl to set
 	 */
-	public static void setCdnManagementUrl(String cdnManagementUrl) {
-		Account.cdnManagementUrl = cdnManagementUrl;
+	public void setCdnManagementUrl(String cdnManagementUrl) {
+		this.cdnManagementUrl = cdnManagementUrl;
 	}
 
 	/**
 	 * @return the authToken
 	 */
-	public static String getAuthToken() {
+	public String getAuthToken() {
 		return authToken;
 	}
 
 	/**
 	 * @param authToken the authToken to set
 	 */
-	public static void setAuthToken(String authToken) {
-		Account.authToken = authToken;
+	public void setAuthToken(String authToken) {
+		this.authToken = authToken;
 	}
 
 	/**
 	 * @return the authToken
 	 */
-	public static String getAuthServer() {
+	public String getAuthServer() {
 		return authServer;
 	}
 
 	/**
 	 * @param authToken the authToken to set
 	 */
-	public static void setAuthServer(String authServer) {
-		Account.authServer = authServer;
+	public void setAuthServer(String authServer) {
+		this.authServer = authServer;
 	}
 
 	
 	/**
 	 * @return the username
 	 */
-	public static String getUsername() {
+	public String getUsername() {
 		return username;
 	}
 	
 	/**
 	 * @param username the username to set
 	 */
-	public static void setUsername(String username) {
-		Account.username = username;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 	
 	/**
 	 * @return the apiKey
 	 */
-	public static String getApiKey() {
+	public String getApiKey() {
 		return apiKey;
 	}
 	
 	/**
 	 * @param apiKey the apiKey to set
 	 */
-	public static void setApiKey(String apiKey) {
-		Account.apiKey = apiKey;
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
 	}
    /**
     */
-	public static void setStorageToken(String storageToken) {
-		Account.storageToken = storageToken;
+	public void setStorageToken(String storageToken) {
+		this.storageToken = storageToken;
 		
 	}
 	

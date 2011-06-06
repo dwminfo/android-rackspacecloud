@@ -21,6 +21,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.util.Log;
+
 import com.rackspace.cloud.servers.api.client.parsers.ImagesXMLParser;
 
 /**
@@ -31,17 +33,19 @@ public class ImageManager extends EntityManager {
 
 	public ArrayList<Image> createList(boolean detail) {
 		
+
+		
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet(Account.getServerUrl() + "/images/detail.xml?now=cache_time2");
+		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/images/detail.xml?now=cache_time2");
 		ArrayList<Image> images = new ArrayList<Image>();
 		
-		get.addHeader("X-Auth-Token", Account.getAuthToken());
-		
-		try {			
+		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+
+		try {		
 			HttpResponse resp = httpclient.execute(get);
 		    BasicResponseHandler responseHandler = new BasicResponseHandler();
 		    String body = responseHandler.handleResponse(resp);
-		    
+
 		    if (resp.getStatusLine().getStatusCode() == 200 || resp.getStatusLine().getStatusCode() == 203) {		    	
 		    	
 		    	ImagesXMLParser imagesXMLParser = new ImagesXMLParser();
@@ -49,7 +53,7 @@ public class ImageManager extends EntityManager {
 		    	XMLReader xmlReader = saxParser.getXMLReader();
 		    	xmlReader.setContentHandler(imagesXMLParser);
 		    	xmlReader.parse(new InputSource(new StringReader(body)));		    	
-		    	images = imagesXMLParser.getImages();		    	
+		    	images = imagesXMLParser.getImages();		
 		    } 
 		} catch (ClientProtocolException cpe) {
 			// we'll end up with an empty list; that's good enough

@@ -45,9 +45,9 @@ public class ContainerManager extends EntityManager {
 	public HttpResponse create(Editable editable) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPut put = new HttpPut(Account.getStorageUrl() + "/" + editable);
+		HttpPut put = new HttpPut(Account.getAccount().getStorageUrl() + "/" + editable);
 
-		put.addHeader("X-Auth-Token", Account.getAuthToken());
+		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
 		try {
@@ -71,10 +71,10 @@ public class ContainerManager extends EntityManager {
 	public ArrayList<Container> createCDNList(boolean detail) throws CloudServersException {
 		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet get = new HttpGet(Account.getCdnManagementUrl()+"?format=xml");
+		HttpGet get = new HttpGet(Account.getAccount().getCdnManagementUrl()+"?format=xml");
 		ArrayList<Container> cdnContainers = new ArrayList<Container>();
 		
-		get.addHeader("X-Auth-Token", Account.getAuthToken());
+		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);		    
@@ -129,10 +129,10 @@ public class ContainerManager extends EntityManager {
 			throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPut put = new HttpPut(Account.getCdnManagementUrl() + "/"
+		HttpPut put = new HttpPut(Account.getAccount().getCdnManagementUrl() + "/"
 				+ container);
 
-		put.addHeader("X-Auth-Token", Account.getAuthToken());
+		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		put.addHeader("X-TTL", ttl);
 		put.addHeader("X-Log-Retention", logRet);
 		Log.v("cdn manager", ttl + container + logRet);
@@ -159,10 +159,10 @@ public class ContainerManager extends EntityManager {
 	throws CloudServersException {
        HttpResponse resp = null;
  	    CustomHttpClient httpclient = new CustomHttpClient(context);
-       	HttpPost post = new HttpPost(Account.getCdnManagementUrl() + "/"
+       	HttpPost post = new HttpPost(Account.getAccount().getCdnManagementUrl() + "/"
 		+ container);
 
-       	post.addHeader("X-Auth-Token", Account.getAuthToken());
+       	post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
        		post.addHeader("X-TTL", ttl);
        		post.addHeader("X-Log-Retention", logRet);
        		post.addHeader("X-CDN-Enabled", cdn);
@@ -189,9 +189,9 @@ public class ContainerManager extends EntityManager {
 	public HttpResponse delete(String string) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpDelete put = new HttpDelete(Account.getStorageUrl() + "/" + string);
+		HttpDelete put = new HttpDelete(Account.getAccount().getStorageUrl() + "/" + string);
 
-		put.addHeader("X-Auth-Token", Account.getAuthToken());
+		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
 		try {
@@ -216,10 +216,10 @@ public class ContainerManager extends EntityManager {
 			throws CloudServersException {
 
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet get = new HttpGet(Account.getStorageUrl() + "?format=xml");
+		HttpGet get = new HttpGet(Account.getAccount().getStorageUrl() + "?format=xml");
 		ArrayList<Container> containers = new ArrayList<Container>();
 
-		get.addHeader("X-Storage-Token", Account.getStorageToken());
+		get.addHeader("X-Storage-Token", Account.getAccount().getStorageToken());
 		get.addHeader("Content-Type", "application/xml");
 
 		try {
