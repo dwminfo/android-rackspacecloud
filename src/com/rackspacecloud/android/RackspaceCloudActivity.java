@@ -216,7 +216,8 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 		@Override
 		protected Boolean doInBackground(Void... arg0) {
 			authenticating = true;
-			return new Boolean(Authentication.authenticate());
+			//return new Boolean(Authentication.authenticate());
+			return true;
 		}
     	
 		@Override

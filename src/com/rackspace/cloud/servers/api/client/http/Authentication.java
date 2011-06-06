@@ -13,6 +13,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.util.Log;
 
 import com.rackspace.cloud.servers.api.client.Account;
+import com.rackspace.cloud.servers.api.client.AccountCopy;
 
 /**
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
@@ -20,13 +21,13 @@ import com.rackspace.cloud.servers.api.client.Account;
  */
 public class Authentication {
 
-	public static boolean authenticate() {
+	public static boolean authenticate(AccountCopy account) {
 		
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpGet get = new HttpGet(Account.getAuthServer());
 
-		get.addHeader("X-Auth-User", Account.getUsername());
-		get.addHeader("X-Auth-Key", Account.getApiKey());
+		get.addHeader("X-Auth-User", account.getUsername());
+		get.addHeader("X-Auth-Key", account.getApiKey());
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);

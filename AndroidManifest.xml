@@ -8,7 +8,7 @@
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.APPLICATION" />
             </intent-filter>
         </activity>
 
@@ -81,6 +81,12 @@
 		<activity android:name="BackupServerActivity"></activity>
 		<activity android:name="PasswordServerActivity"></activity>
 		<activity android:name="PingServerActivity"></activity>
+		<activity android:name="ListAccountsActivity">
+			<intent-filter>
+        	 <action android:name="android.intent.action.MAIN"/>
+        	 <category android:name="android.intent.category.LAUNCHER"/>
+        	</intent-filter>
+		</activity>
 
     </application>
     <uses-sdk android:minSdkVersion="4" />
