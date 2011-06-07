@@ -283,13 +283,11 @@ Soft Reboot / Hard Reboot
             android:id="@+id/view_server_backup_button"/>
     	<Button xmlns:android="http://schemas.android.com/apk/res/android"
     		android:id="@+id/view_server_password_button" 
-    		android:text="Change Root Password" 
     		android:layout_width="130dip" 
     		android:layout_marginTop="10dip" 
     		android:layout_marginLeft="10dip" 
-    		android:layout_gravity="left" 
     		android:layout_height="fill_parent" 
-    		android:gravity="center">
+    		android:gravity="center" android:layout_gravity="left" android:text="Root Password">
     	</Button>
     	 
     </LinearLayout>

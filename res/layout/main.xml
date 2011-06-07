@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+	android:baselineAligned="true" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical">
 	<ImageView android:layout_width="279dip"
 		android:layout_height="72dip" android:adjustViewBounds="true"
 		android:layout_gravity="center_horizontal" android:src="@drawable/rackspacecloud" />
@@ -37,9 +36,10 @@
 			android:layout_gravity="left" android:layout_marginLeft="20dip"
 			android:layout_marginTop="10dip" />
 
-		<CheckBox android:id="@+id/show_clear" android:layout_gravity="right"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:text="Show API Key" /><!-- TODO -->
+		<CheckBox android:id="@+id/show_clear"
+			android:layout_gravity="right" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="Show API Key" /><!-- 
+			TODO -->
 
 	</LinearLayout>
 

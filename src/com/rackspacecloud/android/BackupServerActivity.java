@@ -36,6 +36,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class BackupServerActivity extends Activity implements OnItemSelectedListener, OnClickListener {
 		
@@ -163,11 +164,18 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();	
 				Log.d("statuscode", Integer.toString(statusCode));
-				if (statusCode != 204) {
+				if(statusCode == 204 || statusCode == 202){
+					String mustMatch = "The server's backup schedule has been changed.";
+					Toast passwordError = Toast.makeText(getApplicationContext(), mustMatch, Toast.LENGTH_SHORT);
+					passwordError.show();
+					finish();
+				}
+				else if (statusCode != 204 && statusCode != 202) {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
 						showAlert("Error", "There was a problem rebooting your server.");
 					} else {
+						Log.d("info", "here");
 						showAlert("Error", "There was a problem rebooting your server: " + cse.getMessage() + " " + statusCode);
 					}
 				}

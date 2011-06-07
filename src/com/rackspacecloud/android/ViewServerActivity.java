@@ -27,6 +27,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -53,7 +57,7 @@ public class ViewServerActivity extends Activity {
 	private Flavor[] flavors;
 	private String[] flavorNames;
 	private String selectedFlavorId;
-	private boolean imageLoaded;
+	//private boolean imageLoaded;
     private String modifiedServerName;
     private Image[] images;
 	private String[] imageNames;
@@ -72,13 +76,13 @@ public class ViewServerActivity extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("server", server);
-		outState.putBoolean("imageLoaded", imageLoaded);
+		//outState.putBoolean("imageLoaded", imageLoaded);
 	}
 
     private void restoreState(Bundle state) {
     	if (state != null && state.containsKey("server")) {
     		server = (Server) state.getSerializable("server");
-    		imageLoaded = state.getBoolean("imageLoaded");
+    		//imageLoaded = state.getBoolean("imageLoaded");
     	}
         loadServerData();
         setupButtons();
@@ -89,12 +93,13 @@ public class ViewServerActivity extends Activity {
     private void loadImage() {
     	// hate to do this, but devices run out of memory after a few rotations
     	// because the background images are so large
-    	if (!imageLoaded) {
-        	ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
-        	osLogo.setAlpha(100);
-	    	osLogo.setImageResource(server.getImage().logoResourceId());
-	    	imageLoaded = true;
-    	}
+    	// but seems to work on device - not emulator though
+    	//if (!imageLoaded) {
+        ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
+        osLogo.setAlpha(100);
+	    osLogo.setImageResource(server.getImage().logoResourceId());
+	    //	imageLoaded = true;
+    	//}
 
     }
     
@@ -152,6 +157,8 @@ public class ViewServerActivity extends Activity {
 	    	loadImage();
 	    	ipAddressesLoaded = true;
     	}
+    	
+    	Log.d("server refesh", "serer was refereshed");
     }
     
     private void loadFlavors() {
