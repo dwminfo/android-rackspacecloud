@@ -11,7 +11,7 @@
 		android:layout_marginLeft="22dip" android:layout_width="fill_parent"></TextView>
 	<EditText android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:layout_marginLeft="22dip"
-		android:layout_marginRight="30dip" android:id="@+id/username"></EditText>
+		android:layout_marginRight="30dip" android:id="@+id/username" android:singleLine="true"></EditText>
 	<TextView android:layout_height="wrap_content" android:text="API Key"
 		android:layout_marginLeft="22dip" android:layout_width="fill_parent"></TextView>
 	<EditText android:id="@+id/apikey"

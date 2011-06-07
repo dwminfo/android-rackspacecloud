@@ -17,7 +17,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-public class AddAccountActivity extends Activity implements OnClickListener, OnItemSelectedListener{
+public class AddAccountActivity extends Activity implements OnClickListener{
 	
 	EditText usernameText;
 	EditText apiKeyText;
@@ -55,6 +55,18 @@ public class AddAccountActivity extends Activity implements OnClickListener, OnI
 		ArrayAdapter<String> imageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, providers);
 		imageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		providerSpinner.setAdapter(imageAdapter);
+		providerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+		    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+		    	if(pos == 0){
+					authServer = "https://auth.api.rackspacecloud.com/v1.0";
+				}
+				else if(pos == 1){
+					authServer = "https://lon.auth.api.rackspacecloud.com/v1.0";
+				}
+		    }
+		    public void onNothingSelected(AdapterView<?> parent) {
+		    }
+		});
 	}
 	
 	public void onClick(View arg0) {
@@ -95,21 +107,5 @@ public class AddAccountActivity extends Activity implements OnClickListener, OnI
     	String apiKey = apiKeyText.getText().toString();
     	return !"".equals(username) && !"".equals(apiKey);
     }
-	
-	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		if(position == 0){
-			authServer = "https://auth.api.rackspacecloud.com/v1.0";
-		}
-		else{
-			authServer = "https://lon.auth.api.rackspacecloud.com/v1.0";
-		}
-	}
-	
-	public void onNothingSelected(AdapterView<?> parent) {
-	}
-	
-
-	
-	
 
 }

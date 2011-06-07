@@ -40,7 +40,7 @@ import android.widget.TextView;
 public class ListAccountsActivity extends ListActivity{
 
 	private ArrayList<Account> accounts;
-	private final String FILENAME = "accounts.txt";
+	private final String FILENAME = "accounts.data";
 	private Intent tabViewIntent;
 	private boolean authenticating;
 
@@ -64,6 +64,7 @@ public class ListAccountsActivity extends ListActivity{
     		hideActivityIndicators();
     	}
 		if (state != null && state.containsKey("accounts")) {
+			Log.d("wowowowowo", "is this it???");
     		accounts = readAccounts();
     		if (accounts.size() == 0) {
     			displayNoAccountsCell();
@@ -89,9 +90,6 @@ public class ListAccountsActivity extends ListActivity{
 
 	private void setAccountList() {
 	
-		if (accounts == null) {
-			accounts = new ArrayList<Account>();
-		}
 		if (accounts.size() == 0) {
 			displayNoAccountsCell();
 		} else {
@@ -102,7 +100,7 @@ public class ListAccountsActivity extends ListActivity{
 
 	private void writeAccounts(){
 		FileOutputStream fos;
-		ObjectOutputStream out;
+		ObjectOutputStream out = null;
 		try{
 			fos = openFileOutput(FILENAME, Context.MODE_PRIVATE);
 			out = new ObjectOutputStream(fos);
@@ -116,7 +114,6 @@ public class ListAccountsActivity extends ListActivity{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
 	private ArrayList<Account> readAccounts(){
@@ -157,9 +154,19 @@ public class ListAccountsActivity extends ListActivity{
     }
 	
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		setActivityIndicatorsVisibility(View.VISIBLE, v);
-		Account.setAccount(accounts.get(position));
-		login();
+		if (accounts != null && accounts.size() > 0) {
+			setActivityIndicatorsVisibility(View.VISIBLE, v);
+			Account.setAccount(accounts.get(position));
+			login();
+		}		
+    }
+	
+	protected void onListItemLongPress(ListView l, View v, int position, long id) {
+		if (accounts != null && accounts.size() > 0) {
+			setActivityIndicatorsVisibility(View.VISIBLE, v);
+			accounts.remove(position);
+			loadAccounts();
+		}
 		//Intent viewIntent = new Intent(this, TabViewActivity.class);
 	    //viewIntent.putExtra("server", servers[position]);
 		//startActivityForResult(viewIntent, 57); // arbitrary number; never used again
@@ -227,19 +234,20 @@ public class ListAccountsActivity extends ListActivity{
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		  super.onActivityResult(requestCode, resultCode, data);
-		  
-		  if (resultCode == RESULT_OK) {	  
-			  Account acc = new Account();
-			  Bundle b = data.getBundleExtra("accountInfo");
-			  acc.setApiKey(b.getString("apiKey"));
-			  acc.setUsername(b.getString("username"));
-			  acc.setAuthServer(b.getString("server"));
-			  accounts.add(acc);
-			  loadAccounts();
-		 }
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if (resultCode == RESULT_OK && requestCode == 78) {	  
+			Account acc = new Account();
+			Bundle b = data.getBundleExtra("accountInfo");
+			acc.setApiKey(b.getString("apiKey"));
+			acc.setUsername(b.getString("username"));
+			acc.setAuthServer(b.getString("server"));
+			accounts.add(acc);
+			writeAccounts();
+			loadAccounts();
+		}
 	}	
-	
+
 	private void setActivityIndicatorsVisibility(int visibility) {
 		//FINISH THIS TO LET USER KNOW PROGRAM IS STILL WORKING
 		

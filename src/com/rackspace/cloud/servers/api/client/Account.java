@@ -9,17 +9,21 @@ package com.rackspace.cloud.servers.api.client;
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
-public class Account {
+public class Account implements java.io.Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2180740077014156769L;
 	private String username;
 	private String apiKey;
-	private String authToken;
+	private transient String authToken;
 	private String authServer;
-	private String serverUrl;
-	private String storageUrl;
-	private String storageToken;
-	private String cdnManagementUrl;
-	private static Account currentAccount;
+	private transient String serverUrl;
+	private transient String storageUrl;
+	private transient String storageToken;
+	private transient String cdnManagementUrl;
+	private transient static Account currentAccount;
 	
 	
 	public static Account getAccount(){
