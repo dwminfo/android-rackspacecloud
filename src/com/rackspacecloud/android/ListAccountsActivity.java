@@ -1,6 +1,5 @@
 package com.rackspacecloud.android;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -25,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,7 +40,7 @@ import android.widget.TextView;
 public class ListAccountsActivity extends ListActivity{
 
 	private ArrayList<Account> accounts;
-	private final String FILENAME = "accounts";
+	private final String FILENAME = "accounts.txt";
 	private Intent tabViewIntent;
 	private boolean authenticating;
 
@@ -129,6 +127,7 @@ public class ListAccountsActivity extends ListActivity{
 			in = new ObjectInputStream(fis);
 			ArrayList<Account> file = (ArrayList<Account>)in.readObject();
 			in.close();
+			Log.d("captin", Boolean.toString(file == null));
 			return file;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -158,6 +157,7 @@ public class ListAccountsActivity extends ListActivity{
     }
 	
 	protected void onListItemClick(ListView l, View v, int position, long id) {
+		setActivityIndicatorsVisibility(View.VISIBLE, v);
 		Account.setAccount(accounts.get(position));
 		login();
 		//Intent viewIntent = new Intent(this, TabViewActivity.class);
@@ -241,6 +241,15 @@ public class ListAccountsActivity extends ListActivity{
 	}	
 	
 	private void setActivityIndicatorsVisibility(int visibility) {
+		//FINISH THIS TO LET USER KNOW PROGRAM IS STILL WORKING
+		
+        //ProgressBar pb = new ProgressBar();
+    	//TextView tv = (TextView) findViewById(R.id.login_authenticating_label);
+        //pb.setVisibility(visibility);
+        //tv.setVisibility(visibility);
+    }
+	
+	private void setActivityIndicatorsVisibility(int visibility, View v) {
 		//FINISH THIS TO LET USER KNOW PROGRAM IS STILL WORKING
 		
         //ProgressBar pb = new ProgressBar();
