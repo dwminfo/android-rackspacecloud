@@ -151,7 +151,7 @@ public class ContainerObjectDetails extends Activity {
     }
     
     private class MyOnClickListener implements View.OnClickListener {
-        @Override
+        //@Override********************************************************************remove comment
         public void onClick(View v) {
         	Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(cdnURL + "/" + objects.getCName()));
         	startActivity(viewIntent);  

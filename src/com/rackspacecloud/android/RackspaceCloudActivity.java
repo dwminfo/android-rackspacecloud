@@ -47,12 +47,22 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	private Intent tabViewIntent;
 	private boolean authenticating;
 	private Context context;
+	private boolean showApi;
+
 		
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        
+        //use different layouts for different orientation
+        int orientation = getWindowManager().getDefaultDisplay().getOrientation();
+        if(orientation == 0){
+        	setContentView(R.layout.main);
+        }
+        if(orientation == 1){
+        	setContentView(R.layout.mainhoriz);
+        }
         
         final CheckBox show_clear = (CheckBox) findViewById(R.id.show_clear);
         final EditText loginApiKey = (EditText) findViewById(R.id.login_apikey);
@@ -60,23 +70,24 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
         context = getApplicationContext();
         
         show_clear.setOnClickListener(new OnClickListener() {
-			@Override
+        	@Override 
 			public void onClick(View v) {
 		        if (((CheckBox) v).isChecked()) {
 		        	loginApiKey.setTransformationMethod(new SingleLineTransformationMethod());
-		        } else {
+		        	showApi = true;
+		        } else {    	
 		        	loginApiKey.setTransformationMethod(new PasswordTransformationMethod());	
+		        	showApi = false;
 		        }
 		        loginApiKey.requestFocus();
 		    }	
 		});
-        
+
         ((Button) findViewById(R.id.button)).setOnClickListener(this);
         
 		loginApiKey.setOnEditorActionListener(this);
         loadLoginPreferences();
         restoreState(savedInstanceState);
-        
         // use the TabViewActivity when Cloud Files is added
         // tabViewIntent = new Intent(this, TabViewActivity.class);
         
@@ -87,9 +98,26 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putBoolean("authenticating", authenticating);
+		Log.d("storing apikey", Boolean.toString(showApi));
+		outState.putBoolean("showApiKey", showApi);
 	}
 
-    public boolean onCreateOptionsMenu(Menu menu) {
+    private void restoreState(Bundle state) {
+		if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
+			showActivityIndicators();
+		} else {
+			hideActivityIndicators();
+		}
+	
+		if (state != null && state.containsKey("showApiKey") && state.getBoolean("showApiKey")) {
+			((EditText) findViewById(R.id.login_apikey)).setTransformationMethod(new SingleLineTransformationMethod());
+	    } else {    
+	    	((EditText) findViewById(R.id.login_apikey)).setTransformationMethod(new PasswordTransformationMethod());	
+	    }
+		
+	}
+
+	public boolean onCreateOptionsMenu(Menu menu) {
     	MenuItem settings = menu.add(0, SHOW_PREFERENCES, 0, R.string.preference_name);
     	settings.setIcon(android.R.drawable.ic_menu_preferences);
         return true;
@@ -109,14 +137,6 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
         Intent settingsActivity = new Intent(getBaseContext(),
                 Preferences.class);
         startActivity(settingsActivity);
-    }
-    
-    private void restoreState(Bundle state) {
-    	if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
-    		showActivityIndicators();
-    	} else {
-    		hideActivityIndicators();
-    	}
     }
     
     public void login() {

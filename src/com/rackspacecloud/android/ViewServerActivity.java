@@ -24,18 +24,25 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Flavor;
+import com.rackspace.cloud.servers.api.client.Image;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
@@ -53,6 +60,11 @@ public class ViewServerActivity extends Activity {
 	private String selectedFlavorId;
 	private boolean imageLoaded;
 	Context context;
+	//private boolean imageLoaded;
+    private String modifiedServerName;
+    private Image[] images;
+	private String[] imageNames;
+	private String selectedImageId;
 	
     /** Called when the activity is first created. */
     @Override
@@ -68,28 +80,29 @@ public class ViewServerActivity extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("server", server);
-		outState.putBoolean("imageLoaded", imageLoaded);
+		//outState.putBoolean("imageLoaded", imageLoaded);
 	}
 
     private void restoreState(Bundle state) {
     	if (state != null && state.containsKey("server")) {
     		server = (Server) state.getSerializable("server");
-    		imageLoaded = state.getBoolean("imageLoaded");
+    		//imageLoaded = state.getBoolean("imageLoaded");
     	}
         loadServerData();
         setupButtons();
         loadFlavors();
+        loadImages();
     }
 
     private void loadImage() {
     	// hate to do this, but devices run out of memory after a few rotations
     	// because the background images are so large
-    	if (!imageLoaded) {
-        	ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
-        	osLogo.setAlpha(100);
-	    	osLogo.setImageResource(server.getImage().logoResourceId());
-	    	imageLoaded = true;
-    	}
+    	//if (!imageLoaded) {
+    		ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
+    		osLogo.setAlpha(100);
+    		osLogo.setImageResource(server.getImage().logoResourceId());
+    	//	imageLoaded = true;
+    	//}
 
     }
     
@@ -147,6 +160,8 @@ public class ViewServerActivity extends Activity {
 	    	loadImage();
 	    	ipAddressesLoaded = true;
     	}
+    	
+    	Log.d("server refesh", "serer was refereshed");
     }
     
     private void loadFlavors() {
@@ -162,6 +177,22 @@ public class ViewServerActivity extends Activity {
 			i++;
 		}
 		selectedFlavorId = flavors[0].getId();
+    }
+    
+    private void loadImages() {
+		imageNames = new String[Image.getImages().size()]; 
+		images = new Image[Image.getImages().size()];
+
+		Iterator<Image> iter = Image.getImages().values().iterator();
+		int i = 0;
+		while (iter.hasNext()) {
+			Image image = iter.next();
+			images[i] = image;
+			imageNames[i] = image.getName(); 
+			i++;
+		}
+		selectedImageId = images[0].getId();
+		
     }
 
     private void setupButton(int resourceId, OnClickListener onClickListener) {
@@ -191,6 +222,45 @@ public class ViewServerActivity extends Activity {
     	setupButton(R.id.view_server_delete_button, new OnClickListener() {
             public void onClick(View v) {
                 showDialog(R.id.view_server_delete_button);
+            }
+    	});
+    	
+    	setupButton(R.id.view_server_rename_button, new OnClickListener() {
+            public void onClick(View v) {
+                showDialog(R.id.view_server_rename_button);
+            }
+    	});
+    	
+    	setupButton(R.id.view_server_rebuild_button, new OnClickListener() {
+            public void onClick(View v) {
+                showDialog(R.id.view_server_rebuild_button);
+            }
+    	});
+    	
+    	
+    	setupButton(R.id.view_server_backup_button, new OnClickListener() {
+            public void onClick(View v) {
+            	Intent viewIntent = new Intent(v.getContext(), BackupServerActivity.class);
+            	viewIntent.putExtra("server", server);
+            	startActivity(viewIntent);
+            }
+    	});
+    	
+    	setupButton(R.id.view_server_password_button, new OnClickListener() {
+            public void onClick(View v) {
+            	Intent viewIntent = new Intent(v.getContext(), PasswordServerActivity.class);
+            	viewIntent.putExtra("server", server);
+            	startActivity(viewIntent);
+            }
+    	});
+    	
+    	setupButton(R.id.view_server_ping_button, new OnClickListener() {
+            public void onClick(View v) {
+            	Intent viewIntent = new Intent(v.getContext(), PingServerActivity.class);
+            	
+            	//ping the first public ip
+            	viewIntent.putExtra("ipAddress", server.getPublicIpAddresses()[0]);
+            	startActivity(viewIntent);
             }
     	});
     	
@@ -285,7 +355,39 @@ public class ViewServerActivity extends Activity {
         			// User clicked Cancel so do some stuff
         		}
         	})
-        	.create();
+        	.create();          
+         case R.id.view_server_rename_button:
+        	final EditText input = new EditText(this);
+        	input.setText(server.getName());
+            return new AlertDialog.Builder(ViewServerActivity.this)
+        	.setIcon(R.drawable.alert_dialog_icon)
+            .setView(input)
+        	.setTitle("Rename")
+        	.setMessage("Enter new name for server: ")        	         
+        	.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked OK so do some stuff
+        			modifiedServerName = input.getText().toString();
+        			new RenameServerTask().execute((Void[]) null);
+        		}
+        	})
+        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			// User clicked Cancel so do some stuff
+        		}
+        	})
+        	.create();     
+         case R.id.view_server_rebuild_button:
+            return new AlertDialog.Builder(ViewServerActivity.this)
+            .setItems(imageNames, new RebuildClickListener())
+         	.setIcon(R.drawable.alert_dialog_icon)
+         	.setTitle("Rebuild Server")
+         	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+         		public void onClick(DialogInterface dialog, int whichButton) {
+         			// User clicked Cancel so do some stuff
+         		}
+         	})
+         	.create();
         }
         return null;
     }
@@ -298,6 +400,17 @@ public class ViewServerActivity extends Activity {
 		}
     	
     }
+    
+    private class RebuildClickListener implements android.content.DialogInterface.OnClickListener {
+
+		public void onClick(DialogInterface dialog, int which) {
+			selectedImageId = images[which].getId() + "";
+			new RebuildServerTask().execute((Void[]) null);
+		}
+    	
+    }
+    
+
     
     private CloudServersException parseCloudServersException(HttpResponse response) {
 		CloudServersException cse = new CloudServersException();
@@ -459,7 +572,7 @@ public class ViewServerActivity extends Activity {
 		}
     }
 	
-	private class DeleteServerTask extends AsyncTask<Void, Void, HttpResponse> {
+	public class DeleteServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
 		private CloudServersException exception;
 
@@ -494,4 +607,80 @@ public class ViewServerActivity extends Activity {
 			}			
 		}
     }
+	
+	private class RenameServerTask extends AsyncTask<Void, Void, HttpResponse> {
+		
+		private CloudServersException exception;
+		
+		@Override
+		protected HttpResponse doInBackground(Void... arg0) {
+			HttpResponse resp = null;
+			try {
+				resp = (new ServerManager()).rename(server, modifiedServerName);
+			} catch (CloudServersException e) {
+				exception = e;
+			}
+			return resp;
+		}
+		
+		@Override
+		protected void onPostExecute(HttpResponse response) {
+			if (response != null) {
+				int statusCode = response.getStatusLine().getStatusCode();			
+				if (statusCode == 204) {	
+					new PollServerTask().execute((Void[]) null);
+				} else {
+					CloudServersException cse = parseCloudServersException(response);
+					if ("".equals(cse.getMessage())) {
+						showAlert("Error", "There was a problem renaming your server.");
+					} else {
+						showAlert("Error", "There was a problem renaming your server: " + cse.getMessage());
+					}					
+				}
+			}
+		    else if (exception != null) {
+		    	showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());	
+		    }
+		}
+		
+	}
+	
+	private class RebuildServerTask extends AsyncTask<Void, Void, HttpResponse> {
+    	
+		private CloudServersException exception;
+
+		@Override
+		protected HttpResponse doInBackground(Void... arg0) {
+			HttpResponse resp = null;
+			try {
+				resp = (new ServerManager()).rebuild(server, Integer.parseInt(selectedImageId));
+			} catch (CloudServersException e) {
+				exception = e;
+			}
+			return resp;
+		}
+    	
+		@Override
+		protected void onPostExecute(HttpResponse response) {
+			if (response != null) {
+				int statusCode = response.getStatusLine().getStatusCode();			
+				if (statusCode == 202) {
+					new PollServerTask().execute((Void[]) null);
+				} else {					
+					CloudServersException cse = parseCloudServersException(response);
+					if ("".equals(cse.getMessage())) {
+						showAlert("Error", "There was a problem deleting your server.");
+					} else {
+						showAlert("Error", "There was a problem deleting your server: " + cse.getMessage());
+					}					
+				}
+			} else if (exception != null) {
+				showAlert("Error", "There was a problem resizing your server: " + exception.getMessage());
+				
+			}
+			
+		}
+    }
+	
+	
 }
