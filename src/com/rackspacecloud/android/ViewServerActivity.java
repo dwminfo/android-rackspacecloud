@@ -93,12 +93,11 @@ public class ViewServerActivity extends Activity {
     private void loadImage() {
     	// hate to do this, but devices run out of memory after a few rotations
     	// because the background images are so large
-    	// but seems to work on device - not emulator though
     	//if (!imageLoaded) {
-        ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
-        osLogo.setAlpha(100);
-	    osLogo.setImageResource(server.getImage().logoResourceId());
-	    //	imageLoaded = true;
+    		ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
+    		osLogo.setAlpha(100);
+    		osLogo.setImageResource(server.getImage().logoResourceId());
+    	//	imageLoaded = true;
     	//}
 
     }
