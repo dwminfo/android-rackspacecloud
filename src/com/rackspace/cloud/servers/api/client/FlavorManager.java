@@ -35,10 +35,10 @@ public class FlavorManager extends EntityManager {
 	public ArrayList<Flavor> createList(boolean detail, Context context) {
 		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet get = new HttpGet(Account.getServerUrl() + "/flavors/detail.xml?now=cache_time2");
+		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/flavors/detail.xml?now=cache_time2");
 		ArrayList<Flavor> flavors = new ArrayList<Flavor>();
 		
-		get.addHeader("X-Auth-Token", Account.getAuthToken());
+		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);
@@ -46,13 +46,12 @@ public class FlavorManager extends EntityManager {
 		    String body = responseHandler.handleResponse(resp);
 		    
 		    if (resp.getStatusLine().getStatusCode() == 200 || resp.getStatusLine().getStatusCode() == 203) {		    	
-		    	
 		    	FlavorsXMLParser flavorsXMLParser = new FlavorsXMLParser();
 		    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 		    	XMLReader xmlReader = saxParser.getXMLReader();
 		    	xmlReader.setContentHandler(flavorsXMLParser);
-		    	xmlReader.parse(new InputSource(new StringReader(body)));		    	
-		    	flavors = flavorsXMLParser.getFlavors();		    	
+		    	xmlReader.parse(new InputSource(new StringReader(body)));	
+		    	flavors = flavorsXMLParser.getFlavors();	
 		    }
 		} catch (ClientProtocolException cpe) {
 			// we'll end up with an empty list; that's good enough

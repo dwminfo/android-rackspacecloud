@@ -43,11 +43,11 @@ public class ServerManager extends EntityManager {
 	public static final String HARD_REBOOT = "HARD";
 	
 	public void create(Server entity, Context context) throws CloudServersException {
-		
+
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers.xml");
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers.xml");
 		
-		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 
 		StringEntity tmp = null;
@@ -109,10 +109,9 @@ public class ServerManager extends EntityManager {
 	public ArrayList<Server> createList(boolean detail, Context context) throws CloudServersException {
 		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/detail.xml" + cacheBuster());
+		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/servers/detail.xml" + cacheBuster());
 		ArrayList<Server> servers = new ArrayList<Server>();
-		
-		get.addHeader("X-Auth-Token", Account.getAuthToken());
+		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);		    
@@ -162,11 +161,11 @@ public class ServerManager extends EntityManager {
 	}
 
 	public Server find(long id, Context context) throws CloudServersException {
+		
 		Server server = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/" + id + ".xml" + cacheBuster());
-		
-		get.addHeader("X-Auth-Token", Account.getAuthToken());
+		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/servers/" + id + ".xml" + cacheBuster());
+		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);		    
@@ -217,9 +216,8 @@ public class ServerManager extends EntityManager {
 	public HttpResponse reboot(Server server, String rebootType, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
-				
-		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");		
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 
 		StringEntity tmp = null;
@@ -255,9 +253,8 @@ public class ServerManager extends EntityManager {
 	public HttpResponse resize(Server server, int flavorId, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
-				
-		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");			
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -293,9 +290,8 @@ public class ServerManager extends EntityManager {
 	public HttpResponse delete(Server server, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpDelete delete = new HttpDelete(Account.getServerUrl() + "/servers/" + server.getId() + ".xml");
-				
-		delete.addHeader("X-Auth-Token", Account.getAuthToken());
+		HttpDelete delete = new HttpDelete(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");				
+		delete.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		delete.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -320,9 +316,9 @@ public class ServerManager extends EntityManager {
 	public HttpResponse rename(Server server, String name) throws CloudServersException{
 		HttpResponse resp = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPut put = new HttpPut(Account.getServerUrl() + "/servers/" + server.getId() + ".xml");
+		HttpPut put = new HttpPut(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");
 	
-		put.addHeader("X-Auth-Token", Account.getAuthToken());
+		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		put.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);  //*******FIND OUT WITH THIS DOES?
 	
@@ -357,9 +353,9 @@ public class ServerManager extends EntityManager {
 	public HttpResponse rebuild(Server server, int imageId) throws CloudServersException {
 		HttpResponse resp = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");
 				
-		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -394,9 +390,9 @@ public class ServerManager extends EntityManager {
 	public HttpResponse backup(Server server, String weeklyValue, String dailyValue, boolean enabled) throws CloudServersException {
 		HttpResponse resp = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/backup_schedule.xml");
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/backup_schedule.xml");
 				
-		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -433,9 +429,9 @@ public class ServerManager extends EntityManager {
 	public HttpResponse changePassword(Server server, String password) throws CloudServersException{
 		HttpResponse resp = null;
 		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPut put = new HttpPut(Account.getServerUrl() + "/servers/" + server.getId() + ".xml");
+		HttpPut put = new HttpPut(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");
 	
-		put.addHeader("X-Auth-Token", Account.getAuthToken());
+		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		put.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class); 
 	

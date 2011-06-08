@@ -35,7 +35,7 @@ import com.rackspace.cloud.servers.api.client.ImageManager;
 import com.rackspace.cloud.servers.api.client.http.Authentication;
 
 
-public class RackspaceCloudActivity extends Activity implements View.OnClickListener, OnEditorActionListener {
+public class RackspaceCloudActivity{ //extends Activity implements View.OnClickListener, OnEditorActionListener {
 	
 	private static final String OPT_USERNAME = "username";
 	private static final String OPT_USERNAME_DEF = "";
@@ -49,8 +49,8 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 	private Context context;
 	private boolean showApi;
 
-		
     /** Called when the activity is first created. */
+	/*
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -239,7 +239,12 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 		@Override
 		protected Boolean doInBackground(Void... arg0) {
 			authenticating = true;
+<<<<<<< HEAD
 			return new Boolean(Authentication.authenticate(context));
+=======
+			//return new Boolean(Authentication.authenticate());
+			return true;
+>>>>>>> refs/heads/mutipleAccounts
 		}
     	
 		@Override
@@ -258,7 +263,12 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
     	
 		@Override
 		protected ArrayList<Flavor> doInBackground(Void... arg0) {
+<<<<<<< HEAD
 			return (new FlavorManager()).createList(true, context);
+=======
+			//return (new FlavorManager()).createList(true);
+			return new ArrayList<Flavor>();
+>>>>>>> refs/heads/mutipleAccounts
 		}
     	
 		@Override
@@ -302,5 +312,10 @@ public class RackspaceCloudActivity extends Activity implements View.OnClickList
 			//hideActivityIndicators();
 		}
     }
+<<<<<<< HEAD
 
 }
+=======
+*/
+}
+
