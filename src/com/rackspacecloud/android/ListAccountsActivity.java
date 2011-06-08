@@ -19,6 +19,7 @@ import com.rackspace.cloud.servers.api.client.http.Authentication;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -43,6 +44,7 @@ public class ListAccountsActivity extends ListActivity{
 	private final String FILENAME = "accounts.data";
 	private Intent tabViewIntent;
 	private boolean authenticating;
+	ProgressDialog dialog;
 
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +66,6 @@ public class ListAccountsActivity extends ListActivity{
     		hideActivityIndicators();
     	}
 		if (state != null && state.containsKey("accounts")) {
-			Log.d("wowowowowo", "is this it???");
     		accounts = readAccounts();
     		if (accounts.size() == 0) {
     			displayNoAccountsCell();
@@ -166,16 +167,13 @@ public class ListAccountsActivity extends ListActivity{
 			setActivityIndicatorsVisibility(View.VISIBLE, v);
 			accounts.remove(position);
 			loadAccounts();
-		}
-		//Intent viewIntent = new Intent(this, TabViewActivity.class);
-	    //viewIntent.putExtra("server", servers[position]);
-		//startActivityForResult(viewIntent, 57); // arbitrary number; never used again
-    		
+		}    		
     }
 	
 	public void login() {
         //showActivityIndicators();
         //setLoginPreferences();
+		dialog = ProgressDialog.show(ListAccountsActivity.this, "", "Authenticating...", true);
         new AuthenticateTask().execute((Void[]) null);
     }
 	
@@ -278,7 +276,7 @@ public class ListAccountsActivity extends ListActivity{
     	
 		@Override
 		protected Boolean doInBackground(Void... arg0) {
-			Log.d("auth", "task1");
+
 			authenticating = true;
 			return new Boolean(Authentication.authenticate());
 			//return true;
@@ -291,6 +289,7 @@ public class ListAccountsActivity extends ListActivity{
 				//startActivity(tabViewIntent);
 	        	new LoadImagesTask().execute((Void[]) null);				
 			} else {
+				dialog.dismiss();
 				showAlert("Login Failure", "Authentication failed.  Please check your User Name and API Key.");
 			}
 		}
@@ -313,8 +312,10 @@ public class ListAccountsActivity extends ListActivity{
 					flavorMap.put(flavor.getId(), flavor);
 				}
 				Flavor.setFlavors(flavorMap);
+				dialog.dismiss();
 				startActivity(tabViewIntent);
 			} else {
+				dialog.dismiss();
 				showAlert("Login Failure", "There was a problem loading server flavors.  Please try again.");
 			}
 			hideActivityIndicators();
@@ -341,6 +342,7 @@ public class ListAccountsActivity extends ListActivity{
 				new LoadFlavorsTask().execute((Void[]) null);
 				//startActivity(tabViewIntent);
 			} else {
+				dialog.dismiss();
 				showAlert("Login Failure", "There was a problem loading server images.  Please try again.");
 			}
 			hideActivityIndicators();
