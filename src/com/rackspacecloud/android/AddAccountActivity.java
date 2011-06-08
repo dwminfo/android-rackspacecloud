@@ -7,9 +7,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
 import android.text.method.SingleLineTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,29 +23,57 @@ public class AddAccountActivity extends Activity implements OnClickListener{
 	EditText apiKeyText;
 	Spinner providerSpinner;
 	String authServer;
+	boolean isHidden;
 	
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.createaccount);
         usernameText = (EditText) findViewById(R.id.username);
-        apiKeyText = (EditText) findViewById(R.id.apikey);
+        apiKeyText = (EditText) findViewById(R.id.addaccount_apikey);
         ((Button) findViewById(R.id.submit_new_account)).setOnClickListener(this);
-        
-        final CheckBox show_clear = (CheckBox) findViewById(R.id.show_clear);
+        isHidden = true;
+        if(savedInstanceState != null)
+        	isHidden = savedInstanceState.containsKey("isHidden") && savedInstanceState.getBoolean("isHidden");
+        setUpApiText(savedInstanceState);
+        setUpCheckBox();
+        loadProviderSpinner();
+    } 
+	
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putBoolean("isHidden", isHidden);
+	}
+	
+	//setup the API textedit to be password dots or regular text
+	private void setUpApiText(Bundle state){
+        isHidden = true;
+        if(state != null)
+        	isHidden = state.containsKey("isHidden") && state.getBoolean("isHidden");
+		if(isHidden){
+        	apiKeyText.setTransformationMethod(new PasswordTransformationMethod());
+		}
+		else{
+        	apiKeyText.setTransformationMethod(new SingleLineTransformationMethod());
+		}
+	}
+	
+	private void setUpCheckBox(){
+		final CheckBox show_clear = (CheckBox) findViewById(R.id.show_clear);
+		show_clear.setChecked(!isHidden);
         show_clear.setOnClickListener(new OnClickListener() {
         	@Override 
 			public void onClick(View v) {
 		        if (((CheckBox) v).isChecked()) {
 		        	apiKeyText.setTransformationMethod(new SingleLineTransformationMethod());
+		        	isHidden = false;
 		        } else {
-		        	apiKeyText.setTransformationMethod(new PasswordTransformationMethod());	
+		        	apiKeyText.setTransformationMethod(new PasswordTransformationMethod());
+		        	isHidden = true;
 		        }
 		        apiKeyText.requestFocus();
 		    }	
 		});
-        
-        loadProviderSpinner();
-    }
+	}
 	
 	private void loadProviderSpinner(){
 		//set the auth server default to us

@@ -81,16 +81,16 @@
 		</activity>
 
 		<activity android:name=".Preferences" android:label="@string/preference_name" />
-		<activity android:name="BackupServerActivity"></activity>
-		<activity android:name="PasswordServerActivity"></activity>
-		<activity android:name="PingServerActivity"></activity>
-		<activity android:name="ListAccountsActivity" android:configChanges="orientation">
+		<activity android:name=".BackupServerActivity"></activity>
+		<activity android:name=".PasswordServerActivity"></activity>
+		<activity android:name=".PingServerActivity"></activity>
+		<activity android:configChanges="orientation" android:name=".ListAccountsActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name="AddAccountActivity"></activity>
+		<activity android:name=".AddAccountActivity"></activity>
 
 	</application>
 	<uses-sdk android:minSdkVersion="4" />

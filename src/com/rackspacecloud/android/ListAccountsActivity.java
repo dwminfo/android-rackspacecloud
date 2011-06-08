@@ -26,16 +26,18 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class ListAccountsActivity extends ListActivity{
@@ -49,6 +51,7 @@ public class ListAccountsActivity extends ListActivity{
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         restoreState(savedInstanceState);
+        registerForContextMenu(getListView());
         tabViewIntent = new Intent(this, TabViewActivity.class);
     }
 	
@@ -79,6 +82,9 @@ public class ListAccountsActivity extends ListActivity{
     }
 	
 	private void loadAccounts() {
+		if(accounts != null)
+			Log.d("loadAccounts", "captin the lenght is: " + accounts.size());
+		//check and see if there are any in memory
 		if(accounts == null){
 			accounts = readAccounts();
 		}
@@ -86,6 +92,8 @@ public class ListAccountsActivity extends ListActivity{
 		if(accounts == null){
 			accounts = new ArrayList<Account>();
 		}
+		Log.d("loadAccounts2", "captin the lenght is: " + accounts.size());
+
 		setAccountList();
 	}
 
@@ -162,14 +170,6 @@ public class ListAccountsActivity extends ListActivity{
 		}		
     }
 	
-	protected void onListItemLongPress(ListView l, View v, int position, long id) {
-		if (accounts != null && accounts.size() > 0) {
-			setActivityIndicatorsVisibility(View.VISIBLE, v);
-			accounts.remove(position);
-			loadAccounts();
-		}    		
-    }
-	
 	public void login() {
         //showActivityIndicators();
         //setLoginPreferences();
@@ -177,7 +177,7 @@ public class ListAccountsActivity extends ListActivity{
         new AuthenticateTask().execute((Void[]) null);
     }
 	
-	
+	//setup menu for when menu button is pressed
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
@@ -186,6 +186,7 @@ public class ListAccountsActivity extends ListActivity{
 	} 
     
     @Override 
+    //in options menu, when add account is selected go to add account activity
     public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.add_account:
@@ -194,6 +195,23 @@ public class ListAccountsActivity extends ListActivity{
 		}
 		return false;
 	} 
+
+    //the context menu for a long press on an account
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.account_context_menu, menu);
+	}
+
+	//removes the selected account from account list if remove is clicked
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		accounts.remove(info.position);
+		writeAccounts();
+		loadAccounts();
+		return true;
+	}
 
 	class AccountAdapter extends ArrayAdapter<Account> {
 
@@ -360,7 +378,6 @@ public class ListAccountsActivity extends ListActivity{
 		alert.show();
 		hideActivityIndicators();
     }
-	
 	
 		
 }
