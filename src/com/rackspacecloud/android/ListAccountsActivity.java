@@ -47,11 +47,13 @@ public class ListAccountsActivity extends ListActivity{
 	private Intent tabViewIntent;
 	private boolean authenticating;
 	ProgressDialog dialog;
+	Context context;
 
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         restoreState(savedInstanceState);
         registerForContextMenu(getListView());
+        context = getApplicationContext();
         tabViewIntent = new Intent(this, TabViewActivity.class);
     }
 	
@@ -296,7 +298,7 @@ public class ListAccountsActivity extends ListActivity{
 		protected Boolean doInBackground(Void... arg0) {
 
 			authenticating = true;
-			return new Boolean(Authentication.authenticate(getApplicationContext()));
+			return new Boolean(Authentication.authenticate(context));
 			//return true;
 		}
     	
@@ -318,7 +320,7 @@ public class ListAccountsActivity extends ListActivity{
 		@Override
 		protected ArrayList<Flavor> doInBackground(Void... arg0) {
 			Log.d("auth", "task2");
-			return (new FlavorManager()).createList(true, getApplicationContext());
+			return (new FlavorManager()).createList(true, context);
 		}
     	
 		@Override
@@ -345,7 +347,7 @@ public class ListAccountsActivity extends ListActivity{
 		@Override
 		protected ArrayList<Image> doInBackground(Void... arg0) {
 			Log.d("auth", "task3");
-			return (new ImageManager()).createList(true, getApplicationContext());
+			return (new ImageManager()).createList(true, context);
 		}
     	
 		@Override

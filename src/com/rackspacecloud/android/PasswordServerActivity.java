@@ -111,7 +111,7 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ServerManager()).changePassword(server, modifiedPassword);
+				resp = (new ServerManager()).changePassword(server, modifiedPassword, getApplicationContext());
 			} catch (CloudServersException e) {
 				exception = e;
 			}

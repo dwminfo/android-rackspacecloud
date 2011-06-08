@@ -29,9 +29,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -58,7 +55,6 @@ public class ViewServerActivity extends Activity {
 	private Flavor[] flavors;
 	private String[] flavorNames;
 	private String selectedFlavorId;
-	private boolean imageLoaded;
 	Context context;
 	//private boolean imageLoaded;
     private String modifiedServerName;
@@ -616,7 +612,7 @@ public class ViewServerActivity extends Activity {
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ServerManager()).rename(server, modifiedServerName);
+				resp = (new ServerManager()).rename(server, modifiedServerName, context);
 			} catch (CloudServersException e) {
 				exception = e;
 			}
@@ -653,7 +649,7 @@ public class ViewServerActivity extends Activity {
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ServerManager()).rebuild(server, Integer.parseInt(selectedImageId));
+				resp = (new ServerManager()).rebuild(server, Integer.parseInt(selectedImageId), context);
 			} catch (CloudServersException e) {
 				exception = e;
 			}

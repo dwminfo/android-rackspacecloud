@@ -151,7 +151,7 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		@Override
 		protected Server doInBackground(Void... arg0) {
 			try {
-				(new ServerManager()).create(server);
+				(new ServerManager()).create(server, getApplicationContext());
 			} catch (CloudServersException e) {
 				exception = e;
 			}

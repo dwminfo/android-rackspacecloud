@@ -47,7 +47,6 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 	private String selectedWeeklyBackup;
 	private String selectedDailyBackup;
 
-	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -151,7 +150,7 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
-				resp = (new ServerManager()).backup(server, selectedWeeklyBackup, selectedDailyBackup, enableCheckBox.isChecked());
+				resp = (new ServerManager()).backup(server, selectedWeeklyBackup, selectedDailyBackup, enableCheckBox.isChecked(), getApplicationContext());
 			} catch (CloudServersException e) {
 				exception = e;
 			}
