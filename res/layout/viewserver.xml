@@ -226,16 +226,7 @@ Soft Reboot / Hard Reboot
             android:layout_marginLeft="20dip"
             android:layout_marginTop="10dip"
             />
-        
-        <Button xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/view_server_delete_button"
-            android:text="Delete Server"
-            android:layout_width="130dip"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left"
-            android:layout_marginLeft="10dip"
-            android:layout_marginTop="10dip"
-            />
+        <Button android:layout_marginTop="10dip" android:id="@+id/view_server_delete_button" android:text="Delete Server" android:layout_width="130dip" android:layout_gravity="left" android:layout_marginLeft="10dip" android:layout_height="wrap_content"></Button>
     </LinearLayout>
     
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

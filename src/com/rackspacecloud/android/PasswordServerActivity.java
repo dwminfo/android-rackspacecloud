@@ -17,6 +17,7 @@ import org.xml.sax.XMLReader;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -56,9 +57,7 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 			new PasswordServerTask().execute((Void[]) null);	
 		}
 		else{
-			String mustMatch = "The password and confirmation do not match.";
-			Toast passwordError = Toast.makeText(getApplicationContext(), mustMatch, Toast.LENGTH_SHORT);
-			passwordError.show();
+			showToast("The password and confirmation do not match");
 		}
 	}
 	
@@ -72,6 +71,13 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 			} }); 
 		alert.show();
 	}
+	
+	private void showToast(String message) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, message, duration);
+		toast.show();
+    }
 
 	private CloudServersException parseCloudServersException(HttpResponse response) {
 		CloudServersException cse = new CloudServersException();
@@ -107,6 +113,10 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 
 		private CloudServersException exception;
 
+		protected void onPreExecute(){
+			showToast("Change root password process has begun");
+		}
+		
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;

@@ -119,10 +119,10 @@ public class ListAccountsActivity extends ListActivity{
 			out.flush();
 			out.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			showAlert("Error", "Could not save accounts.");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			showAlert("Error", "Could not save accounts.");
 			e.printStackTrace();
 		}
 	}
@@ -138,17 +138,17 @@ public class ListAccountsActivity extends ListActivity{
 			Log.d("captin", Boolean.toString(file == null));
 			return file;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			//showAlert("Error", "Could not load accounts.");
 			e.printStackTrace();
 			return null;
 		} catch (StreamCorruptedException e) {
-			// TODO Auto-generated catch block
+			showAlert("Error", "Could not load accounts.");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			showAlert("Error", "Could not load accounts.");
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			showAlert("Error", "Could not load accounts.");
 			e.printStackTrace();
 		}
 		return null;
@@ -233,7 +233,7 @@ public class ListAccountsActivity extends ListActivity{
 			sublabel.setText(getAccountServer(accounts.get(position)));
 			
 			ImageView icon = (ImageView) row.findViewById(R.id.account_type_icon);
-			icon.setImageResource(R.drawable.rackspace60);
+			icon.setImageResource(setAccountIcon(accounts.get(position)));
 			
 			return row;
 		}
@@ -241,14 +241,29 @@ public class ListAccountsActivity extends ListActivity{
 	
 	public String getAccountServer(Account account){
 		String authServer = account.getAuthServer();
-		String result = "Rackspace Cloud";
-		if(authServer.contains("lon")){
-			result += " (UK)";
+		String result;
+		if(authServer.equals(Preferences.COUNTRY_UK_AUTH_SERVER)){
+			result = "Rackspace Cloud (UK)";
+		}
+		else if(authServer.equals(Preferences.COUNTRY_US_AUTH_SERVER)){
+			result = "Rackspace Cloud (US)";
 		}
 		else{
-			result += " (US)";
+			result = "Custom";
+			//setCustomIcon();
 		}
 		return result;
+	}
+	
+	//display rackspace logo for cloud accounts and openstack logo for others
+	private int setAccountIcon(Account account){
+		if(account.getAuthServer().equals(Preferences.COUNTRY_UK_AUTH_SERVER) 
+				|| account.getAuthServer().equals(Preferences.COUNTRY_US_AUTH_SERVER)){
+			return R.drawable.rackspacecloud_icon;
+		}
+		else{
+			return R.drawable.openstack_icon;
+		}
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -260,6 +275,7 @@ public class ListAccountsActivity extends ListActivity{
 			acc.setApiKey(b.getString("apiKey"));
 			acc.setUsername(b.getString("username"));
 			acc.setAuthServer(b.getString("server"));
+			Log.d("captin captin!", acc.getAuthServer());
 			accounts.add(acc);
 			writeAccounts();
 			loadAccounts();

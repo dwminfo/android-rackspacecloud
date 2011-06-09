@@ -5,6 +5,7 @@ package com.rackspacecloud.android;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -36,6 +37,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Flavor;
@@ -152,12 +154,10 @@ public class ViewServerActivity extends Activity {
 	        	tv.setText(privateIps[i]);
 	        	layout.addView(tv, layoutIndex++);
 	    	}
-
-	    	loadImage();
 	    	ipAddressesLoaded = true;
     	}
     	
-    	Log.d("server refesh", "serer was refereshed");
+    	loadImage();
     }
     
     private void loadFlavors() {
@@ -187,6 +187,9 @@ public class ViewServerActivity extends Activity {
 			imageNames[i] = image.getName(); 
 			i++;
 		}
+		//sort arrays so they display nicely in the spinner
+		Arrays.sort(images);
+		Arrays.sort(imageNames);
 		selectedImageId = images[0].getId();
 		
     }
@@ -271,6 +274,13 @@ public class ViewServerActivity extends Activity {
 	        return;
 	    } }); 
 		alert.show();
+    }
+    
+    private void showToast(String message) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, message, duration);
+		toast.show();
     }
 	
     /**
@@ -467,6 +477,12 @@ public class ViewServerActivity extends Activity {
 		private CloudServersException exception;
 		
 		@Override
+		//let user know their process has started
+		protected void onPreExecute(){
+			showToast("Reboot process has begun");
+		}
+		
+		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
@@ -481,7 +497,8 @@ public class ViewServerActivity extends Activity {
 		protected void onPostExecute(HttpResponse response) {
 
 			if (response != null) {
-				int statusCode = response.getStatusLine().getStatusCode();				
+				int statusCode = response.getStatusLine().getStatusCode();	
+				if(statusCode == 202){ showToast("Reboot successful"); }
 				if (statusCode != 202) {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
@@ -500,6 +517,12 @@ public class ViewServerActivity extends Activity {
 	private class HardRebootServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
 		private CloudServersException exception;
+		
+		@Override
+		//let user know their process has started
+		protected void onPreExecute(){
+			showToast("Reboot process has begun");
+		}
 
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
@@ -515,7 +538,8 @@ public class ViewServerActivity extends Activity {
 		@Override
 		protected void onPostExecute(HttpResponse response) {
 			if (response != null) {
-				int statusCode = response.getStatusLine().getStatusCode();			
+				int statusCode = response.getStatusLine().getStatusCode();	
+				if(statusCode == 202){ showToast("Reboot successful"); }
 				if (statusCode != 202) {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
@@ -551,13 +575,14 @@ public class ViewServerActivity extends Activity {
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();			
 				if (statusCode == 202) {
+					showToast("Resize process has begun, please confirm your resize after process finishes.");
 					new PollServerTask().execute((Void[]) null);
 				} else {					
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem deleting your server.");
+						showAlert("Error", "There was a problem resizing your server.");
 					} else {
-						showAlert("Error", "There was a problem deleting your server: " + cse.getMessage());
+						showAlert("Error", "There was a problem resizing your server: " + cse.getMessage());
 					}					
 				}
 			} else if (exception != null) {
@@ -568,10 +593,16 @@ public class ViewServerActivity extends Activity {
 		}
     }
 	
+	
 	public class DeleteServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
 		private CloudServersException exception;
-
+		
+		@Override
+		//let user know their process has started
+		protected void onPreExecute(){
+			showToast("Delete process has begun");
+		}
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
@@ -588,6 +619,7 @@ public class ViewServerActivity extends Activity {
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 202) {
+					showToast("Delete successful");
 					setResult(Activity.RESULT_OK);
 					finish();
 				} else {
@@ -609,6 +641,12 @@ public class ViewServerActivity extends Activity {
 		private CloudServersException exception;
 		
 		@Override
+		//let user know their process has started
+		protected void onPreExecute(){
+			showToast("Rename process has begun");
+		}
+		
+		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
@@ -622,8 +660,9 @@ public class ViewServerActivity extends Activity {
 		@Override
 		protected void onPostExecute(HttpResponse response) {
 			if (response != null) {
-				int statusCode = response.getStatusLine().getStatusCode();			
+				int statusCode = response.getStatusLine().getStatusCode();	
 				if (statusCode == 204) {	
+					showToast("Rename successful");
 					new PollServerTask().execute((Void[]) null);
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
@@ -635,7 +674,7 @@ public class ViewServerActivity extends Activity {
 				}
 			}
 		    else if (exception != null) {
-		    	showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());	
+		    	showAlert("Error", "There was a problem renaming your server: " + exception.getMessage());	
 		    }
 		}
 		
@@ -644,7 +683,7 @@ public class ViewServerActivity extends Activity {
 	private class RebuildServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
 		private CloudServersException exception;
-
+		
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
@@ -661,17 +700,18 @@ public class ViewServerActivity extends Activity {
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();			
 				if (statusCode == 202) {
+					showToast("Rebuild process has begun");
 					new PollServerTask().execute((Void[]) null);
 				} else {					
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem deleting your server.");
+						showAlert("Error", "There was a problem rebuilding your server.");
 					} else {
-						showAlert("Error", "There was a problem deleting your server: " + cse.getMessage());
+						showAlert("Error", "There was a problem rebuilding your server: " + cse.getMessage());
 					}					
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem resizing your server: " + exception.getMessage());
+				showAlert("Error", "There was a problem rebuilding your server: " + exception.getMessage());
 				
 			}
 			

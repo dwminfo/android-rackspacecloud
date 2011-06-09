@@ -284,6 +284,42 @@ public class ServerManager extends EntityManager {
 		}	
 		return resp;
 	}
+	
+	public HttpResponse confirmResize(Server server, Context context) throws CloudServersException {
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");			
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<confirmResize xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\">");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		post.setEntity(tmp);
+
+		try {			
+			resp = httpclient.execute(post);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
 
 
 	public HttpResponse delete(Server server, Context context) throws CloudServersException {

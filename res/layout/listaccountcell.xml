@@ -3,7 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
   android:orientation="horizontal" android:layout_height="64dip">
-    <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/account_type_icon" android:src="@drawable/rackspace60"></ImageView>
+    <ImageView android:id="@+id/account_type_icon" android:layout_gravity="center" android:layout_height="fill_parent" android:layout_width="wrap_content" android:maxHeight="30dp" android:maxWidth="30dp" android:layout_marginLeft="10dip"></ImageView>
     <TableLayout android:orientation="vertical" android:layout_height="fill_parent" android:layout_marginLeft="10dip" android:id="@+id/tableLayout1" android:layout_width="190dip">
         <TableRow android:layout_height="wrap_content" android:id="@+id/tableRow1" android:layout_width="wrap_content">
             <TextView android:textSize="24sp" android:textColor="#FFFFFF" android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_marginTop="5px" android:id="@+id/label"></TextView>
@@ -12,5 +12,4 @@
             <TextView android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/sublabel"></TextView>
         </TableRow>
     </TableLayout>
-    <ProgressBar android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="center" android:visibility="invisible" android:id="@+id/logon_progress_bar"></ProgressBar>
 </LinearLayout>

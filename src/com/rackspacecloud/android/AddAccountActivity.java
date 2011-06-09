@@ -20,6 +20,7 @@ public class AddAccountActivity extends Activity implements OnClickListener{
 	
 	EditText usernameText;
 	EditText apiKeyText;
+	EditText customServer;
 	Spinner providerSpinner;
 	String authServer;
 	boolean isHidden;
@@ -29,8 +30,10 @@ public class AddAccountActivity extends Activity implements OnClickListener{
         setContentView(R.layout.createaccount);
         usernameText = (EditText) findViewById(R.id.username);
         apiKeyText = (EditText) findViewById(R.id.addaccount_apikey);
+        customServer = (EditText) findViewById(R.id.custom_auth_server_edit);
         ((Button) findViewById(R.id.submit_new_account)).setOnClickListener(this);
         isHidden = true;
+        customServer.setEnabled(false);
         if(savedInstanceState != null)
         	isHidden = savedInstanceState.containsKey("isHidden") && savedInstanceState.getBoolean("isHidden");
         setUpApiText(savedInstanceState);
@@ -78,17 +81,22 @@ public class AddAccountActivity extends Activity implements OnClickListener{
 		//set the auth server default to us
 		authServer = "https://auth.api.rackspacecloud.com/v1.0";
 		providerSpinner = (Spinner) findViewById(R.id.provider_spinner);
-		String[] providers = {"Rackspace Cloud (US)", "Rackspace Cloud (UK)"};
+		String[] providers = {"Rackspace Cloud (US)", "Rackspace Cloud (UK)", "Custom"};
 		ArrayAdapter<String> imageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, providers);
 		imageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		providerSpinner.setAdapter(imageAdapter);
 		providerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
 		    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 		    	if(pos == 0){
-					authServer = "https://auth.api.rackspacecloud.com/v1.0";
+					authServer = Preferences.COUNTRY_US_AUTH_SERVER;
+			        customServer.setEnabled(false);
 				}
 				else if(pos == 1){
-					authServer = "https://lon.auth.api.rackspacecloud.com/v1.0";
+					authServer = Preferences.COUNTRY_UK_AUTH_SERVER;
+			        customServer.setEnabled(false);
+				}
+				else{
+			        customServer.setEnabled(true);
 				}
 		    }
 		    public void onNothingSelected(AdapterView<?> parent) {
@@ -97,14 +105,14 @@ public class AddAccountActivity extends Activity implements OnClickListener{
 	}
 	
 	public void onClick(View arg0) {
-		
+
 		if (hasValidInput()) {
 			//showActivityIndicators();
 			Intent result = new Intent();
 			Bundle b = new Bundle();
 			b.putString("username", usernameText.getText().toString());
 			b.putString("apiKey", apiKeyText.getText().toString());
-			b.putString("server", authServer);
+			b.putString("server", getAuthServer());
 			result.putExtra("accountInfo", b);
 			setResult(RESULT_OK, result);
 			finish();
@@ -112,6 +120,13 @@ public class AddAccountActivity extends Activity implements OnClickListener{
 			showAlert("Required Fields Missing", "Username and API Key are required.");
 		}
 		
+	}
+	
+	private String getAuthServer(){
+		if(customServer.isEnabled()){
+			authServer = customServer.getText().toString();
+		}
+		return authServer;
 	}
 	
 	private void showAlert(String title, String message) {

@@ -23,6 +23,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 
 import android.os.AsyncTask;
@@ -112,6 +113,13 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 		alert.show();
 	}
 	
+    private void showToast(String message) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, message, duration);
+		toast.show();
+    }
+	
 	private CloudServersException parseCloudServersException(HttpResponse response) {
 		CloudServersException cse = new CloudServersException();
 		try {
@@ -147,6 +155,12 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 		private CloudServersException exception;
 		
 		@Override
+		//let user know their process has started
+		protected void onPreExecute(){
+			showToast("Changing backup schedule process has begun");
+		}
+		
+		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
 			HttpResponse resp = null;
 			try {
@@ -164,9 +178,7 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 				int statusCode = response.getStatusLine().getStatusCode();	
 				Log.d("statuscode", Integer.toString(statusCode));
 				if(statusCode == 204 || statusCode == 202){
-					String mustMatch = "The server's backup schedule has been changed.";
-					Toast passwordError = Toast.makeText(getApplicationContext(), mustMatch, Toast.LENGTH_SHORT);
-					passwordError.show();
+					showToast("The server's backup schedule has been change.");
 					finish();
 				}
 				else if (statusCode != 204 && statusCode != 202) {
