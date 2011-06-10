@@ -60,6 +60,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	public int bConver = 1048576;
 	public int kbConver = 1024;
 	private Context context;
+	private String currentPath;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -72,13 +73,15 @@ public class ContainerObjectsActivity extends ListActivity {
 		} else {
 			cdnEnabledIs = "false";
 		}
+		getPath();
 		restoreState(savedInstanceState);
 	}
-
+	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("container", files);
+		outState.putString("path", currentPath);
 	}
 
 	private void restoreState(Bundle state) {
@@ -89,29 +92,58 @@ public class ContainerObjectsActivity extends ListActivity {
 			} else {
 				getListView().setDividerHeight(1); // restore divider lines
 				setListAdapter(new FileAdapter());
-
 			}
-		} else {
+		} 
+		else {
 			loadFiles();
-
 		}
 	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		if (files != null && files.length > 0) {
-			Intent viewIntent = new Intent(this, ContainerObjectDetails.class);
-			viewIntent.putExtra("container", files[position]);
-			viewIntent.putExtra("cdnUrl", container.getCdnUrl());
-			viewIntent.putExtra("containerNames", container.getName());
-			viewIntent.putExtra("isCdnEnabled", cdnEnabledIs);
-			startActivityForResult(viewIntent, 55); // arbitrary number; never
-													// used again
+
+			Intent viewIntent;
+
+			if(files[position].getContentType().equals("application/directory")){
+				viewIntent = new Intent(this, ContainerObjectsActivity.class);
+				viewIntent.putExtra("container", container);
+				viewIntent.putExtra("cdnUrl", container.getCdnUrl());
+				viewIntent.putExtra("containerNames", container.getName());
+				viewIntent.putExtra("isCdnEnabled", cdnEnabledIs);
+				viewIntent.putExtra("path", files[position].getCName());
+				Log.d("the path name is: ","captin " + files[position].getCName());
+				startActivity(viewIntent);
+			}
+
+
+			else{
+				viewIntent = new Intent(this, ContainerObjectDetails.class);
+				viewIntent.putExtra("container", files[position]);
+				viewIntent.putExtra("cdnUrl", container.getCdnUrl());
+				viewIntent.putExtra("containerNames", container.getName());
+				viewIntent.putExtra("isCdnEnabled", cdnEnabledIs);
+				startActivityForResult(viewIntent, 55); // arbitrary number; never
+				// used again
+			}
 		}
+	}
+
+
+	private void getPath(){
+		if(this.getIntent().getExtras().containsKey("path")){
+			Log.d("contained path", "captin: " +  (String)this.getIntent().getExtras().get("path"));
+			currentPath = (String)this.getIntent().getExtras().get("path");
+		}
+		else{
+			Log.d("contained path", "captin no path");
+			currentPath = "";
+		}
+		
 	}
 
 	private void loadFiles() {
 		displayLoadingCell();
-		new LoadFilesTask().execute((Void[]) null);
+		new LoadFilesTask().execute(currentPath);
 
 	}
 
@@ -180,16 +212,16 @@ public class ContainerObjectsActivity extends ListActivity {
 	}
 
 	private class LoadFilesTask extends
-			AsyncTask<Void, Void, ArrayList<ContainerObjects>> {
+			AsyncTask<String, Void, ArrayList<ContainerObjects>> {
 
 		private CloudServersException exception;
 
 		@Override
-		protected ArrayList<ContainerObjects> doInBackground(Void... arg0) {
+		protected ArrayList<ContainerObjects> doInBackground(String... path) {
 			ArrayList<ContainerObjects> files = null;
 			try {
 				files = (new ContainerObjectManager(context)).createList(true,
-						container.getName());
+						container.getName(), path[0]);
 			} catch (CloudServersException e) {
 				exception = e;
 				e.printStackTrace();
@@ -220,7 +252,8 @@ public class ContainerObjectsActivity extends ListActivity {
 					parent, false);
 
 			TextView label = (TextView) row.findViewById(R.id.label);
-			label.setText(file.getCName());
+			//label.setText(file.getCName());
+			label.setText(getShortName(file.getCName()));
 
 			if (file.getBytes() >= bConver) {
 				megaBytes = Math.abs(file.getBytes() / bConver + 0.2);
@@ -236,6 +269,19 @@ public class ContainerObjectsActivity extends ListActivity {
 			}
 
 			return (row);
+		}
+	}
+	
+	/* just get the last part of the filename
+	 * so the entire file path does not show
+	*/
+	private String getShortName(String longName){
+		String s = longName;
+		if(!s.contains("/")){
+			return s;
+		}
+		else {
+			return s.substring(s.lastIndexOf('/')+1);
 		}
 	}
 

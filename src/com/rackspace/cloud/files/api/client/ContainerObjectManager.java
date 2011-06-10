@@ -43,10 +43,11 @@ public class ContainerObjectManager extends EntityManager {
 		this.context = context;
 	}
 
-	public ArrayList<ContainerObjects> createList(boolean detail, String passName) throws CloudServersException {
+	public ArrayList<ContainerObjects> createList(boolean detail, String passName, String path) throws CloudServersException {
 		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet get = new HttpGet(Account.getAccount().getStorageUrl()+"/"+passName+"?format=xml");
+		Log.d("Request", "captin the request is : " + Account.getAccount().getStorageUrl()+"/"+passName+"?path=" + path + "&format=xml");
+		HttpGet get = new HttpGet(Account.getAccount().getStorageUrl()+"/"+passName+"?path=" + path + "&format=xml");
 		ArrayList<ContainerObjects> files = new ArrayList<ContainerObjects>();
 		
 		
