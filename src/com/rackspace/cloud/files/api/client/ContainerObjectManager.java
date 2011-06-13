@@ -20,7 +20,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.rackspace.cloud.files.api.client.parsers.ContainerObjectXMLparser;
 import com.rackspace.cloud.servers.api.client.Account;
@@ -43,11 +42,10 @@ public class ContainerObjectManager extends EntityManager {
 		this.context = context;
 	}
 
-	public ArrayList<ContainerObjects> createList(boolean detail, String passName, String path) throws CloudServersException {
+	public ArrayList<ContainerObjects> createList(boolean detail, String passName) throws CloudServersException {
 		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		Log.d("Request", "captin the request is : " + Account.getAccount().getStorageUrl()+"/"+passName+"?path=" + path + "&format=xml");
-		HttpGet get = new HttpGet(Account.getAccount().getStorageUrl()+"/"+passName+"?path=" + path + "&format=xml");
+		HttpGet get = new HttpGet(Account.getAccount().getStorageUrl()+"/"+passName + "?format=xml");
 		ArrayList<ContainerObjects> files = new ArrayList<ContainerObjects>();
 		
 		
@@ -108,7 +106,6 @@ public class ContainerObjectManager extends EntityManager {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpDelete deleteObject = new HttpDelete(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Object);
-		Log.v(LOG, "the container (deleteObject) vairble "+Container+" "+Object);
 				
 		deleteObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);

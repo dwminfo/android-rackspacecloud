@@ -51,6 +51,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
 public class ContainerObjectsActivity extends ListActivity {
 
 	private static final int deleteContainer = 0;
+	private static final int deleteFolder = 1;
 	private ContainerObjects[] files;
 	private static Container container;
 	public String LOG = "viewFilesActivity";
@@ -61,6 +62,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	public int kbConver = 1024;
 	private Context context;
 	private String currentPath;
+	private ContainerObjects[] curDirFiles;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,7 +75,6 @@ public class ContainerObjectsActivity extends ListActivity {
 		} else {
 			cdnEnabledIs = "false";
 		}
-		getPath();
 		restoreState(savedInstanceState);
 	}
 	
@@ -85,6 +86,8 @@ public class ContainerObjectsActivity extends ListActivity {
 	}
 
 	private void restoreState(Bundle state) {
+		getPath();
+		
 		if (state != null && state.containsKey("container")) {
 			files = (ContainerObjects[]) state.getSerializable("container");
 			if (files.length == 0) {
@@ -100,11 +103,10 @@ public class ContainerObjectsActivity extends ListActivity {
 	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (files != null && files.length > 0) {
-
+		if (curDirFiles != null && curDirFiles.length > 0) {
 			Intent viewIntent;
-
-			if(files[position].getContentType().equals("application/directory")){
+			if(curDirFiles[position].getContentType().equals("application/directory")){
+				/*
 				viewIntent = new Intent(this, ContainerObjectsActivity.class);
 				viewIntent.putExtra("container", container);
 				viewIntent.putExtra("cdnUrl", container.getCdnUrl());
@@ -112,9 +114,13 @@ public class ContainerObjectsActivity extends ListActivity {
 				viewIntent.putExtra("isCdnEnabled", cdnEnabledIs);
 				viewIntent.putExtra("path", files[position].getCName());
 				Log.d("the path name is: ","captin " + files[position].getCName());
-				startActivity(viewIntent);
+				startActivityForResult(viewIntent, 56);
+				*/
+				
+				currentPath = curDirFiles[position].getCName() + "/";
+				loadCurrentDirectoryFiles();
+				displayCurrentFiles();
 			}
-
 
 			else{
 				viewIntent = new Intent(this, ContainerObjectDetails.class);
@@ -127,15 +133,37 @@ public class ContainerObjectsActivity extends ListActivity {
 			}
 		}
 	}
+	
+	/*
+	 * overriding back button press, because we are not actually changing
+	 * activites when we navigate the file structure
+	 */
+	public void onBackPressed() {
+		if(currentPath.equals("")){
+			finish();
+		}
+		else{
+			goUpDirectory();
+		}
+	}
+	
+	/*
+	 * go to the current directory's parent and display that data
+	 */
+	private void goUpDirectory(){
+		currentPath = currentPath.substring(0, currentPath.substring(0, currentPath.length()-2).lastIndexOf("/")+1);
+		loadCurrentDirectoryFiles();
+		displayCurrentFiles();
+	}
 
-
+	/*
+	 * get the path that was stored in the intent
+	 */
 	private void getPath(){
 		if(this.getIntent().getExtras().containsKey("path")){
-			Log.d("contained path", "captin: " +  (String)this.getIntent().getExtras().get("path"));
 			currentPath = (String)this.getIntent().getExtras().get("path");
 		}
 		else{
-			Log.d("contained path", "captin no path");
 			currentPath = "";
 		}
 		
@@ -143,10 +171,49 @@ public class ContainerObjectsActivity extends ListActivity {
 
 	private void loadFiles() {
 		displayLoadingCell();
-		new LoadFilesTask().execute(currentPath);
+		new LoadFilesTask().execute();
+	}
+	
+	/* load only the files that should display for the 
+	 * current directory in the curDirFiles[]
+	 */
+	private void loadCurrentDirectoryFiles(){
+		ArrayList<ContainerObjects> curFiles = new ArrayList<ContainerObjects>();
 
+		if(files != null){
+			for(int i = 0 ; i < files.length; i ++){
+				if(fileBelongsInDir(files[i])){
+					curFiles.add(files[i]);
+				}
+			}
+
+			curDirFiles = new ContainerObjects[curFiles.size()];
+			for(int i = 0; i < curFiles.size(); i++){
+				curDirFiles[i] = curFiles.get(i);
+			}
+		}
+	}
+	
+	/*
+	 * determines if a file should be displayed in current 
+	 * directory
+	 */
+	private Boolean fileBelongsInDir(ContainerObjects obj){
+		String objPath = obj.getCName();
+		if(!objPath.startsWith(currentPath)){
+			return false;
+		}
+		else{
+			objPath = objPath.substring(currentPath.length());
+			return !objPath.contains("/");
+		}
 	}
 
+	
+	/*
+	 * loads all the files that are in the container
+	 * into one array
+	 */
 	private void setFileList(ArrayList<ContainerObjects> files) {
 		if (files == null) {
 			files = new ArrayList<ContainerObjects>();
@@ -162,7 +229,12 @@ public class ContainerObjectsActivity extends ListActivity {
 			}
 		}
 
-		if (fileNames.length == 0) {
+		displayCurrentFiles();
+	}
+	
+	private void displayCurrentFiles(){
+		loadCurrentDirectoryFiles();
+		if (curDirFiles.length == 0) {
 			displayNoServersCell();
 		} else {
 			getListView().setDividerHeight(1); // restore divider lines
@@ -181,11 +253,23 @@ public class ContainerObjectsActivity extends ListActivity {
 		getListView().setItemsCanFocus(false);
 	}
 
+	/*
+	 * display a different empty page depending
+	 * of if you are at top of container or
+	 * in a folder
+	 */
 	private void displayNoServersCell() {
 		String a[] = new String[1];
-		a[0] = "No Files";
-		setListAdapter(new ArrayAdapter<String>(this, R.layout.noobjectscell,
+		if(currentPath.equals("")){
+			a[0] = "Empty Container";
+			setListAdapter(new ArrayAdapter<String>(this, R.layout.noobjectscell,
 				R.id.no_files_label, a));
+		}
+		else{
+			a[0] = "No Files";
+			setListAdapter(new ArrayAdapter<String>(this, R.layout.nofilescell,
+						R.id.no_files_label, a));
+		}
 		getListView().setTextFilterEnabled(true);
 		getListView().setDividerHeight(0); // hide the dividers so it won't look
 											// like a list row
@@ -221,7 +305,7 @@ public class ContainerObjectsActivity extends ListActivity {
 			ArrayList<ContainerObjects> files = null;
 			try {
 				files = (new ContainerObjectManager(context)).createList(true,
-						container.getName(), path[0]);
+						container.getName());
 			} catch (CloudServersException e) {
 				exception = e;
 				e.printStackTrace();
@@ -241,19 +325,19 @@ public class ContainerObjectsActivity extends ListActivity {
 	class FileAdapter extends ArrayAdapter<ContainerObjects> {
 		FileAdapter() {
 			super(ContainerObjectsActivity.this,
-					R.layout.listcontainerobjectcell, files);
+					R.layout.listcontainerobjectcell, curDirFiles);
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 
-			ContainerObjects file = files[position];
+			ContainerObjects file = curDirFiles[position];
 			LayoutInflater inflater = getLayoutInflater();
 			View row = inflater.inflate(R.layout.listcontainerobjectcell,
 					parent, false);
 
 			TextView label = (TextView) row.findViewById(R.id.label);
 			//label.setText(file.getCName());
-			label.setText(getShortName(file.getCName()));
+			label.setText(file.getCName());
 
 			if (file.getBytes() >= bConver) {
 				megaBytes = Math.abs(file.getBytes() / bConver + 0.2);
@@ -281,11 +365,13 @@ public class ContainerObjectsActivity extends ListActivity {
 			return s;
 		}
 		else {
-			return s.substring(s.lastIndexOf('/')+1);
+			return s.substring(s.lastIndexOf('/'));
 		}
 	}
 
-	// Create the Menu options
+	/* 
+	 * Create the Menu options
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -295,10 +381,21 @@ public class ContainerObjectsActivity extends ListActivity {
 	}
 
 	@Override
+	/*
+	 * option performed for delete depends on if you
+	 * are at the top of a container or in a folder
+	 */
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.delete_container:
-			showDialog(deleteContainer);
+			if(currentPath.equals("")){
+				Log.d("deleting", "captin deleting a container");
+				showDialog(deleteContainer);
+			}
+			else{
+				Log.d("deleting", "captin deleting a folder");
+				showDialog(deleteFolder);
+			}
 			return true;
 		case R.id.enable_cdn:
 			Intent viewIntent1 = new Intent(this, EnableCDNActivity.class);
@@ -316,27 +413,80 @@ public class ContainerObjectsActivity extends ListActivity {
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case deleteContainer:
-			return new AlertDialog.Builder(ContainerObjectsActivity.this)
-					.setIcon(R.drawable.alert_dialog_icon)
-					.setTitle("Delete Container")
-					.setMessage(
-							"Are you sure you want to delete this Container?")
-					.setPositiveButton("Delete Container",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int whichButton) {
-									// User clicked OK so do some stuff
-									new DeleteContainerTask()
-											.execute((Void[]) null);
-								}
-							})
-					.setNegativeButton("Cancel",
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int whichButton) {
-									// User clicked Cancel so do some stuff
-								}
-							}).create();
+			if(curDirFiles.length == 0){
+				return new AlertDialog.Builder(ContainerObjectsActivity.this)
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Delete Container")
+				.setMessage(
+				"Are you sure you want to delete this Container?")
+				.setPositiveButton("Delete Container",
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+							int whichButton) {
+						// User clicked OK so do some stuff
+						new DeleteContainerTask()
+						.execute(currentPath);
+					}
+				})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+							int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				}).create();
+			}
+			else{
+				return new AlertDialog.Builder(ContainerObjectsActivity.this)
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Delete Container")
+				.setMessage("Container must be empty to delete")
+				.setNegativeButton("OK",
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+							int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				}).create();
+			}
+		case deleteFolder:
+			if(curDirFiles.length == 0){
+				return new AlertDialog.Builder(ContainerObjectsActivity.this)
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Delete Folder")
+				.setMessage(
+				"Are you sure you want to delete this Folder?")
+				.setPositiveButton("Delete Folder",
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+							int whichButton) {
+						// User clicked OK so do some stuff
+						new DeleteObjectTask()
+						.execute();
+					}
+				})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+							int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				}).create();
+			}
+			else{
+				return new AlertDialog.Builder(ContainerObjectsActivity.this)
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Delete Folder")
+				.setMessage(
+				"Folder must be empty to delete")
+				.setNegativeButton("OK",
+						new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+							int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				}).create();
+			}
 
 		}
 		return null;
@@ -390,13 +540,62 @@ public class ContainerObjectsActivity extends ListActivity {
 		return cse;
 	}
 
-	private class DeleteContainerTask extends
-			AsyncTask<Void, Void, HttpResponse> {
+	
+	private class DeleteObjectTask extends
+	AsyncTask<Void, Void, HttpResponse> {
 
 		private CloudServersException exception;
 
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
+			HttpResponse resp = null;
+			try {
+				//subtring because the current directory contains a "/" at the end of the string
+				resp = (new ContainerObjectManager(context)).deleteObject(container.getName(), currentPath.substring(0, currentPath.length()-1));
+			} catch (CloudServersException e) {
+				exception = e;
+			}
+			return resp;
+		}
+
+		@Override
+		protected void onPostExecute(HttpResponse response) {
+			if (response != null) {
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == 409) {
+					showAlert("Error",
+					"Folder must be empty in order to delete");
+				}
+				if (statusCode == 204) {
+					setResult(Activity.RESULT_OK);
+					goUpDirectory();
+					loadFiles();
+
+				} else {
+					CloudServersException cse = parseCloudServersException(response);
+					if ("".equals(cse.getMessage())) {
+						showAlert("Error",
+							"There was a problem deleting your folder.");
+					} else {
+						showAlert("Error",
+								"There was a problem deleting your folder: "
+									+ cse.getMessage());
+					}
+				}
+			} else if (exception != null) {
+				showAlert("Error", "There was a problem deleting your folder: "
+						+ exception.getMessage());
+			}
+		}
+	}
+	
+	private class DeleteContainerTask extends
+	AsyncTask<String, Void, HttpResponse> {
+
+		private CloudServersException exception;
+
+		@Override
+		protected HttpResponse doInBackground(String... object) {
 			HttpResponse resp = null;
 			try {
 				resp = (new ContainerManager(context)).delete(container.getName());
@@ -413,21 +612,22 @@ public class ContainerObjectsActivity extends ListActivity {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 409) {
 					showAlert("Error",
-							"Container must be empty in order to delete");
+					"Container must be empty in order to delete");
 				}
 				if (statusCode == 204) {
 					setResult(Activity.RESULT_OK);
+					loadFiles();
 					finish();
 
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
 						showAlert("Error",
-								"There was a problem deleting your container.");
+							"There was a problem deleting your container.");
 					} else {
 						showAlert("Error",
 								"There was a problem deleting your container: "
-										+ cse.getMessage());
+									+ cse.getMessage());
 					}
 				}
 			} else if (exception != null) {
