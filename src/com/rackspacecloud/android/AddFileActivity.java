@@ -48,7 +48,7 @@ public class AddFileActivity extends Activity implements OnClickListener{
     }
     
     private void setUpInputs(){
-    	((Button) findViewById(R.id.save_button)).setOnClickListener(this);
+    	((Button) findViewById(R.id.new_file_button)).setOnClickListener(this);
     	fileName = ((EditText)findViewById(R.id.file_name_text));
     	contents = ((EditText)findViewById(R.id.new_file_text));
     }

@@ -138,10 +138,32 @@ public class ContainerObjectsActivity extends ListActivity {
 		displayCurrentFiles();
 	}
 
+	
+	/*
 	private void loadFiles() {
 		//displayLoadingCell();
 		new LoadFilesTask().execute();
 	}
+	*/
+	
+	private void loadFiles(){
+		CloudServersException exception = null;
+
+		ArrayList<ContainerObjects> result = null;
+		try {
+			result = (new ContainerObjectManager(context)).createList(true,
+					container.getName());
+		} catch (CloudServersException e) {
+			exception = e;
+			e.printStackTrace();
+		}
+		if (exception != null) {
+			showAlert("Error", exception.getMessage());
+		}
+		setFileList(result);
+	}
+
+
 
 	
 	/* load only the files that should display for the 
@@ -191,6 +213,8 @@ public class ContainerObjectsActivity extends ListActivity {
 		String[] fileNames = new String[files.size()];
 		this.files = new ContainerObjects[files.size()];
 
+		
+		
 		if (files != null) {
 			for (int i = 0; i < files.size(); i++) {
 				ContainerObjects file = files.get(i);
@@ -198,11 +222,12 @@ public class ContainerObjectsActivity extends ListActivity {
 				fileNames[i] = file.getName();
 			}
 		}
-
+		
 		displayCurrentFiles();
 	}
 	
 	private void displayCurrentFiles(){
+		if(curDirFiles!=null)
 		loadCurrentDirectoryFiles();
 		if (curDirFiles.length == 0) {
 			displayNoServersCell();
@@ -341,6 +366,7 @@ public class ContainerObjectsActivity extends ListActivity {
 			return true;
 		case R.id.add_folder:
 			showDialog(R.id.add_folder);
+			return true;
 		case R.id.add_file:
 			Intent viewIntent2 = new Intent(this, AddFileActivity.class);
 			viewIntent2.putExtra("Cname", container.getName());
@@ -438,7 +464,7 @@ public class ContainerObjectsActivity extends ListActivity {
         	.setMessage("Enter new name for folder: ")        	         
         	.setPositiveButton("Add", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked OK so do some stuff
+        			//User clicked OK so do some stuff
         			String[] info = {input.getText().toString(), "application/directory"};
         			new AddFolderTask().execute(info);
         		}
@@ -504,7 +530,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	class FileAdapter extends ArrayAdapter<ContainerObjects> {
 		FileAdapter() {
 			super(ContainerObjectsActivity.this,
-					R.layout.listcontainerobjectcell, curDirFiles);
+					R.layout.listcontainerobjectcell, curDirFiles);		
 		}
 	
 		public View getView(int position, View convertView, ViewGroup parent) {
@@ -539,11 +565,11 @@ public class ContainerObjectsActivity extends ListActivity {
 			AsyncTask<String, Void, ArrayList<ContainerObjects>> {
 	
 		private CloudServersException exception;
-		
+		/*
 		protected void onPreExecute(){
 			dialog = ProgressDialog.show(ContainerObjectsActivity.this, "", "Loading Files...", true);
 		}
-	
+		*/
 		@Override
 		protected ArrayList<ContainerObjects> doInBackground(String... path) {
 			ArrayList<ContainerObjects> files = null;
@@ -559,7 +585,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	
 		@Override
 		protected void onPostExecute(ArrayList<ContainerObjects> result) {
-			dialog.dismiss();
+			//dialog.dismiss();
 			if (exception != null) {
 				showAlert("Error", exception.getMessage());
 			}
@@ -590,6 +616,7 @@ public class ContainerObjectsActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(HttpResponse response) {
+			dialog.dismiss();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 409) {
@@ -600,7 +627,7 @@ public class ContainerObjectsActivity extends ListActivity {
 					setResult(Activity.RESULT_OK);
 					removeFromList(currentPath);
 					goUpDirectory();
-					dialog.dismiss();
+					
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
@@ -624,10 +651,6 @@ public class ContainerObjectsActivity extends ListActivity {
 	
 		private CloudServersException exception;
 		
-		protected void onPreExecute(){
-			dialog = ProgressDialog.show(ContainerObjectsActivity.this, "", "Adding Folder...", true);
-		}
-	
 		@Override
 		protected HttpResponse doInBackground(String... data) {
 			HttpResponse resp = null;
@@ -641,7 +664,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	
 		@Override
 		protected void onPostExecute(HttpResponse response) {
-			dialog.dismiss();
+			//dialog.dismiss();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 201) {
