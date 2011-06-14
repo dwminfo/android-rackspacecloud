@@ -13,6 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.xml.sax.InputSource;
@@ -128,5 +129,62 @@ public class ContainerObjectManager extends EntityManager {
 		return resp;
 	}
 	
+	public HttpResponse addObject(String Container, String Path, String Object, String type) throws CloudServersException {
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPut addObject = new HttpPut(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Path + Object);
+				
+		addObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		addObject.addHeader("Content-Type", type);
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
+		try {			
+			resp = httpclient.execute(addObject);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+	
+	/*
+	 * used for adding text files, requires an extra parameter to 
+	 * store the data for the file
+	 */
+	public HttpResponse addObject(String Container, String Path, String Object, String type, String data) throws CloudServersException {
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPut addObject = new HttpPut(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Path + Object);
+				
+		addObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		addObject.addHeader("Content-Type", type);
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
+		try {			
+			resp = httpclient.execute(addObject);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
 
 }

@@ -21,6 +21,7 @@ import org.xml.sax.XMLReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -61,6 +62,7 @@ public class ContainerObjectDetails extends Activity {
 	private double kiloBytes;
 	public Button previewButton;
 	public Context context;
+	ProgressDialog dialog;
 	
     /** Called when the activity is first created. */
     @Override
@@ -263,6 +265,10 @@ public class ContainerObjectDetails extends Activity {
 	    	 private class ContainerObjectDeleteTask extends AsyncTask<Void, Void, HttpResponse> {
 	    	    	
 	    			private CloudServersException exception;
+	    			
+	    			protected void onPreExecute(){
+	    				dialog = ProgressDialog.show(ContainerObjectDetails.this, "", "Deleting...", true);
+	    			}
 
 	    			@Override
 	    			protected HttpResponse doInBackground(Void... arg0) {
@@ -278,6 +284,7 @@ public class ContainerObjectDetails extends Activity {
 	    	    	
 	    			@Override
 	    			protected void onPostExecute(HttpResponse response) {
+	    				dialog.dismiss();
 	    				if (response != null) {
 	    					int statusCode = response.getStatusLine().getStatusCode();
 	    					if (statusCode == 204) {
