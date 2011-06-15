@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
    <item android:id="@+id/add_account" android:title="New Account" android:icon="@drawable/add_button" />
+   <item android:title="Fanitical Support" android:id="@+id/contact_rackspace" android:icon="@drawable/rackspacecloud_icon"></item>
 </menu>

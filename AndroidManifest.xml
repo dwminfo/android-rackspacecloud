@@ -92,6 +92,7 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".AddAccountActivity"></activity>
+		<activity android:name=".ContactActivity"></activity>
 
 	</application>
 	<uses-sdk android:minSdkVersion="4" />

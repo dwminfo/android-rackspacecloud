@@ -190,13 +190,17 @@ public class ListAccountsActivity extends ListActivity{
     @Override 
     //in options menu, when add account is selected go to add account activity
     public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.add_account:
-			startActivityForResult(new Intent(this, AddAccountActivity.class), 78); // arbitrary number; never used again
-			return true;
-		}
-		return false;
-	} 
+    	switch (item.getItemId()) {
+    	case R.id.add_account:
+    		startActivityForResult(new Intent(this, AddAccountActivity.class), 78); // arbitrary number; never used again
+    		return true;
+
+    	case R.id.contact_rackspace:
+    		startActivity(new Intent(this, ContactActivity.class));
+    		return true;
+    	}	
+    	return false;
+    } 
 
     //the context menu for a long press on an account
 	public void onCreateContextMenu(ContextMenu menu, View v,
