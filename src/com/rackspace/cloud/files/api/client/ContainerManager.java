@@ -157,7 +157,7 @@ public class ContainerManager extends EntityManager {
 	}
 	public HttpResponse disable(String container, String cdn, String ttl, String logRet)
 	throws CloudServersException {
-       HttpResponse resp = null;
+        HttpResponse resp = null;
  	    CustomHttpClient httpclient = new CustomHttpClient(context);
        	HttpPost post = new HttpPost(Account.getAccount().getCdnManagementUrl() + "/"
 		+ container);
