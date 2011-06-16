@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:id="@+id/linearLayout1"
+	android:layout_width="fill_parent" 
+	android:orientation="vertical"
+	android:layout_height="264dip">
+	<TextView android:text="No Accounts" 
+		android:layout_width="fill_parent"
+		android:layout_marginTop="125px" 
+		android:gravity="center" 
+		android:textColor="#FFFFFF" 
+		android:textSize="24sp"
+		android:layout_height="wrap_content" android:id="@+id/no_accounts_label">
+	</TextView>
+	<TextView android:text="Press the Menu button to create an account"
+		android:layout_width="fill_parent" 
+		android:layout_marginTop="10px"
+		android:gravity="center"
+		android:textColor="#FFFFFF"
+		android:textSize="12sp"
+		android:layout_height="wrap_content" android:id="@+id/no_accounts_sublabel">
+	</TextView>
+</LinearLayout>

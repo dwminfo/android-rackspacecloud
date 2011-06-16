@@ -11,7 +11,7 @@ import com.rackspacecloud.android.R;
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
-public class Image extends Entity {
+public class Image extends Entity implements Comparable<Image>{
 
 	private static final long serialVersionUID = -9020224299062520935L;
 	private static TreeMap<String, Image> images;
@@ -67,8 +67,25 @@ public class Image extends Entity {
 			iconResourceId = R.drawable.centos_icon;
 		} else if ("49".equals(getId())) {
 			iconResourceId = R.drawable.ubuntu_icon;
+		} else if ("51".equals(getId())) {
+			iconResourceId = R.drawable.centos_icon;
+		} else if ("53".equals(getId())) {
+			iconResourceId = R.drawable.fedora_icon;
+		} else if ("55".equals(getId())) {
+			iconResourceId = R.drawable.arch_icon;
+		} else if ("56".equals(getId())) {
+			iconResourceId = R.drawable.windows_icon;
+		} else if ("57".equals(getId())) {
+			iconResourceId = R.drawable.windows_icon;
+		} else if ("58".equals(getId())) {
+			iconResourceId = R.drawable.windows_icon;
+		} else if ("62".equals(getId())) {
+			iconResourceId = R.drawable.redhat_icon;
+		} else if ("69".equals(getId())) {
+			iconResourceId = R.drawable.ubuntu_icon;
+		} else if ("71".equals(getId())) {
+			iconResourceId = R.drawable.fedora_icon;
 		}
-		
 		return iconResourceId;
 	}
 	
@@ -121,6 +138,24 @@ public class Image extends Entity {
 			logoResourceId = R.drawable.centos_large;
 		} else if ("49".equals(getId())) {
 			logoResourceId = R.drawable.ubuntu_large;
+		} else if ("51".equals(getId())) {
+			logoResourceId = R.drawable.centos_large;
+		} else if ("53".equals(getId())) {
+			logoResourceId = R.drawable.fedora_large;
+		} else if ("55".equals(getId())) {
+			logoResourceId = R.drawable.arch_large;
+		} else if ("56".equals(getId())) {
+			logoResourceId = R.drawable.windows_large;
+		} else if ("57".equals(getId())) {
+			logoResourceId = R.drawable.windows_large;
+		} else if ("58".equals(getId())) {
+			logoResourceId = R.drawable.windows_large;
+		} else if ("62".equals(getId())) {
+			logoResourceId = R.drawable.redhat_large;
+		} else if ("69".equals(getId())) {
+			logoResourceId = R.drawable.ubuntu_large;
+		} else if ("71".equals(getId())) {
+			logoResourceId = R.drawable.fedora_large;
 		}
 		
 		return logoResourceId;
@@ -163,6 +198,11 @@ public class Image extends Entity {
 	 */
 	public static void setImages(TreeMap<String, Image> images) {
 		Image.images = images;
+	}
+
+	@Override
+	public int compareTo(Image b) {
+		return this.getName().compareTo(b.getName());
 	}
 	
 	

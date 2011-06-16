@@ -3,6 +3,7 @@
  */
 package com.rackspacecloud.android;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import android.app.Activity;
@@ -67,6 +68,11 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 			imageNames[i] = image.getName();
 			i++;
 		}
+		
+		//Sort so they display better in the spinner
+		Arrays.sort(images);
+		Arrays.sort(imageNames);
+		
 		selectedImageId = images[0].getId();
 		ArrayAdapter<String> imageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, imageNames);
 		imageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -151,7 +157,7 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		@Override
 		protected Server doInBackground(Void... arg0) {
 			try {
-				(new ServerManager()).create(server);
+				(new ServerManager()).create(server, getApplicationContext());
 			} catch (CloudServersException e) {
 				exception = e;
 			}

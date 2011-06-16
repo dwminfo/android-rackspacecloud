@@ -18,14 +18,17 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import android.content.Context;
+
+import com.rackspace.cloud.files.api.client.CustomHttpClient;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 import com.rackspace.cloud.servers.api.client.parsers.ServersXMLParser;
 
@@ -38,12 +41,12 @@ public class ServerManager extends EntityManager {
 	public static final String SOFT_REBOOT = "SOFT";
 	public static final String HARD_REBOOT = "HARD";
 	
-	public void create(Server entity) throws CloudServersException {
+	public void create(Server entity, Context context) throws CloudServersException {
+
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers.xml");
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers.xml");
-		
-		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 
 		StringEntity tmp = null;
@@ -102,13 +105,12 @@ public class ServerManager extends EntityManager {
 		}	
 	}
 
-	public ArrayList<Server> createList(boolean detail) throws CloudServersException {
+	public ArrayList<Server> createList(boolean detail, Context context) throws CloudServersException {
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/detail.xml" + cacheBuster());
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/servers/detail.xml" + cacheBuster());
 		ArrayList<Server> servers = new ArrayList<Server>();
-		
-		get.addHeader("X-Auth-Token", Account.getAuthToken());
+		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);		    
@@ -157,12 +159,12 @@ public class ServerManager extends EntityManager {
 		return servers;
 	}
 
-	public Server find(long id) throws CloudServersException {
-		Server server = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpGet get = new HttpGet(Account.getServerUrl() + "/servers/" + id + ".xml" + cacheBuster());
+	public Server find(long id, Context context) throws CloudServersException {
 		
-		get.addHeader("X-Auth-Token", Account.getAuthToken());
+		Server server = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/servers/" + id + ".xml" + cacheBuster());
+		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);		    
@@ -210,12 +212,11 @@ public class ServerManager extends EntityManager {
 		return server;
 	}
 
-	public HttpResponse reboot(Server server, String rebootType) throws CloudServersException {
+	public HttpResponse reboot(Server server, String rebootType, Context context) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
-				
-		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");		
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 
 		StringEntity tmp = null;
@@ -248,12 +249,11 @@ public class ServerManager extends EntityManager {
 		return resp;
 	}
 
-	public HttpResponse resize(Server server, int flavorId) throws CloudServersException {
+	public HttpResponse resize(Server server, int flavorId, Context context) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpPost post = new HttpPost(Account.getServerUrl() + "/servers/" + server.getId() + "/action.xml");
-				
-		post.addHeader("X-Auth-Token", Account.getAuthToken());
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");			
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		post.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -284,14 +284,49 @@ public class ServerManager extends EntityManager {
 		}	
 		return resp;
 	}
-
-
-	public HttpResponse delete(Server server) throws CloudServersException {
+	
+	public HttpResponse confirmResize(Server server, Context context) throws CloudServersException {
 		HttpResponse resp = null;
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpDelete delete = new HttpDelete(Account.getServerUrl() + "/servers/" + server.getId() + ".xml");
-				
-		delete.addHeader("X-Auth-Token", Account.getAuthToken());
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");			
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<confirmResize xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\">");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		post.setEntity(tmp);
+
+		try {			
+			resp = httpclient.execute(post);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+
+
+	public HttpResponse delete(Server server, Context context) throws CloudServersException {
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpDelete delete = new HttpDelete(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");				
+		delete.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		delete.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -312,5 +347,155 @@ public class ServerManager extends EntityManager {
 		}	
 		return resp;
 	}
+	
+	public HttpResponse rename(Server server, String name, Context context) throws CloudServersException{
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPut put = new HttpPut(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");
+	
+		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		put.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);  //*******FIND OUT WITH THIS DOES?
+	
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<server xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" name=\"" + name + "\"/>");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		put.setEntity(tmp);
+		
+		try {			
+			resp = httpclient.execute(put);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+	
+	public HttpResponse rebuild(Server server, int imageId, Context context) throws CloudServersException {
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");
+				
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<rebuild xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" imageId=\"" + imageId + "\"/>");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		post.setEntity(tmp);
+
+		try {			
+			resp = httpclient.execute(post);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+
+	public HttpResponse backup(Server server, String weeklyValue, String dailyValue, boolean enabled, Context context) throws CloudServersException {
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/backup_schedule.xml");
+				
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<backupSchedule xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" enabled=\"" + enabled + "\" " +
+					"weekly=\"" + weeklyValue + "\" daily=\"" + dailyValue + "\"/>");
+			
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		post.setEntity(tmp);
+
+		try {			
+			resp = httpclient.execute(post);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+	
+	public HttpResponse changePassword(Server server, String password, Context context) throws CloudServersException{
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPut put = new HttpPut(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");
+	
+		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		put.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class); 
+	
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<server xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" adminPass=\"" + password + "\"/>");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		put.setEntity(tmp);
+		
+		try {			
+			resp = httpclient.execute(put);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+	
 }

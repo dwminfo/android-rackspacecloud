@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent" android:layout_width="fill_parent">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/view_server_layout"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
 
 <!-- 
 Name
@@ -229,21 +226,63 @@ Soft Reboot / Hard Reboot
             android:layout_marginLeft="20dip"
             android:layout_marginTop="10dip"
             />
-        
+        <Button android:layout_marginTop="10dip" android:id="@+id/view_server_delete_button" android:text="Delete Server" android:layout_width="130dip" android:layout_gravity="left" android:layout_marginLeft="10dip" android:layout_height="wrap_content"></Button>
+    </LinearLayout>
+    
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:id="@+id/linearLayout1" 
+    	android:layout_width="fill_parent" 
+    	android:layout_marginTop="10dip" 
+    	android:orientation="horizontal" 
+    	android:layout_height="fill_parent">
         <Button xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/view_server_delete_button"
-            android:text="Delete Server"
+        	android:text="Rename Server" 
+        	android:layout_width="130dip" 
+        	android:layout_marginTop="10dip" 
+        	android:layout_gravity="left" 
+        	android:id="@+id/view_server_rename_button" 
+        	android:layout_marginLeft="20dip" 
+        	android:layout_height="wrap_content">
+        </Button>
+        <Button xmlns:android="http://schemas.android.com/apk/res/android"
+        	android:text="Rebuild Server" 
+        	android:layout_width="130dip" 
+        	android:layout_marginTop="10dip" 
+        	android:layout_gravity="left" 
+        	android:id="@+id/view_server_rebuild_button" 
+        	android:layout_marginLeft="10dip" 
+        	android:layout_height="wrap_content">
+        </Button>
+    </LinearLayout>
+  
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:layout_width="fill_parent" 
+    	android:orientation="horizontal" 	
+    	android:layout_height="fill_parent" 
+    	android:layout_marginTop="10dip">
+    	
+    	<Button xmlns:android="http://schemas.android.com/apk/res/android"
+            android:text="Backup Schedule"
             android:layout_width="130dip"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
-            android:layout_marginLeft="10dip"
+            android:layout_marginLeft="20dip"
             android:layout_marginTop="10dip"
-            />
+            android:id="@+id/view_server_backup_button"/>
+    	<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    		android:id="@+id/view_server_password_button" 
+    		android:layout_width="130dip" 
+    		android:layout_marginTop="10dip" 
+    		android:layout_marginLeft="10dip" 
+    		android:layout_height="fill_parent" 
+    		android:gravity="center" android:layout_gravity="left" android:text="Root Password">
+    	</Button>
+    	 
+    </LinearLayout>
+    <LinearLayout android:layout_width="fill_parent" android:id="@+id/linearLayout1" android:orientation="horizontal" android:layout_marginTop="10dip" android:layout_height="fill_parent">
+        <Button android:layout_width="130dip" android:layout_marginLeft="20dip" android:layout_gravity="left" android:text="Ping Server" android:layout_marginTop="10dip" android:id="@+id/view_server_ping_button" android:layout_height="wrap_content"></Button>
     </LinearLayout>
 
-</LinearLayout>
 
-<!--
-    android:layout_height="wrap_content"
- -->
+	</LinearLayout>
  </ScrollView>
