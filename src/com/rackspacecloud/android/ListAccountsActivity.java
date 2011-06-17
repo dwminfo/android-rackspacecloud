@@ -18,11 +18,13 @@ import com.rackspace.cloud.servers.api.client.ImageManager;
 import com.rackspace.cloud.servers.api.client.http.Authentication;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,12 +35,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ListAccountsActivity extends ListActivity{
 
@@ -46,6 +52,7 @@ public class ListAccountsActivity extends ListActivity{
 	private final String FILENAME = "accounts.data";
 	private Intent tabViewIntent;
 	private boolean authenticating;
+	private final int PASSWORD_PROMPT = 123;
 	ProgressDialog dialog;
 	Context context;
 
@@ -55,6 +62,7 @@ public class ListAccountsActivity extends ListActivity{
         registerForContextMenu(getListView());
         context = getApplicationContext();
         tabViewIntent = new Intent(this, TabViewActivity.class);
+        verifyPassword();
     }
 	
 	@Override
@@ -82,6 +90,57 @@ public class ListAccountsActivity extends ListActivity{
             loadAccounts();        
     	} 	
     }
+	
+	/*
+	 * if the application is password protected,
+	 * the user must provide the password before
+	 * gaining access
+	 */
+	private void verifyPassword(){
+		PasswordManager pwManager = new PasswordManager(getSharedPreferences(
+				Preferences.SHARED_PREFERENCES_NAME, MODE_PRIVATE));
+		if(pwManager.hasPassword()){
+			createCustomDialog(PASSWORD_PROMPT);
+		}
+	}
+	
+	private boolean rightPassword(String password){
+		PasswordManager pwManager = new PasswordManager(getSharedPreferences(
+				Preferences.SHARED_PREFERENCES_NAME, MODE_PRIVATE));
+		return pwManager.verifyEnteredPassword(password);
+	}
+	
+	
+	/*
+	 * forces the user to enter a correct password
+	 * before they gain access to application data
+	 */
+	private void createCustomDialog(int id) {
+		final Dialog dialog = new Dialog(ListAccountsActivity.this);
+		switch (id) {
+		case PASSWORD_PROMPT:
+			dialog.setContentView(R.layout.passworddialog);
+			dialog.setTitle("Enter your password:");
+			dialog.setCancelable(false);
+			Button button = (Button) dialog.findViewById(R.id.submit_password);
+			button.setOnClickListener(new OnClickListener() {
+				public void onClick(View v){
+					EditText passwordText = ((EditText)dialog.findViewById(R.id.submit_password_text));
+					if(!rightPassword(passwordText.getText().toString())){
+						passwordText.setText("");
+						showToast("Password was incorrect.");
+					}
+					else{
+						dialog.dismiss();
+					}
+				}
+				
+			});
+			dialog.show();
+		}
+	}
+	
+	
 	
 	private void loadAccounts() {
 		if(accounts != null)
@@ -197,6 +256,10 @@ public class ListAccountsActivity extends ListActivity{
 
     	case R.id.contact_rackspace:
     		startActivity(new Intent(this, ContactActivity.class));
+    		return true;
+    		
+    	case R.id.add_password:
+    		startActivity(new Intent(this, CreatePasswordActivity.class));
     		return true;
     	}	
     	return false;
@@ -400,6 +463,15 @@ public class ListAccountsActivity extends ListActivity{
 		alert.show();
 		hideActivityIndicators();
     }
+    
+    private void showToast(String message) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, message, duration);
+		toast.show();
+    }
+    
+    
 	
 		
 }
