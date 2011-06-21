@@ -53,7 +53,7 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".ContainerObjectsActivity"
-			android:label="@string/app_name" android:configChanges="orientation">
+			android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.APPLICATION" />
@@ -67,7 +67,8 @@
 			</intent-filter>
 		</activity>
 		<activity android:name=".ContainerObjectDetails"
-			android:label="@string/app_name">
+			android:label="@string/app_name"
+			android:configChanges="orientation">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.APPLICATION" />

@@ -137,12 +137,35 @@ public class ContainerObjectsActivity extends ListActivity {
 		loadCurrentDirectoryFiles();
 		displayCurrentFiles();
 	}
+
 	
+	/*
 	private void loadFiles() {
 		//displayLoadingCell();
 		new LoadFilesTask().execute();
 	}
+	*/
+	
+	private void loadFiles(){
+		CloudServersException exception = null;
 
+		ArrayList<ContainerObjects> result = null;
+		try {
+			result = (new ContainerObjectManager(context)).createList(true,
+					container.getName());
+		} catch (CloudServersException e) {
+			exception = e;
+			e.printStackTrace();
+		}
+		if (exception != null) {
+			showAlert("Error", exception.getMessage());
+		}
+		setFileList(result);
+	}
+
+
+
+	
 	/* load only the files that should display for the 
 	 * current directory in the curDirFiles[]
 	 */
@@ -160,9 +183,6 @@ public class ContainerObjectsActivity extends ListActivity {
 			for(int i = 0; i < curFiles.size(); i++){
 				curDirFiles[i] = curFiles.get(i);
 			}
-		}
-		else{
-			curDirFiles = new ContainerObjects[0];
 		}
 	}
 	
@@ -193,6 +213,8 @@ public class ContainerObjectsActivity extends ListActivity {
 		String[] fileNames = new String[files.size()];
 		this.files = new ContainerObjects[files.size()];
 
+		
+		
 		if (files != null) {
 			for (int i = 0; i < files.size(); i++) {
 				ContainerObjects file = files.get(i);
@@ -205,7 +227,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	}
 	
 	private void displayCurrentFiles(){
-		
+		if(curDirFiles!=null)
 		loadCurrentDirectoryFiles();
 		if (curDirFiles.length == 0) {
 			displayNoServersCell();
@@ -505,23 +527,14 @@ public class ContainerObjectsActivity extends ListActivity {
 		return cse;
 	}
 	
-	private String arrToString(){
-		String res = "";
-		for(int i = 0; i < curDirFiles.length; i++){
-			res += curDirFiles[i].getCName() + " ";
-		}
-		return res;
-	}
-	
 	class FileAdapter extends ArrayAdapter<ContainerObjects> {
 		FileAdapter() {
 			super(ContainerObjectsActivity.this,
 					R.layout.listcontainerobjectcell, curDirFiles);		
-			Log.d("info", "captin" +  arrToString());
 		}
 	
 		public View getView(int position, View convertView, ViewGroup parent) {
-			Log.d("info", "captin using position: " + position);
+	
 			ContainerObjects file = curDirFiles[position];
 			LayoutInflater inflater = getLayoutInflater();
 			View row = inflater.inflate(R.layout.listcontainerobjectcell,
