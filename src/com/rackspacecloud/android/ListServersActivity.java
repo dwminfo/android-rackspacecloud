@@ -34,7 +34,8 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
 public class ListServersActivity extends ListActivity {
 
 	private Server[] servers;
-	Context context;
+	private Context context;
+	private boolean loading;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,10 +48,12 @@ public class ListServersActivity extends ListActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("servers", servers);
+		outState.putBoolean("loading", loading);
 	}
 
     private void restoreState(Bundle state) {
-    	if (state != null && state.containsKey("servers")) {
+    	boolean loading = state != null && state.containsKey("loading") && state.getBoolean("loading");
+    	if (state != null && state.containsKey("servers") && !loading) {
     		servers = (Server[]) state.getSerializable("servers");
     		if (servers.length == 0) {
     			displayNoServersCell();
@@ -139,6 +142,10 @@ public class ListServersActivity extends ListActivity {
     	
     	private CloudServersException exception;
     	
+    	protected void onPreExecute(){
+    		loading = true;
+    	}
+    	
 		@Override
 		protected ArrayList<Server> doInBackground(Void... arg0) {
 			ArrayList<Server> servers = null;
@@ -156,6 +163,7 @@ public class ListServersActivity extends ListActivity {
 				showAlert("Error", exception.getMessage());
 			}
 			setServerList(result);
+			loading = false;
 		}
     }
     

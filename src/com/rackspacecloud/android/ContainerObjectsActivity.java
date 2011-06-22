@@ -67,7 +67,10 @@ public class ContainerObjectsActivity extends ListActivity {
 	private Context context;
 	private String currentPath;
 	private ContainerObjects[] curDirFiles;
-	ProgressDialog dialog;
+	//private ProgressDialog dialog;
+	private boolean loadingFiles;
+	private FileAdapter adapter;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -89,9 +92,15 @@ public class ContainerObjectsActivity extends ListActivity {
 		outState.putSerializable("container", files);
 		outState.putString("path", currentPath);
 		outState.putSerializable("curFiles", curDirFiles);
+		outState.putBoolean("loadingFiles", loadingFiles);
 	}
+	
+	
 
 	private void restoreState(Bundle state) {
+		
+		adapter = (FileAdapter)getLastNonConfigurationInstance();
+		
 		if(state != null){
 			if(state.containsKey("path")){
 				currentPath = state.getString("path");
@@ -99,14 +108,23 @@ public class ContainerObjectsActivity extends ListActivity {
 			else{
 				currentPath = "";
 			}
-			if(state.containsKey("container") && state.containsKey("curFiles")){
-				files = (ContainerObjects[]) state.getSerializable("container");
-				curDirFiles = (ContainerObjects[]) state.getSerializable("curFiles");
-				if(curDirFiles.length == 0){
-					displayNoServersCell();
-				} else {
-					getListView().setDividerHeight(1); //restore divider lines
-					setListAdapter(new FileAdapter());
+			
+			if(state.containsKey("loadingFiles") && state.getBoolean("loadingFiles")){
+				loadFiles();
+			}
+			else{
+				if(state.containsKey("container") && state.containsKey("curFiles")){
+					files = (ContainerObjects[]) state.getSerializable("container");
+					curDirFiles = (ContainerObjects[]) state.getSerializable("curFiles");
+					if(curDirFiles != null){
+						if(curDirFiles.length == 0){
+							displayNoServersCell();
+						} else {
+							Log.d("info", "captin curDirFiles lenght is: " + curDirFiles.length);
+							getListView().setDividerHeight(1); //restore divider lines
+							setListAdapter(new FileAdapter());
+						}
+					}
 				}
 			}
 		}
@@ -114,6 +132,10 @@ public class ContainerObjectsActivity extends ListActivity {
 			currentPath = "";
 			loadFiles();
 		}	
+	}
+	
+	public Object onRetainNonConfigurationInstance(){
+		return adapter;
 	}
 
 	/*
@@ -138,33 +160,24 @@ public class ContainerObjectsActivity extends ListActivity {
 		displayCurrentFiles();
 	}
 
-	
 	/*
+	 * load all file that are in the container
+	 */
 	private void loadFiles() {
-		//displayLoadingCell();
+		displayLoadingCell();
 		new LoadFilesTask().execute();
 	}
-	*/
 	
-	private void loadFiles(){
-		CloudServersException exception = null;
-
-		ArrayList<ContainerObjects> result = null;
-		try {
-			result = (new ContainerObjectManager(context)).createList(true,
-					container.getName());
-		} catch (CloudServersException e) {
-			exception = e;
-			e.printStackTrace();
-		}
-		if (exception != null) {
-			showAlert("Error", exception.getMessage());
-		}
-		setFileList(result);
+	private void displayLoadingCell() {
+		String a[] = new String[1];
+		a[0] = "Loading...";
+		setListAdapter(new ArrayAdapter<String>(this, R.layout.loadingcell,
+				R.id.loading_label, a));
+		getListView().setTextFilterEnabled(true);
+		getListView().setDividerHeight(0); // hide the dividers so it won't look
+											// like a list row
+		getListView().setItemsCanFocus(false);
 	}
-
-
-
 	
 	/* load only the files that should display for the 
 	 * current directory in the curDirFiles[]
@@ -227,13 +240,13 @@ public class ContainerObjectsActivity extends ListActivity {
 	}
 	
 	private void displayCurrentFiles(){
-		if(curDirFiles!=null)
 		loadCurrentDirectoryFiles();
 		if (curDirFiles.length == 0) {
 			displayNoServersCell();
 		} else {
 			getListView().setDividerHeight(1); // restore divider lines
-			setListAdapter(new FileAdapter());
+			adapter = new FileAdapter();
+			setListAdapter(adapter);
 		}
 	}
 
@@ -429,8 +442,7 @@ public class ContainerObjectsActivity extends ListActivity {
 					public void onClick(DialogInterface dialog,
 							int whichButton) {
 						// User clicked OK so do some stuff
-						new DeleteObjectTask()
-						.execute();
+						new DeleteObjectTask().execute();
 					}
 				})
 				.setNegativeButton("Cancel",
@@ -535,6 +547,8 @@ public class ContainerObjectsActivity extends ListActivity {
 	
 		public View getView(int position, View convertView, ViewGroup parent) {
 	
+			Log.d("info", "captin updating position " + position);
+			
 			ContainerObjects file = curDirFiles[position];
 			LayoutInflater inflater = getLayoutInflater();
 			View row = inflater.inflate(R.layout.listcontainerobjectcell,
@@ -563,13 +577,12 @@ public class ContainerObjectsActivity extends ListActivity {
 
 	private class LoadFilesTask extends
 			AsyncTask<String, Void, ArrayList<ContainerObjects>> {
-	
+
 		private CloudServersException exception;
-		/*
 		protected void onPreExecute(){
-			dialog = ProgressDialog.show(ContainerObjectsActivity.this, "", "Loading Files...", true);
+			loadingFiles = true;
 		}
-		*/
+		
 		@Override
 		protected ArrayList<ContainerObjects> doInBackground(String... path) {
 			ArrayList<ContainerObjects> files = null;
@@ -590,7 +603,9 @@ public class ContainerObjectsActivity extends ListActivity {
 				showAlert("Error", exception.getMessage());
 			}
 			setFileList(result);
+			loadingFiles = false;
 		}
+
 	}
 
 	private class DeleteObjectTask extends
@@ -599,7 +614,7 @@ public class ContainerObjectsActivity extends ListActivity {
 		private CloudServersException exception;
 		
 		protected void onPreExecute(){
-			dialog = ProgressDialog.show(ContainerObjectsActivity.this, "", "Deleting...", true);
+			//dialog = ProgressDialog.show(ContainerObjectsActivity.this, "", "Deleting...", true);
 		}
 		
 		@Override
@@ -616,7 +631,7 @@ public class ContainerObjectsActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(HttpResponse response) {
-			dialog.dismiss();
+			//dialog.dismiss();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 409) {

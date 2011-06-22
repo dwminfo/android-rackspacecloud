@@ -41,6 +41,7 @@ public class ListContainerActivity extends ListActivity {
 	public int kbConver = 1024;
 	protected static final int DELETE_ID = 0;
 	private Context context;
+	private boolean loading;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,10 +54,12 @@ public class ListContainerActivity extends ListActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("container", containers);
+		outState.putBoolean("loading", loading);
 	}
 
 	private void restoreState(Bundle state) {
-		if (state != null && state.containsKey("container")) {
+		loading = state!= null && state.containsKey("loading") && state.getBoolean("loading");
+		if (state != null && state.containsKey("container") && !loading) {
 			containers = (Container[]) state.getSerializable("container");
 			if (containers.length == 0) {
 				displayNoServersCell();
@@ -75,9 +78,6 @@ public class ListContainerActivity extends ListActivity {
 			Intent viewIntent = new Intent(this, ContainerObjectsActivity.class);
 			viewIntent.putExtra("container", containers[position]);
 			startActivityForResult(viewIntent, 55);
-
-			// startActivityForResult(viewIntent, 55); // arbitrary number;
-			// never used again
 		}
 	}
 
@@ -142,6 +142,11 @@ public class ListContainerActivity extends ListActivity {
 		private CloudServersException exception;
 
 		@Override
+		protected void onPreExecute(){
+			loading = true;
+		}
+			
+		@Override
 		protected ArrayList<Container> doInBackground(Void... arg0) {
 			ArrayList<Container> containers = null;
 
@@ -168,7 +173,7 @@ public class ListContainerActivity extends ListActivity {
 					containerNames[i] = container.getName();
 				}
 			}
-
+			loading = false;
 			new LoadCDNContainersTask().execute((Void[]) null);
 		}
 	}
@@ -178,6 +183,11 @@ public class ListContainerActivity extends ListActivity {
 
 		private CloudServersException exception;
 
+		@Override
+		protected void onPreExecute(){
+			loading = true;
+		}
+		
 		@Override
 		protected ArrayList<Container> doInBackground(Void... arg0) {
 			ArrayList<Container> cdnContainers = null;
@@ -211,6 +221,7 @@ public class ListContainerActivity extends ListActivity {
 				}
 			}
 			setContainerList();
+			loading = false;
 		}
 	}
 

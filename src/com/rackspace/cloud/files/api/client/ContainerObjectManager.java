@@ -129,6 +129,32 @@ public class ContainerObjectManager extends EntityManager {
 		return resp;
 	}
 	
+	public HttpResponse getObject(String Container, String Object) throws CloudServersException {
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpGet getObject = new HttpGet(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Object);
+				
+		getObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+
+		try {			
+			resp = httpclient.execute(getObject);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return resp;
+	}
+	
 	public HttpResponse addObject(String Container, String Path, String Object, String type) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);

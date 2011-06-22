@@ -93,16 +93,11 @@
     android:textColor="#fff"
     android:layout_marginBottom="15dip"
     />
- <!-- Preview Button --> 
-    <Button xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/preview_button"
-    android:text="Preview File"
-    android:layout_width="100dip"
-    android:layout_height="wrap_content"
-    android:layout_gravity="left"
-    android:layout_marginLeft="20dip"
-    android:layout_marginTop="10dip"
-    />
+ <!-- Preview Button -->
+<LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/linearLayout1">
+    <Button android:layout_gravity="left" android:id="@+id/download_button" android:layout_height="wrap_content" android:layout_marginTop="10dip" android:layout_marginLeft="20dip" android:text="Download" android:layout_width="130dip"></Button>
+    <Button android:layout_gravity="left" android:id="@+id/preview_button" android:layout_height="wrap_content" android:layout_marginTop="10dip" android:text="Preview File" android:layout_width="130dip" android:layout_marginLeft="10dip"></Button>
+</LinearLayout>
 	</LinearLayout>
 
  </ScrollView>
