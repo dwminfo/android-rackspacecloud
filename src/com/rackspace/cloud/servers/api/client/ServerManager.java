@@ -27,6 +27,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.rackspace.cloud.files.api.client.CustomHttpClient;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
@@ -163,6 +164,7 @@ public class ServerManager extends EntityManager {
 		
 		Server server = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
+		Log.d("info", "captin the url is " + Account.getAccount().getServerUrl() + "/servers/" + id + ".xml" + cacheBuster());
 		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/servers/" + id + ".xml" + cacheBuster());
 		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		

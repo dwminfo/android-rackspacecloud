@@ -23,6 +23,7 @@ import org.xml.sax.XMLReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,11 +35,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.rackspace.cloud.servers.api.client.Account;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Image;
@@ -63,6 +64,9 @@ public class ViewServerActivity extends Activity {
     private Image[] images;
 	private String[] imageNames;
 	private String selectedImageId;
+	private boolean isPolling;
+	private PollServerTask pollServerTask;
+	private boolean canPoll;
 	
     /** Called when the activity is first created. */
     @Override
@@ -78,10 +82,18 @@ public class ViewServerActivity extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("server", server);
-		//outState.putBoolean("imageLoaded", imageLoaded);
+		if(pollServerTask != null && isPolling){
+			Log.d("info", "captin cancelling the polling");
+			pollServerTask.cancel(true);
+		}
+		outState.putBoolean("wasPolling", isPolling);
 	}
 
     private void restoreState(Bundle state) {
+    	if(state != null && state.containsKey("wasPolling") && state.getBoolean("wasPolling") == true){
+    		pollServerTask = new PollServerTask();
+    		pollServerTask.execute((Void[]) null);
+    	}
     	if (state != null && state.containsKey("server")) {
     		server = (Server) state.getSerializable("server");
     		//imageLoaded = state.getBoolean("imageLoaded");
@@ -104,59 +116,95 @@ public class ViewServerActivity extends Activity {
 
     }
 */  
+    
+    /*
+     * need to manage the polling task
+     * if the activity is stopped
+     */
+    @Override
+    public void onStop(){
+    	super.onStop();
+    	if(pollServerTask != null && isPolling){
+    		Log.d("info", "captin in onStop cancelling");
+    		pollServerTask.cancel(true);
+    		isPolling = true;
+			Log.d("info", "captin polling is true");
+    	}
+    	canPoll = false;
+    	
+    }
+    
+    /*
+     * restart the pollingtask 
+     * if it was running before
+     * 
+     */
+    @Override
+    public void onStart(){
+    	super.onStart();
+    	if(isPolling){
+    		Log.d("info", "captin in onStart starting");
+    		pollServerTask = new PollServerTask();
+    		pollServerTask.execute((Void[]) null);
+    	}
+    	canPoll = true;
+    
+    }
+   
     private void loadServerData() {
     	TextView name = (TextView) findViewById(R.id.view_server_name);
     	name.setText(server.getName());
-    	
+
     	TextView os = (TextView) findViewById(R.id.view_server_os);
     	os.setText(server.getImage().getName());
-    	
+
     	TextView memory = (TextView) findViewById(R.id.view_server_memory);
     	memory.setText(server.getFlavor().getRam() + " MB");
-    	
+
     	TextView disk = (TextView) findViewById(R.id.view_server_disk);
     	disk.setText(server.getFlavor().getDisk() + " GB");
-    	
+
     	TextView status = (TextView) findViewById(R.id.view_server_status);
 
     	// show status and possibly the progress, with polling
     	if (!"ACTIVE".equals(server.getStatus())) {
-        	status.setText(server.getStatus() + " - " + server.getProgress() + "%");
-    		new PollServerTask().execute((Void[]) null);
+    		status.setText(server.getStatus() + " - " + server.getProgress() + "%");
+    		pollServerTask = new PollServerTask();
+    		pollServerTask.execute((Void[]) null);
     	} else {
-        	status.setText(server.getStatus());
+    		status.setText(server.getStatus());
     	}
-    	
+
     	if (!ipAddressesLoaded) {
-	    	// public IPs
-	    	int layoutIndex = 12; // public IPs start here
-	    	LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
-	    	String publicIps[] = server.getPublicIpAddresses();
-	    	for (int i = 0; i < publicIps.length; i++) {
-	        	TextView tv = new TextView(this.getBaseContext());
-	        	tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
-	        	tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
-	        	tv.setTextSize(os.getTextSize());
-	        	tv.setTextColor(Color.WHITE);
-	        	tv.setText(publicIps[i]);
-	        	layout.addView(tv, layoutIndex++);
-	    	}
-	    	
-	    	// private IPs
-	    	layoutIndex++; // skip over the Private IPs label
-	    	String privateIps[] = server.getPrivateIpAddresses();
-	    	for (int i = 0; i < privateIps.length; i++) {
-	        	TextView tv = new TextView(this.getBaseContext());
-	        	tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
-	        	tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
-	        	tv.setTextSize(os.getTextSize());
-	        	tv.setTextColor(Color.WHITE);
-	        	tv.setText(privateIps[i]);
-	        	layout.addView(tv, layoutIndex++);
-	    	}
-	    	ipAddressesLoaded = true;
+    		// public IPs
+    		int layoutIndex = 12; // public IPs start here
+    		LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
+    		String publicIps[] = server.getPublicIpAddresses();
+    		for (int i = 0; i < publicIps.length; i++) {
+    			TextView tv = new TextView(this.getBaseContext());
+    			tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+    			tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+    			tv.setTextSize(os.getTextSize());
+    			tv.setTextColor(Color.WHITE);
+    			tv.setText(publicIps[i]);
+    			layout.addView(tv, layoutIndex++);
+    		}
+
+    		// private IPs
+    		layoutIndex++; // skip over the Private IPs label
+    		String privateIps[] = server.getPrivateIpAddresses();
+    		for (int i = 0; i < privateIps.length; i++) {
+    			TextView tv = new TextView(this.getBaseContext());
+    			tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+    			tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+    			tv.setTextSize(os.getTextSize());
+    			tv.setTextColor(Color.WHITE);
+    			tv.setText(privateIps[i]);
+    			layout.addView(tv, layoutIndex++);
+    		}
+    		ipAddressesLoaded = true;
     	}
-    	
+
     	//loadImage();
     }
     
@@ -202,55 +250,55 @@ public class ViewServerActivity extends Activity {
     private void setupButtons() {
     	setupButton(R.id.view_server_soft_reboot_button, new OnClickListener() {
             public void onClick(View v) {
-                showDialog(R.id.view_server_soft_reboot_button);
+            		showDialog(R.id.view_server_soft_reboot_button);
             }
         });
     	
     	setupButton(R.id.view_server_hard_reboot_button, new OnClickListener() {
             public void onClick(View v) {
-                showDialog(R.id.view_server_hard_reboot_button);
+            		showDialog(R.id.view_server_hard_reboot_button);
             }
     	});
 
     	setupButton(R.id.view_server_resize_button, new OnClickListener() {
             public void onClick(View v) {
-                showDialog(R.id.view_server_resize_button);
+            		showDialog(R.id.view_server_resize_button);
             }
     	});
 
     	setupButton(R.id.view_server_delete_button, new OnClickListener() {
             public void onClick(View v) {
-                showDialog(R.id.view_server_delete_button);
+            		showDialog(R.id.view_server_delete_button);
             }
     	});
     	
     	setupButton(R.id.view_server_rename_button, new OnClickListener() {
             public void onClick(View v) {
-                showDialog(R.id.view_server_rename_button);
+            		showDialog(R.id.view_server_rename_button);
             }
     	});
     	
     	setupButton(R.id.view_server_rebuild_button, new OnClickListener() {
             public void onClick(View v) {
-                showDialog(R.id.view_server_rebuild_button);
+            		showDialog(R.id.view_server_rebuild_button);
             }
     	});
     	
     	
     	setupButton(R.id.view_server_backup_button, new OnClickListener() {
             public void onClick(View v) {
-            	Intent viewIntent = new Intent(v.getContext(), BackupServerActivity.class);
-            	viewIntent.putExtra("server", server);
-            	startActivity(viewIntent);
+                	Intent viewIntent = new Intent(v.getContext(), BackupServerActivity.class);
+                	viewIntent.putExtra("server", server);
+                	startActivity(viewIntent);
             }
     	});
-    	
+
     	setupButton(R.id.view_server_password_button, new OnClickListener() {
-            public void onClick(View v) {
-            	Intent viewIntent = new Intent(v.getContext(), PasswordServerActivity.class);
-            	viewIntent.putExtra("server", server);
-            	startActivity(viewIntent);
-            }
+    		public void onClick(View v) {
+    				Intent viewIntent = new Intent(v.getContext(), PasswordServerActivity.class);
+    				viewIntent.putExtra("server", server);
+    				startActivity(viewIntent);
+    		}
     	});
     	
     	setupButton(R.id.view_server_ping_button, new OnClickListener() {
@@ -260,13 +308,15 @@ public class ViewServerActivity extends Activity {
             	//ping the first public ip
             	viewIntent.putExtra("ipAddress", server.getPublicIpAddresses()[0]);
             	startActivity(viewIntent);
+            	
+            	
             }
     	});
     	
     }
     
     private void showAlert(String title, String message) {
-		AlertDialog alert = new AlertDialog.Builder(this).create();
+		AlertDialog alert = new AlertDialog.Builder(ViewServerActivity.this).create();
 		alert.setTitle(title);
 		alert.setMessage(message);
 		alert.setButton("OK", new DialogInterface.OnClickListener() {
@@ -280,6 +330,13 @@ public class ViewServerActivity extends Activity {
 		Context context = getApplicationContext();
 		int duration = Toast.LENGTH_SHORT;
 		Toast toast = Toast.makeText(context, message, duration);
+		toast.show();
+    }
+    
+    private void showToast(String title, String message) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, "   "+title + "\n\n" + message, duration);
 		toast.show();
     }
 	
@@ -415,9 +472,7 @@ public class ViewServerActivity extends Activity {
 		}
     	
     }
-    
-
-    
+      
     private CloudServersException parseCloudServersException(HttpResponse response) {
 		CloudServersException cse = new CloudServersException();
 		try {
@@ -452,23 +507,47 @@ public class ViewServerActivity extends Activity {
     
 	private class PollServerTask extends AsyncTask<Void, Void, Server> {
     	
+		private Server tempServer;
+		
+		@Override 
+		protected void onPreExecute(){
+			Log.d("info", "captin The POLLING TASK HAS STARTED!");
+			isPolling = true;
+		}
+		
 		@Override
 		protected Server doInBackground(Void... arg0) {
+			Log.d("info", "captin can poll is " + canPoll);
+			if(isCancelled() || !canPoll){
+				return null;
+			}
 			try {
-				server = (new ServerManager()).find(Integer.parseInt(server.getId()), context);
+				 tempServer = (new ServerManager()).find(Integer.parseInt(server.getId()), context);
 			} catch (NumberFormatException e) {
 				// we're polling, so need to show exceptions
 			} catch (CloudServersException e) {
 				// we're polling, so need to show exceptions
 			}
-			return server;
+			return tempServer;
 		}
     	
 		@Override
 		protected void onPostExecute(Server result) {
 			server = result;
-			loadServerData();
+			if(server != null){
+				Log.d("info", "captin about to load data");
+				loadServerData();
+			}
+			isPolling = false;
+			Log.d("info", "captin polling is false");
 		}
+		
+		@Override
+		protected void onCancelled (){
+			isPolling = false;
+			Log.d("info", "captin polling is false and the poll has been canceled");
+		}
+		
     }
 
     
@@ -495,20 +574,19 @@ public class ViewServerActivity extends Activity {
     	
 		@Override
 		protected void onPostExecute(HttpResponse response) {
-
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();	
 				if(statusCode == 202){ showToast("Reboot successful"); }
 				if (statusCode != 202) {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem rebooting your server.");
+						showToast("Error", "There was a problem rebooting your server.");
 					} else {
-						showAlert("Error", "There was a problem rebooting your server: " + cse.getMessage());
+						showToast("Error", "There was a problem rebooting your server: " + cse.getMessage());
 					}
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());
+				showToast("Error", "There was a problem rebooting your server: " + exception.getMessage());
 				
 			}
 		}
@@ -543,13 +621,13 @@ public class ViewServerActivity extends Activity {
 				if (statusCode != 202) {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem rebooting your server.");
+						showToast("Error", "There was a problem rebooting your server.");
 					} else {
-						showAlert("Error", "There was a problem rebooting your server: " + cse.getMessage());
+						showToast("Error", "There was a problem rebooting your server: " + cse.getMessage());
 					}
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());
+				showToast("Error", "There was a problem rebooting your server: " + exception.getMessage());
 				
 			}
 		}
@@ -558,6 +636,11 @@ public class ViewServerActivity extends Activity {
 	private class ResizeServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
 		private CloudServersException exception;
+		
+		@Override
+		protected void onPreExecute(){
+			showToast("Resize process has begun, please confirm your resize after process finishes.");
+		}
 
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
@@ -575,18 +658,18 @@ public class ViewServerActivity extends Activity {
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();			
 				if (statusCode == 202) {
-					showToast("Resize process has begun, please confirm your resize after process finishes.");
-					new PollServerTask().execute((Void[]) null);
+					pollServerTask = new PollServerTask();
+		    		pollServerTask.execute((Void[]) null);
 				} else {					
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem resizing your server.");
+						showToast("Error", "There was a problem resizing your server.");
 					} else {
-						showAlert("Error", "There was a problem resizing your server: " + cse.getMessage());
+						showToast("Error", "There was a problem resizing your server: " + cse.getMessage());
 					}					
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem resizing your server: " + exception.getMessage());
+				showToast("Error", "There was a problem resizing your server: " + exception.getMessage());
 				
 			}
 			
@@ -625,13 +708,13 @@ public class ViewServerActivity extends Activity {
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem deleting your server.");
+						showToast("Error", "There was a problem deleting your server.");
 					} else {
-						showAlert("Error", "There was a problem deleting your server: " + cse.getMessage());
+						showToast("Error", "There was a problem deleting your server: " + cse.getMessage());
 					}
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem deleting your server: " + exception.getMessage());				
+				showToast("Error", "There was a problem deleting your server: " + exception.getMessage());				
 			}			
 		}
     }
@@ -643,7 +726,7 @@ public class ViewServerActivity extends Activity {
 		@Override
 		//let user know their process has started
 		protected void onPreExecute(){
-			showToast("Rename process has begun");
+			showToast("Rename process has begun.");
 		}
 		
 		@Override
@@ -663,18 +746,19 @@ public class ViewServerActivity extends Activity {
 				int statusCode = response.getStatusLine().getStatusCode();	
 				if (statusCode == 204) {	
 					showToast("Rename successful");
-					new PollServerTask().execute((Void[]) null);
+					pollServerTask = new PollServerTask();
+		    		pollServerTask.execute((Void[]) null);
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem renaming your server.");
+						showToast("Error", "There was a problem renaming your server.");
 					} else {
-						showAlert("Error", "There was a problem renaming your server: " + cse.getMessage());
+						showToast("Error", "There was a problem renaming your server: " + cse.getMessage());
 					}					
 				}
 			}
 		    else if (exception != null) {
-		    	showAlert("Error", "There was a problem renaming your server: " + exception.getMessage());	
+		    	showToast("Error", "There was a problem renaming your server: " + exception.getMessage());	
 		    }
 		}
 		
@@ -683,6 +767,11 @@ public class ViewServerActivity extends Activity {
 	private class RebuildServerTask extends AsyncTask<Void, Void, HttpResponse> {
     	
 		private CloudServersException exception;
+		
+		@Override
+		protected void onPreExecute(){
+			showToast("Rebuild process has begun");
+		}
 		
 		@Override
 		protected HttpResponse doInBackground(Void... arg0) {
@@ -700,18 +789,18 @@ public class ViewServerActivity extends Activity {
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();			
 				if (statusCode == 202) {
-					showToast("Rebuild process has begun");
-					new PollServerTask().execute((Void[]) null);
+					pollServerTask = new PollServerTask();
+		    		pollServerTask.execute((Void[]) null);
 				} else {					
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem rebuilding your server.");
+						showToast("Error", "There was a problem rebuilding your server.");
 					} else {
-						showAlert("Error", "There was a problem rebuilding your server: " + cse.getMessage());
+						showToast("Error", "There was a problem rebuilding your server: " + cse.getMessage());
 					}					
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem rebuilding your server: " + exception.getMessage());
+				showToast("Error", "There was a problem rebuilding your server: " + exception.getMessage());
 				
 			}
 			

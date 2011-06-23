@@ -12,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -139,11 +138,6 @@ public class ListServersActivity extends ListActivity {
     private class LoadServersTask extends AsyncTask<Void, Void, ArrayList<Server>> {
     	
     	private CloudServersException exception;
-    	
-    	@Override
-    	protected void onPreExecute(){
-    		Log.d("info", "captin load called");
-    	}
     	
 		@Override
 		protected ArrayList<Server> doInBackground(Void... arg0) {
