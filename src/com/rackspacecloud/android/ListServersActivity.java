@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,7 +35,7 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
 public class ListServersActivity extends ListActivity {
 
 	private Server[] servers;
-	Context context;
+	private Context context;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,7 +51,7 @@ public class ListServersActivity extends ListActivity {
 	}
 
     private void restoreState(Bundle state) {
-    	if (state != null && state.containsKey("servers")) {
+    	if (state != null && state.containsKey("servers") && state.getSerializable("servers") != null) {
     		servers = (Server[]) state.getSerializable("servers");
     		if (servers.length == 0) {
     			displayNoServersCell();
@@ -139,6 +140,11 @@ public class ListServersActivity extends ListActivity {
     	
     	private CloudServersException exception;
     	
+    	@Override
+    	protected void onPreExecute(){
+    		Log.d("info", "captin load called");
+    	}
+    	
 		@Override
 		protected ArrayList<Server> doInBackground(Void... arg0) {
 			ArrayList<Server> servers = null;
@@ -174,6 +180,7 @@ public class ListServersActivity extends ListActivity {
 			startActivityForResult(new Intent(this, AddServerActivity.class), 56); // arbitrary number; never used again
 			return true;
 		case R.id.refresh:
+			servers = null;
 			loadServers();
 	        return true;
 		}

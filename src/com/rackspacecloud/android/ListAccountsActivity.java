@@ -46,29 +46,39 @@ public class ListAccountsActivity extends ListActivity{
 	private final String FILENAME = "accounts.data";
 	private Intent tabViewIntent;
 	private boolean authenticating;
-	ProgressDialog dialog;
-	Context context;
+	private ProgressDialog dialog;
+	private Context context;
 
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        restoreState(savedInstanceState);
+        onRestoreInstanceState(savedInstanceState);
+        //restoreState(savedInstanceState);
         registerForContextMenu(getListView());
         context = getApplicationContext();
         tabViewIntent = new Intent(this, TabViewActivity.class);
     }
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+		Log.d("info", "captin the acounnt activity state has been saved");
+		Log.d("info", "captin it is " + Boolean.toString(authenticating) + "that the app is authing");
 		outState.putBoolean("authenticating", authenticating);
+		//need to set authenticating back to true because it is set to false
+		//in hideDialog()
+		if(authenticating){
+			hideDialog();
+			authenticating = true;
+		}
 		writeAccounts();
 	}
 	
-	private void restoreState(Bundle state) {
+	@Override
+	protected void onRestoreInstanceState(Bundle state) {
 		if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
-    		showActivityIndicators();
+    		showDialog();
     	} else {
-    		hideActivityIndicators();
+    		hideDialog();
     	}
 		if (state != null && state.containsKey("accounts")) {
     		accounts = readAccounts();
@@ -83,6 +93,25 @@ public class ListAccountsActivity extends ListActivity{
     	} 	
     }
 	
+	@Override
+	protected void onStart(){
+		super.onStart();
+		Log.d("info", "captin onStop called");
+		if(authenticating){
+			showDialog();
+		}
+	}
+	
+	@Override
+	protected void onStop(){
+		super.onStop();
+		Log.d("info", "captin onStart called");
+		if(authenticating){
+			hideDialog();
+			authenticating = true;
+		}
+	}
+		
 	private void loadAccounts() {
 		if(accounts != null)
 			Log.d("loadAccounts", "captin the lenght is: " + accounts.size());
@@ -166,7 +195,7 @@ public class ListAccountsActivity extends ListActivity{
 	
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		if (accounts != null && accounts.size() > 0) {
-			setActivityIndicatorsVisibility(View.VISIBLE, v);
+			//setActivityIndicatorsVisibility(View.VISIBLE, v);
 			Account.setAccount(accounts.get(position));
 			login();
 		}		
@@ -175,7 +204,6 @@ public class ListAccountsActivity extends ListActivity{
 	public void login() {
         //showActivityIndicators();
         //setLoginPreferences();
-		dialog = ProgressDialog.show(ListAccountsActivity.this, "", "Authenticating...", true);
         new AuthenticateTask().execute((Void[]) null);
     }
 	
@@ -281,7 +309,7 @@ public class ListAccountsActivity extends ListActivity{
 			loadAccounts();
 		}
 	}	
-
+/*
 	private void setActivityIndicatorsVisibility(int visibility) {
 		//FINISH THIS TO LET USER KNOW PROGRAM IS STILL WORKING
 		
@@ -299,33 +327,40 @@ public class ListAccountsActivity extends ListActivity{
         //pb.setVisibility(visibility);
         //tv.setVisibility(visibility);
     }
+*/
 	
-	private void showActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.VISIBLE);
+	private void showDialog() {
+		authenticating = true;
+		dialog = ProgressDialog.show(ListAccountsActivity.this, "", "Authenticating...", true);
     }
     
-    private void hideActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.INVISIBLE);
+    private void hideDialog() {
+    	if(dialog != null){
+    		dialog.dismiss();
+    	}
+    	authenticating = false;
     }
-	
+
 	private class AuthenticateTask extends AsyncTask<Void, Void, Boolean> {
     	
 		@Override
+		protected void onPreExecute(){
+			showDialog();
+		}
+		
+		@Override
 		protected Boolean doInBackground(Void... arg0) {
-
-			authenticating = true;
 			return new Boolean(Authentication.authenticate(context));
 			//return true;
 		}
     	
 		@Override
 		protected void onPostExecute(Boolean result) {
-			authenticating = false;
 			if (result.booleanValue()) {
 				//startActivity(tabViewIntent);
-	        	new LoadImagesTask().execute((Void[]) null);				
+	        	new LoadImagesTask().execute((Void[]) null);
 			} else {
-				dialog.dismiss();
+				hideDialog();
 				showAlert("Login Failure", "Authentication failed.  Please check your User Name and API Key.");
 			}
 		}
@@ -335,7 +370,6 @@ public class ListAccountsActivity extends ListActivity{
     	
 		@Override
 		protected ArrayList<Flavor> doInBackground(Void... arg0) {
-			Log.d("auth", "task2");
 			return (new FlavorManager()).createList(true, context);
 		}
     	
@@ -348,13 +382,12 @@ public class ListAccountsActivity extends ListActivity{
 					flavorMap.put(flavor.getId(), flavor);
 				}
 				Flavor.setFlavors(flavorMap);
-				dialog.dismiss();
+				hideDialog();
 				startActivity(tabViewIntent);
 			} else {
-				dialog.dismiss();
+				hideDialog();
 				showAlert("Login Failure", "There was a problem loading server flavors.  Please try again.");
 			}
-			hideActivityIndicators();
 		}
     }
 
@@ -362,7 +395,6 @@ public class ListAccountsActivity extends ListActivity{
     	
 		@Override
 		protected ArrayList<Image> doInBackground(Void... arg0) {
-			Log.d("auth", "task3");
 			return (new ImageManager()).createList(true, context);
 		}
     	
@@ -378,10 +410,9 @@ public class ListAccountsActivity extends ListActivity{
 				new LoadFlavorsTask().execute((Void[]) null);
 				//startActivity(tabViewIntent);
 			} else {
-				dialog.dismiss();
+				hideDialog();
 				showAlert("Login Failure", "There was a problem loading server images.  Please try again.");
 			}
-			hideActivityIndicators();
 		}
     }
     
@@ -394,7 +425,6 @@ public class ListAccountsActivity extends ListActivity{
 	        return;
 	    } }); 
 		alert.show();
-		hideActivityIndicators();
     }
 	
 		

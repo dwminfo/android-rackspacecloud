@@ -91,19 +91,19 @@ public class ViewServerActivity extends Activity {
         loadFlavors();
         loadImages();
     }
-
+/*
     private void loadImage() {
     	// hate to do this, but devices run out of memory after a few rotations
     	// because the background images are so large
-    	//if (!imageLoaded) {
+    	if (!imageLoaded) {
     		ImageView osLogo = (ImageView) findViewById(R.id.view_server_os_logo);
     		osLogo.setAlpha(100);
     		osLogo.setImageResource(server.getImage().logoResourceId());
-    	//	imageLoaded = true;
-    	//}
+    		imageLoaded = true;
+    	}
 
     }
-    
+*/  
     private void loadServerData() {
     	TextView name = (TextView) findViewById(R.id.view_server_name);
     	name.setText(server.getName());
@@ -157,7 +157,7 @@ public class ViewServerActivity extends Activity {
 	    	ipAddressesLoaded = true;
     	}
     	
-    	loadImage();
+    	//loadImage();
     }
     
     private void loadFlavors() {

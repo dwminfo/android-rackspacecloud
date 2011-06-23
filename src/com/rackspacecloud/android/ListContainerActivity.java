@@ -56,7 +56,7 @@ public class ListContainerActivity extends ListActivity {
 	}
 
 	private void restoreState(Bundle state) {
-		if (state != null && state.containsKey("container")) {
+		if (state != null && state.containsKey("container") && state.getSerializable("container") != null) {
 			containers = (Container[]) state.getSerializable("container");
 			if (containers.length == 0) {
 				displayNoServersCell();
@@ -234,6 +234,7 @@ public class ListContainerActivity extends ListActivity {
 																		// again
 			return true;
 		case R.id.refresh:
+			containers = null;
 			loadContainers();
 			return true;
 		}
