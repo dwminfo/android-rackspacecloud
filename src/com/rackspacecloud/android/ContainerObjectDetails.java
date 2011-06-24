@@ -176,7 +176,7 @@ public class ContainerObjectDetails extends Activity {
     }
     
     private class MyOnClickListener implements View.OnClickListener {
-        //@Override********************************************************************remove comment
+        @Override
         public void onClick(View v) {
         	if(v.equals(findViewById(R.id.preview_button))){
         		Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(cdnURL + "/" + objects.getCName()));
@@ -184,12 +184,15 @@ public class ContainerObjectDetails extends Activity {
         	}
         	/*
         	 * need to perform different functions based on if
-        	 * the file has in the devices filesystem
+        	 * the file is in the devices filesystem
         	 */
         	if(v.equals(findViewById(R.id.download_button))){
         		if(!isDownloaded){
         			if(storageIsReady()){
         				new ContainerObjectDownloadTask().execute();
+        			}
+        			else{
+        				showAlert("Error", "Storage not found.");
         			}
         		}
         		else{
