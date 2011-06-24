@@ -13,6 +13,12 @@ public class Preferences extends PreferenceActivity{
 
     // The key to the Auth Server preference.
     public static final String PREF_KEY_AUTH_SERVER = "authServerPref";
+    
+    // The key to the application passcode hash.
+    public static final String PREF_KEY_PASSCODE_HASH = "passcode";
+    
+    //the key to the Password on/off preference.
+    public static final String PREF_KEY_PASSWORD_LOCK = "hasPassword";
 
     // The values of the preferences for the type of results to show (us/uk).
     // Identical to the values specified in res/values/strings.xml.
@@ -22,7 +28,6 @@ public class Preferences extends PreferenceActivity{
     //Define auth server here
     public static final String COUNTRY_US_AUTH_SERVER = "https://auth.api.rackspacecloud.com/v1.0";
     public static final String COUNTRY_UK_AUTH_SERVER = "https://lon.auth.api.rackspacecloud.com/v1.0";
-
     
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
