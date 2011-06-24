@@ -61,8 +61,6 @@ public class ListAccountsActivity extends ListActivity{
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		Log.d("info", "captin the acounnt activity state has been saved");
-		Log.d("info", "captin it is " + Boolean.toString(authenticating) + "that the app is authing");
 		outState.putBoolean("authenticating", authenticating);
 		//need to set authenticating back to true because it is set to false
 		//in hideDialog()
@@ -96,7 +94,6 @@ public class ListAccountsActivity extends ListActivity{
 	@Override
 	protected void onStart(){
 		super.onStart();
-		Log.d("info", "captin onStop called");
 		if(authenticating){
 			showDialog();
 		}
@@ -105,7 +102,6 @@ public class ListAccountsActivity extends ListActivity{
 	@Override
 	protected void onStop(){
 		super.onStop();
-		Log.d("info", "captin onStart called");
 		if(authenticating){
 			hideDialog();
 			authenticating = true;
@@ -113,8 +109,6 @@ public class ListAccountsActivity extends ListActivity{
 	}
 		
 	private void loadAccounts() {
-		if(accounts != null)
-			Log.d("loadAccounts", "captin the lenght is: " + accounts.size());
 		//check and see if there are any in memory
 		if(accounts == null){
 			accounts = readAccounts();
@@ -123,7 +117,6 @@ public class ListAccountsActivity extends ListActivity{
 		if(accounts == null){
 			accounts = new ArrayList<Account>();
 		}
-		Log.d("loadAccounts2", "captin the lenght is: " + accounts.size());
 
 		setAccountList();
 	}
@@ -164,7 +157,6 @@ public class ListAccountsActivity extends ListActivity{
 			in = new ObjectInputStream(fis);
 			ArrayList<Account> file = (ArrayList<Account>)in.readObject();
 			in.close();
-			Log.d("captin", Boolean.toString(file == null));
 			return file;
 		} catch (FileNotFoundException e) {
 			//showAlert("Error", "Could not load accounts.");
@@ -303,7 +295,6 @@ public class ListAccountsActivity extends ListActivity{
 			acc.setApiKey(b.getString("apiKey"));
 			acc.setUsername(b.getString("username"));
 			acc.setAuthServer(b.getString("server"));
-			Log.d("captin captin!", acc.getAuthServer());
 			accounts.add(acc);
 			writeAccounts();
 			loadAccounts();

@@ -23,14 +23,12 @@ import org.xml.sax.XMLReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -39,7 +37,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.rackspace.cloud.servers.api.client.Account;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Flavor;
 import com.rackspace.cloud.servers.api.client.Image;
@@ -83,7 +80,6 @@ public class ViewServerActivity extends Activity {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("server", server);
 		if(pollServerTask != null && isPolling){
-			Log.d("info", "captin cancelling the polling");
 			pollServerTask.cancel(true);
 		}
 		outState.putBoolean("wasPolling", isPolling);
@@ -94,10 +90,11 @@ public class ViewServerActivity extends Activity {
     		pollServerTask = new PollServerTask();
     		pollServerTask.execute((Void[]) null);
     	}
-    	if (state != null && state.containsKey("server")) {
+    	if (server == null && state != null && state.containsKey("server")) {
     		server = (Server) state.getSerializable("server");
     		//imageLoaded = state.getBoolean("imageLoaded");
     	}
+    	canPoll = true;
         loadServerData();
         setupButtons();
         loadFlavors();
@@ -125,10 +122,8 @@ public class ViewServerActivity extends Activity {
     public void onStop(){
     	super.onStop();
     	if(pollServerTask != null && isPolling){
-    		Log.d("info", "captin in onStop cancelling");
     		pollServerTask.cancel(true);
     		isPolling = true;
-			Log.d("info", "captin polling is true");
     	}
     	canPoll = false;
     	
@@ -143,7 +138,6 @@ public class ViewServerActivity extends Activity {
     public void onStart(){
     	super.onStart();
     	if(isPolling){
-    		Log.d("info", "captin in onStart starting");
     		pollServerTask = new PollServerTask();
     		pollServerTask.execute((Void[]) null);
     	}
@@ -314,18 +308,7 @@ public class ViewServerActivity extends Activity {
     	});
     	
     }
-    
-    private void showAlert(String title, String message) {
-		AlertDialog alert = new AlertDialog.Builder(ViewServerActivity.this).create();
-		alert.setTitle(title);
-		alert.setMessage(message);
-		alert.setButton("OK", new DialogInterface.OnClickListener() {
-	      public void onClick(DialogInterface dialog, int which) {
-	        return;
-	    } }); 
-		alert.show();
-    }
-    
+        
     private void showToast(String message) {
 		Context context = getApplicationContext();
 		int duration = Toast.LENGTH_SHORT;
@@ -354,106 +337,129 @@ public class ViewServerActivity extends Activity {
 		this.server = server;
 	}
 
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-        case R.id.view_server_soft_reboot_button:
-            return new AlertDialog.Builder(ViewServerActivity.this)
-        	.setIcon(R.drawable.alert_dialog_icon)
-        	.setTitle("Soft Reboot")
-        	.setMessage("Are you sure you want to perform a soft reboot?")
-        	.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked OK so do some stuff
-        			new SoftRebootServerTask().execute((Void[]) null);
-        		}
-        	})
-        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked Cancel so do some stuff
-        		}
-        	})
-        	.create();
-        case R.id.view_server_hard_reboot_button:
-            return new AlertDialog.Builder(ViewServerActivity.this)
-        	.setIcon(R.drawable.alert_dialog_icon)
-        	.setTitle("Hard Reboot")
-        	.setMessage("Are you sure you want to perform a hard reboot?")
-        	.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked OK so do some stuff
-        			new HardRebootServerTask().execute((Void[]) null);
-        		}
-        	})
-        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked Cancel so do some stuff
-        		}
-        	})
-        	.create();
-        case R.id.view_server_resize_button:
-            return new AlertDialog.Builder(ViewServerActivity.this)
-            .setItems(flavorNames, new ResizeClickListener())
-        	.setIcon(R.drawable.alert_dialog_icon)
-        	.setTitle("Resize Server")
-        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked Cancel so do some stuff
-        		}
-        	})
-        	.create();
-        case R.id.view_server_delete_button:
-            return new AlertDialog.Builder(ViewServerActivity.this)
-        	.setIcon(R.drawable.alert_dialog_icon)
-        	.setTitle("Delete Server")
-        	.setMessage("Are you sure you want to delete this server?  This operation cannot be undone and all backups will be deleted.")
-        	.setPositiveButton("Delete Server", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked OK so do some stuff
-        			new DeleteServerTask().execute((Void[]) null);
-        		}
-        	})
-        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked Cancel so do some stuff
-        		}
-        	})
-        	.create();          
-         case R.id.view_server_rename_button:
-        	final EditText input = new EditText(this);
-        	input.setText(server.getName());
-            return new AlertDialog.Builder(ViewServerActivity.this)
-        	.setIcon(R.drawable.alert_dialog_icon)
-            .setView(input)
-        	.setTitle("Rename")
-        	.setMessage("Enter new name for server: ")        	         
-        	.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked OK so do some stuff
-        			modifiedServerName = input.getText().toString();
-        			new RenameServerTask().execute((Void[]) null);
-        		}
-        	})
-        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked Cancel so do some stuff
-        		}
-        	})
-        	.create();     
-         case R.id.view_server_rebuild_button:
-            return new AlertDialog.Builder(ViewServerActivity.this)
-            .setItems(imageNames, new RebuildClickListener())
-         	.setIcon(R.drawable.alert_dialog_icon)
-         	.setTitle("Rebuild Server")
-         	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-         		public void onClick(DialogInterface dialog, int whichButton) {
-         			// User clicked Cancel so do some stuff
-         		}
-         	})
-         	.create();
-        }
-        return null;
-    }
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		if(server == null){
+			return new AlertDialog.Builder(ViewServerActivity.this)
+			.setIcon(R.drawable.alert_dialog_icon)
+			.setTitle("Error")
+			.setMessage("Server is Busy")
+			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					// User clicked Cancel so do some stuff
+				}
+			})
+			.create();
+		}
+		else{
+			switch (id) {
+			case R.id.view_server_soft_reboot_button:
+				return new AlertDialog.Builder(ViewServerActivity.this)
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Soft Reboot")
+				.setMessage("Are you sure you want to perform a soft reboot?")
+				.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked OK so do some stuff
+						new SoftRebootServerTask().execute((Void[]) null);
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				})
+				.create();
+			case R.id.view_server_hard_reboot_button:
+				return new AlertDialog.Builder(ViewServerActivity.this)
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Hard Reboot")
+				.setMessage("Are you sure you want to perform a hard reboot?")
+				.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked OK so do some stuff
+						new HardRebootServerTask().execute((Void[]) null);
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				})
+				.create();
+			case R.id.view_server_resize_button:
+				return new AlertDialog.Builder(ViewServerActivity.this)
+				.setItems(flavorNames, new ResizeClickListener())
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Resize Server")
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				})
+				.create();
+			case R.id.view_server_delete_button:
+				return new AlertDialog.Builder(ViewServerActivity.this)
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Delete Server")
+				.setMessage("Are you sure you want to delete this server?  This operation cannot be undone and all backups will be deleted.")
+				.setPositiveButton("Delete Server", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked OK so do some stuff
+						new DeleteServerTask().execute((Void[]) null);
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				})
+				.create();          
+			case R.id.view_server_rename_button:
+				final EditText input = new EditText(this);
+				input.setText(server.getName());
+				return new AlertDialog.Builder(ViewServerActivity.this)
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setView(input)
+				.setTitle("Rename")
+				.setMessage("Enter new name for server: ")        	         
+				.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked OK so do some stuff
+						modifiedServerName = input.getText().toString();
+						new RenameServerTask().execute((Void[]) null);
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				})
+				.create();     
+			case R.id.view_server_rebuild_button:
+				return new AlertDialog.Builder(ViewServerActivity.this)
+				.setItems(imageNames, new RebuildClickListener())
+				.setIcon(R.drawable.alert_dialog_icon)
+				.setTitle("Rebuild Server")
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// User clicked Cancel so do some stuff
+					}
+				})
+				.create();
+			}
+		}
+		return new AlertDialog.Builder(ViewServerActivity.this)
+		.setIcon(R.drawable.alert_dialog_icon)
+		.setTitle("Error")
+		.setMessage("Server is Busy")
+		.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				// User clicked Cancel so do some stuff
+			}
+		})
+		.create();
+	}
 
     private class ResizeClickListener implements android.content.DialogInterface.OnClickListener {
 
@@ -511,13 +517,11 @@ public class ViewServerActivity extends Activity {
 		
 		@Override 
 		protected void onPreExecute(){
-			Log.d("info", "captin The POLLING TASK HAS STARTED!");
 			isPolling = true;
 		}
 		
 		@Override
 		protected Server doInBackground(Void... arg0) {
-			Log.d("info", "captin can poll is " + canPoll);
 			if(isCancelled() || !canPoll){
 				return null;
 			}
@@ -535,17 +539,14 @@ public class ViewServerActivity extends Activity {
 		protected void onPostExecute(Server result) {
 			server = result;
 			if(server != null){
-				Log.d("info", "captin about to load data");
 				loadServerData();
 			}
 			isPolling = false;
-			Log.d("info", "captin polling is false");
 		}
 		
 		@Override
 		protected void onCancelled (){
 			isPolling = false;
-			Log.d("info", "captin polling is false and the poll has been canceled");
 		}
 		
     }
