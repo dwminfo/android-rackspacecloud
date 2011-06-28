@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -30,6 +31,7 @@ import android.widget.TextView;
 
 import com.rackspace.cloud.files.api.client.ContainerManager;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 /** 
  * 
@@ -120,22 +122,31 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 		return cse;
     }
     
-    private class SaveFileTask extends AsyncTask<Void, Void, HttpResponse> {
+	private void startFileError(String message, HttpBundle bundle){
+		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
+		viewIntent.putExtra("errorMessage", message);
+		viewIntent.putExtra("response", bundle.getResponseText());
+		viewIntent.putExtra("request", bundle.getCurlRequest());
+		startActivity(viewIntent);
+	}
+    
+    private class SaveFileTask extends AsyncTask<Void, Void, HttpBundle> {
     	private CloudServersException exception;
     	
     	@Override
-		protected HttpResponse doInBackground(Void... arg0) {
-			HttpResponse resp = null;
+		protected HttpBundle doInBackground(Void... arg0) {
+    		HttpBundle bundle = null;
 			try {
-				resp = (new ContainerManager(context)).create(fileName.getText());
+				bundle = (new ContainerManager(context)).create(fileName.getText());
 			} catch (CloudServersException e) {
 				exception = e;
 			}
-			return resp;
+			return bundle;
 		}
     	
 		@Override
-		protected void onPostExecute(HttpResponse response) {
+		protected void onPostExecute(HttpBundle bundle) {
+			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 201) {
@@ -144,13 +155,13 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem creating your container.");
+						startFileError("There was a problem creating your container.", bundle);
 					} else {
-						showAlert("Error", "There was a problem creating your container: " + cse.getMessage() + " Check container name and try again");
+						startFileError("There was a problem creating your container: " + cse.getMessage() + " Check container name and try again", bundle);
 					}
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem creating your container: " + exception.getMessage()+" Check container name and try again");				
+				startFileError("There was a problem creating your container: " + exception.getMessage()+" Check container name and try again", bundle);				
 			}			
 		}
     }

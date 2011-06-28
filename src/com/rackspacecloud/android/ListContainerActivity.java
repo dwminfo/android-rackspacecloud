@@ -41,6 +41,7 @@ public class ListContainerActivity extends ListActivity {
 	public int kbConver = 1024;
 	protected static final int DELETE_ID = 0;
 	private Context context;
+	private boolean loading;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,7 @@ public class ListContainerActivity extends ListActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("container", containers);
+		outState.putBoolean("loading", loading);
 	}
 
 	private void restoreState(Bundle state) {
@@ -75,9 +77,6 @@ public class ListContainerActivity extends ListActivity {
 			Intent viewIntent = new Intent(this, ContainerObjectsActivity.class);
 			viewIntent.putExtra("container", containers[position]);
 			startActivityForResult(viewIntent, 55);
-
-			// startActivityForResult(viewIntent, 55); // arbitrary number;
-			// never used again
 		}
 	}
 
@@ -142,6 +141,11 @@ public class ListContainerActivity extends ListActivity {
 		private CloudServersException exception;
 
 		@Override
+		protected void onPreExecute(){
+			loading = true;
+		}
+			
+		@Override
 		protected ArrayList<Container> doInBackground(Void... arg0) {
 			ArrayList<Container> containers = null;
 
@@ -168,7 +172,7 @@ public class ListContainerActivity extends ListActivity {
 					containerNames[i] = container.getName();
 				}
 			}
-
+			loading = false;
 			new LoadCDNContainersTask().execute((Void[]) null);
 		}
 	}
@@ -178,6 +182,11 @@ public class ListContainerActivity extends ListActivity {
 
 		private CloudServersException exception;
 
+		@Override
+		protected void onPreExecute(){
+			loading = true;
+		}
+		
 		@Override
 		protected ArrayList<Container> doInBackground(Void... arg0) {
 			ArrayList<Container> cdnContainers = null;
@@ -211,6 +220,7 @@ public class ListContainerActivity extends ListActivity {
 				}
 			}
 			setContainerList();
+			loading = false;
 		}
 	}
 
@@ -227,11 +237,7 @@ public class ListContainerActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case R.id.add_container:
 			startActivityForResult(
-					new Intent(this, AddContainerActivity.class), 56); // arbitrary
-																		// number;
-																		// never
-																		// used
-																		// again
+					new Intent(this, AddContainerActivity.class), 56); // arbitrary number never used again
 			return true;
 		case R.id.refresh:
 			containers = null;

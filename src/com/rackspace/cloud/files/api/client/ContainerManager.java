@@ -29,6 +29,7 @@ import com.rackspace.cloud.files.api.client.parsers.ContainerXMLParser;
 import com.rackspace.cloud.servers.api.client.Account;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.EntityManager;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
 /**
@@ -42,7 +43,7 @@ public class ContainerManager extends EntityManager {
 		this.context = context;
 	}
 
-	public HttpResponse create(Editable editable) throws CloudServersException {
+	public HttpBundle create(Editable editable) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPut put = new HttpPut(Account.getAccount().getStorageUrl() + "/" + editable);
@@ -50,8 +51,12 @@ public class ContainerManager extends EntityManager {
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(put);
+		
 		try {
 			resp = httpclient.execute(put);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -65,7 +70,7 @@ public class ContainerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}
-		return resp;
+		return bundle;
 	}
 
 	public ArrayList<Container> createCDNList(boolean detail) throws CloudServersException {
@@ -125,7 +130,7 @@ public class ContainerManager extends EntityManager {
 	}
 
 	
-	public HttpResponse enable(String container, String ttl, String logRet)
+	public HttpBundle enable(String container, String ttl, String logRet)
 			throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
@@ -138,8 +143,12 @@ public class ContainerManager extends EntityManager {
 		Log.v("cdn manager", ttl + container + logRet);
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(put);
+		
 		try {
 			resp = httpclient.execute(put);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -153,9 +162,9 @@ public class ContainerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}
-		return resp;
+		return bundle;
 	}
-	public HttpResponse disable(String container, String cdn, String ttl, String logRet)
+	public HttpBundle disable(String container, String cdn, String ttl, String logRet)
 	throws CloudServersException {
        HttpResponse resp = null;
  	    CustomHttpClient httpclient = new CustomHttpClient(context);
@@ -168,8 +177,12 @@ public class ContainerManager extends EntityManager {
        		post.addHeader("X-CDN-Enabled", cdn);
        		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+       		HttpBundle bundle = new HttpBundle();
+    		bundle.setCurlRequest(post);
+       		
        		try {
        			resp = httpclient.execute(post);
+       			bundle.setHttpResponse(resp);
        		} catch (ClientProtocolException e) {
        			CloudServersException cse = new CloudServersException();
        			cse.setMessage(e.getLocalizedMessage());
@@ -183,10 +196,10 @@ public class ContainerManager extends EntityManager {
        			cse.setMessage(e.getLocalizedMessage());
        			throw cse;
        		}
-       		return resp;
+       		return bundle;
 	}
 
-	public HttpResponse delete(String string) throws CloudServersException {
+	public HttpBundle delete(String string) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpDelete put = new HttpDelete(Account.getAccount().getStorageUrl() + "/" + string);
@@ -194,8 +207,12 @@ public class ContainerManager extends EntityManager {
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(put);
+		
 		try {
 			resp = httpclient.execute(put);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -209,7 +226,7 @@ public class ContainerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}
-		return resp;
+		return bundle;
 	}
 
 	public ArrayList<Container> createList(boolean detail)

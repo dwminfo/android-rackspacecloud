@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-   <item android:id="@+id/delete_container" android:title="Delete Container" android:icon="@drawable/add_button" />
+   <item android:icon="@drawable/add_button" android:title="Delete" android:id="@+id/delete_container"/>
    <item android:id="@+id/enable_cdn" android:title="Enable CDN" android:icon="@drawable/add_button" />
    <item android:id="@+id/refresh" android:title="Refresh" android:icon="@drawable/refresh_button" />
+   <item android:title="Add Folder" android:id="@+id/add_folder" android:icon="@drawable/add_button"></item>
+   <item android:title="Add File" android:id="@+id/add_file" android:icon="@drawable/add_button"></item>
 </menu>

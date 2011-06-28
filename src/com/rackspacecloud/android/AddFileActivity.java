@@ -15,61 +15,58 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import com.rackspace.cloud.files.api.client.ContainerObjectManager;
+import com.rackspace.cloud.servers.api.client.CloudServersException;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
+import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
+
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import com.rackspace.cloud.servers.api.client.CloudServersException;
-import com.rackspace.cloud.servers.api.client.Server;
-import com.rackspace.cloud.servers.api.client.ServerManager;
-import com.rackspace.cloud.servers.api.client.http.HttpBundle;
-import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
+public class AddFileActivity extends Activity implements OnClickListener{
+	
+	private Context context;	
+	private EditText fileName;
+	private EditText contents;
+	private String containerName;
+	private String path;
 
-public class PasswordServerActivity extends Activity implements OnClickListener{
-	
-	private Server server;
-	private String modifiedPassword;
-	
-	public void onCreate(Bundle savedInstanceState) {
+	/** Called when the activity is first created. */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.viewchangepassword); 
-        server = (Server) this.getIntent().getExtras().get("server");
-    	setupButtons();       
+        setContentView(R.layout.addtextfile);
+        context = getApplicationContext();
+        containerName = (String) this.getIntent().getExtras().get("Cname");
+        path = (String) this.getIntent().getExtras().get("curPath");
+        setUpInputs();
     }
-
-	private void setupButtons() {
-		Button update = (Button) findViewById(R.id.password_change_button);
-		update.setOnClickListener(this);
-	}
-	
-	@Override
-	public void onClick(View v) {
-		String password = ((EditText)findViewById(R.id.password_edittext)).getText().toString();
-		String confirm = ((EditText)findViewById(R.id.password_confirm_edittext)).getText().toString();
-		if(password.equals(confirm)){
-			modifiedPassword = password;
-			new PasswordServerTask().execute((Void[]) null);	
-		}
-		else{
-			showToast("The password and confirmation do not match");
-		}
-	}
-	
-	private void showToast(String message) {
-		Context context = getApplicationContext();
-		int duration = Toast.LENGTH_SHORT;
-		Toast toast = Toast.makeText(context, message, duration);
-		toast.show();
+    
+    private void setUpInputs(){
+    	((Button) findViewById(R.id.new_file_button)).setOnClickListener(this);
+    	fileName = ((EditText)findViewById(R.id.file_name_text));
+    	contents = ((EditText)findViewById(R.id.new_file_text));
     }
-
+    
+    public void onClick(View arg0) {
+		if ("".equals(fileName.getText().toString())) {
+			showAlert("Required Fields Missing", " File name is required.");
+		} else {
+			//showActivityIndicators();
+			new SaveFileTask().execute((Void[]) null);
+		}
+	}
+    
+    //using cloudServersException, it works for us too
 	private CloudServersException parseCloudServersException(HttpResponse response) {
 		CloudServersException cse = new CloudServersException();
 		try {
@@ -99,60 +96,63 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 		}
 		return cse;
 	}
-
-	private void startServerError(String message, HttpBundle bundle){
+	
+	private void showAlert(String title, String message) {
+    	try {
+		AlertDialog alert = new AlertDialog.Builder(this).create();
+		alert.setTitle(title);
+		alert.setMessage(message);
+		alert.setButton("OK", new DialogInterface.OnClickListener() {
+	      public void onClick(DialogInterface dialog, int which) {
+	        return;
+	    } }); 
+		alert.show();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+	
+	private void startFileError(String message, HttpBundle bundle){
 		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
 		viewIntent.putExtra("errorMessage", message);
 		viewIntent.putExtra("response", bundle.getResponseText());
 		viewIntent.putExtra("request", bundle.getCurlRequest());
 		startActivity(viewIntent);
 	}
-	
-	private class PasswordServerTask extends AsyncTask<Void, Void, HttpBundle> {
 
-		private CloudServersException exception;
-
-		protected void onPreExecute(){
-			showToast("Change root password process has begun");
-		}
-		
-		@Override
+	private class SaveFileTask extends AsyncTask<Void, Void, HttpBundle> {
+    	private CloudServersException exception;
+    	
+    	@Override
 		protected HttpBundle doInBackground(Void... arg0) {
-			HttpBundle bundle = null;
+    		HttpBundle bundle = null;
 			try {
-				Log.d("info", "captin the password is: " + modifiedPassword);
-				bundle = (new ServerManager()).changePassword(server, modifiedPassword, getApplicationContext());
+				bundle = (new ContainerObjectManager(context)).addObject(containerName, path, fileName.getText().toString(), "text/plain", contents.getText().toString());
 			} catch (CloudServersException e) {
 				exception = e;
 			}
 			return bundle;
 		}
-
+    	
 		@Override
 		protected void onPostExecute(HttpBundle bundle) {
 			HttpResponse response = bundle.getResponse();
 			if (response != null) {
-				int statusCode = response.getStatusLine().getStatusCode();	
-				if(statusCode == 204){
-					String mustMatch = "The server's root password has successfully been changed.";
-					Toast passwordError = Toast.makeText(getApplicationContext(), mustMatch, Toast.LENGTH_SHORT);
-					passwordError.show();
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == 201) {
+					setResult(Activity.RESULT_OK);
 					finish();
-				}
-				if (statusCode != 204) {
+				} else {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						startServerError("There was a problem changing your password.", bundle);
+						startFileError("There was a problem creating your container.", bundle);
 					} else {
-						startServerError("There was a problem changing your password: " + cse.getMessage() + " " + statusCode, bundle);
+						startFileError("There was a problem creating your container: " + cse.getMessage() + " Check container name and try again", bundle);
 					}
 				}
 			} else if (exception != null) {
-				startServerError("There was a problem changing your password: " + exception.getMessage(), bundle);
-				
-			}
+				startFileError("There was a problem creating your container: " + exception.getMessage()+" Check container name and try again", bundle);				
+			}			
 		}
-
-
-	}
+    }
 }

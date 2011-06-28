@@ -5,21 +5,22 @@
     android:layout_height="264dip"
     >
     
-    <TextView android:id="@+id/no_files_label"
+    <TextView android:id="@+id/no_servers_label"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="125px"
         android:textColor="#FFFFFF"
+        android:text="No Servers"
         android:gravity="center"
         
-        android:textSize="24sp" android:text="No Files "/>
+        android:textSize="24sp" />
 
-    <TextView android:id="@+id/no_files_sublabel"
+    <TextView android:id="@+id/no_servers_sublabel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10px"
         android:textColor="#FFFFFF"
-        android:text="Press menu to delete an empty container"
+        android:text="Press the Menu button to create a Cloud Server"
         android:gravity="center"
         android:textSize="12sp" />
         

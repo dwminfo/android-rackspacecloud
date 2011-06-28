@@ -1,5 +1,9 @@
 package com.rackspacecloud.android;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.ParseException;
@@ -11,9 +15,11 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.util.EntityUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -21,13 +27,14 @@ import org.xml.sax.XMLReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,6 +45,7 @@ import android.widget.TextView;
 import com.rackspace.cloud.files.api.client.ContainerObjectManager;
 import com.rackspace.cloud.files.api.client.ContainerObjects;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
 
@@ -50,6 +58,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
 public class ContainerObjectDetails extends Activity {
 	
 	private static final int deleteObject = 0;
+	private final String DOWNLOAD_DIRECTORY = "/RackspaceCloud";
 	private ContainerObjects objects;
 	private String containerNames;
 	private String cdnURL;
@@ -60,7 +69,10 @@ public class ContainerObjectDetails extends Activity {
 	private double megaBytes;
 	private double kiloBytes;
 	public Button previewButton;
+	public Button downloadButton;
 	public Context context;
+	private ProgressDialog dialog;
+	private Boolean isDownloaded;
 	
     /** Called when the activity is first created. */
     @Override
@@ -84,25 +96,38 @@ public class ContainerObjectDetails extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("container", objects);
+		outState.putBoolean("isDownloaded", isDownloaded);
 	}
 
     private void restoreState(Bundle state) {
     	if (state != null && state.containsKey("container")) {
     		objects = (ContainerObjects) state.getSerializable("container");
     	}
-        loadObjectData();
-        
-        if ( cdnEnabled.equals("true"))  {
-        	this.previewButton = (Button) findViewById(R.id.preview_button);
-        	previewButton.setOnClickListener(new MyOnClickListener());
-        } else {
-        	this.previewButton = (Button) findViewById(R.id.preview_button);
-        	previewButton.setVisibility(View.GONE);
-      }
-        
+    	loadObjectData();
+
+    	if ( cdnEnabled.equals("true"))  {
+    		this.previewButton = (Button) findViewById(R.id.preview_button);
+    		previewButton.setOnClickListener(new MyOnClickListener());
+    	} else {
+    		this.previewButton = (Button) findViewById(R.id.preview_button);
+    		previewButton.setVisibility(View.GONE);
+    	}
+
+    	if (state != null && state.containsKey("isDownloaded")){
+    		isDownloaded = state.getBoolean("isDownloaded");
+    	}
+    	else{
+    		isDownloaded = fileIsDownloaded();
+    	}
+    	this.downloadButton = (Button) findViewById(R.id.download_button);
+    	if ( isDownloaded )  {
+    		downloadButton.setText("Open File");
+    	} else {
+    		downloadButton.setText("Download File");
+    	}   	
+    	downloadButton.setOnClickListener(new MyOnClickListener());
     }
-   
-    
+
 
     private void loadObjectData() {
     	//Object Name
@@ -151,11 +176,29 @@ public class ContainerObjectDetails extends Activity {
     }
     
     private class MyOnClickListener implements View.OnClickListener {
-        //@Override********************************************************************remove comment
+        @Override
         public void onClick(View v) {
-        	Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(cdnURL + "/" + objects.getCName()));
-        	startActivity(viewIntent);  
-
+        	if(v.equals(findViewById(R.id.preview_button))){
+        		Intent viewIntent = new Intent("android.intent.action.VIEW", Uri.parse(cdnURL + "/" + objects.getCName()));
+        		startActivity(viewIntent);  
+        	}
+        	/*
+        	 * need to perform different functions based on if
+        	 * the file is in the devices filesystem
+        	 */
+        	if(v.equals(findViewById(R.id.download_button))){
+        		if(!isDownloaded){
+        			if(storageIsReady()){
+        				new ContainerObjectDownloadTask().execute();
+        			}
+        			else{
+        				showAlert("Error", "Storage not found.");
+        			}
+        		}
+        		else{
+        			openFile();
+        		}
+        	}
         }
     }
     
@@ -228,6 +271,89 @@ public class ContainerObjectDetails extends Activity {
 		this.objects = object;
 	}
 	
+	/*
+	 * returns false if external storage is not avaliable
+	 * (if its mounted, missing, read-only, etc)
+	 * from: http://developer.android.com/guide/topics/data/data-storage.html#filesExternal
+	 */
+	private boolean storageIsReady(){
+		boolean mExternalStorageAvailable = false;
+		boolean mExternalStorageWriteable = false;
+		String state = Environment.getExternalStorageState();
+
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+		    // We can read and write the media
+		    mExternalStorageAvailable = mExternalStorageWriteable = true;
+		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+		    // We can only read the media
+		    mExternalStorageAvailable = true;
+		    mExternalStorageWriteable = false;
+		} else {
+		    // Something else is wrong. It may be one of many other states, but all we need
+		    //  to know is we can neither read nor write
+		    mExternalStorageAvailable = mExternalStorageWriteable = false;
+		}
+		return mExternalStorageAvailable && mExternalStorageWriteable;
+	}
+	
+	private boolean fileIsDownloaded(){
+		if(storageIsReady()){
+			String fileName = Environment.getExternalStorageDirectory().getPath() + "/RackspaceCloud/" + objects.getCName();
+			File f = new File(fileName);
+			return f.isFile();
+		}
+		return false;
+	}
+	
+	private void openFile(){
+		File object = new File(Environment.getExternalStorageDirectory().getPath() + "/RackspaceCloud/" + objects.getCName());
+		Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
+	    File file = new File(object.getAbsolutePath()); 
+	    String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+	    String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+	    myIntent.setDataAndType(Uri.fromFile(file),mimetype);
+	    startActivity(myIntent);
+	}
+	
+	private boolean writeFile(byte[] data){
+		String directoryName = Environment.getExternalStorageDirectory().getPath() + DOWNLOAD_DIRECTORY;
+		File f = new File(directoryName);
+		
+		if(!f.isDirectory()){
+			if(!f.mkdir()){
+				return false;
+			}
+		}
+		
+		String filename = directoryName + "/" + objects.getCName();
+		File object = new File(filename);
+		BufferedOutputStream bos = null;
+		
+		try{
+			FileOutputStream fos = new FileOutputStream(object);
+			bos = new BufferedOutputStream(fos);
+			bos.write(data);
+		}
+		catch(FileNotFoundException e){
+			e.printStackTrace();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
+		finally{
+			if(bos != null){
+				try {
+					bos.flush();
+					bos.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return true;
+	}
+	
 	//Task's
 	    	
 	    	 private CloudServersException parseCloudServersException(HttpResponse response) {
@@ -260,24 +386,37 @@ public class ContainerObjectDetails extends Activity {
 	    			return cse;
 	    	    }
 	    	 
-	    	 private class ContainerObjectDeleteTask extends AsyncTask<Void, Void, HttpResponse> {
+	    		private void startFileError(String message, HttpBundle bundle){
+	    			Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
+	    			viewIntent.putExtra("errorMessage", message);
+	    			viewIntent.putExtra("response", bundle.getResponseText());
+	    			viewIntent.putExtra("request", bundle.getCurlRequest());
+	    			startActivity(viewIntent);
+	    		}
+	    	 
+	    	 private class ContainerObjectDeleteTask extends AsyncTask<Void, Void, HttpBundle> {
 	    	    	
 	    			private CloudServersException exception;
+	    			
+	    			protected void onPreExecute(){
+	    				dialog = ProgressDialog.show(ContainerObjectDetails.this, "", "Deleting...", true);
+	    			}
 
 	    			@Override
-	    			protected HttpResponse doInBackground(Void... arg0) {
-	    				HttpResponse resp = null;	
+	    			protected HttpBundle doInBackground(Void... arg0) {
+	    				HttpBundle bundle = null;	
 	    				try {
-	    					resp = (new ContainerObjectManager(context)).deleteObject(containerNames, objects.getCName() );
-	    					Log.v(LOG, "container name " + objects.getCName() + " " + containerNames);
+	    					bundle = (new ContainerObjectManager(context)).deleteObject(containerNames, objects.getCName() );
 	    				} catch (CloudServersException e) {
 	    					exception = e;
 	    				}
-	    				return resp;
+	    				return bundle;
 	    			}
 	    	    	
 	    			@Override
-	    			protected void onPostExecute(HttpResponse response) {
+	    			protected void onPostExecute(HttpBundle bundle) {
+	    				dialog.dismiss();
+	    				HttpResponse response = bundle.getResponse();
 	    				if (response != null) {
 	    					int statusCode = response.getStatusLine().getStatusCode();
 	    					if (statusCode == 204) {
@@ -287,13 +426,70 @@ public class ContainerObjectDetails extends Activity {
 	    					} else {
 	    						CloudServersException cse = parseCloudServersException(response);
 	    						if ("".equals(cse.getMessage())) {
-	    							showAlert("Error", "There was a problem deleting your File.");
+	    							startFileError("There was a problem deleting your File.", bundle);
 	    						} else {
-	    							showAlert("Error", "There was a problem deleting your file: " + cse.getMessage());
+	    							startFileError("There was a problem deleting your file: " + cse.getMessage(), bundle);
 	    						}
 	    					}
 	    				} else if (exception != null) {
-	    					showAlert("Error", "There was a problem deleting your file: " + exception.getMessage());				
+	    					startFileError("There was a problem deleting your file: " + exception.getMessage(), bundle);				
+	    				}			
+	    			}
+	    	    }
+	    	 
+	    	 private class ContainerObjectDownloadTask extends AsyncTask<Void, Void, HttpBundle> {
+	    	    	
+	    			private CloudServersException exception;
+	    			
+	    			protected void onPreExecute(){
+	    				dialog = ProgressDialog.show(ContainerObjectDetails.this, "", "Downloading...", true);
+	    			}
+
+	    			@Override
+	    			protected HttpBundle doInBackground(Void... arg0) {
+	    				HttpBundle bundle = null;	
+	    				try {
+	    					bundle = (new ContainerObjectManager(context)).getObject(containerNames, objects.getCName());
+	    				} catch (CloudServersException e) {
+	    					exception = e;
+	    				}
+	    				return bundle;
+	    			}
+	    	    	
+	    			@Override
+	    			protected void onPostExecute(HttpBundle bundle) {
+	    				dialog.dismiss();
+	    				HttpResponse response = bundle.getResponse();
+	    				if (response != null) {
+	    					int statusCode = response.getStatusLine().getStatusCode();
+	    					if (statusCode == 200) {
+	    						setResult(Activity.RESULT_OK);
+	    				    	HttpEntity entity = response.getEntity();
+								
+								try {
+									if(writeFile(EntityUtils.toByteArray(entity))){
+										downloadButton.setText("Open File");
+										isDownloaded = true;
+									}
+									else{
+										showAlert("Error", "There was a problem downloading your file.");
+									}
+									
+								} catch (IOException e) {
+									showAlert("Error", "There was a problem downloading your file.");
+									e.printStackTrace();
+								}
+								
+	    					} else {
+	    						CloudServersException cse = parseCloudServersException(response);
+	    						if ("".equals(cse.getMessage())) {
+	    							startFileError("There was a problem downloading your File.", bundle);
+	    						} else {
+	    							startFileError("There was a problem downloading your file: " + cse.getMessage(), bundle);
+	    						}
+	    					}
+	    				} else if (exception != null) {
+	    					startFileError("There was a problem downloading your file: " + exception.getMessage(), bundle);				
 	    				}			
 	    			}
 	    	    }

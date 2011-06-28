@@ -6,8 +6,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -29,9 +27,6 @@ public class CreatePasswordActivity extends Activity {
 		setContentView(R.layout.password);
 		pwManager = new PasswordManager(getSharedPreferences(
 				Preferences.SHARED_PREFERENCES_NAME, MODE_PRIVATE));
-		Log.d("info",
-				"captin the application had a password"
-				+ Boolean.toString(pwManager.hasPassword()));
 		restoreState(savedInstanceState);
 	}
 

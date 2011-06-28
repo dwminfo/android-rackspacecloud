@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import android.content.Context;
+
 import com.rackspace.cloud.files.api.client.CustomHttpClient;
 import com.rackspace.cloud.servers.api.client.parsers.ImagesXMLParser;
 
@@ -31,7 +32,6 @@ import com.rackspace.cloud.servers.api.client.parsers.ImagesXMLParser;
 public class ImageManager extends EntityManager {
 
 	public ArrayList<Image> createList(boolean detail, Context context) {
-		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/images/detail.xml?now=cache_time2");
 		ArrayList<Image> images = new ArrayList<Image>();
