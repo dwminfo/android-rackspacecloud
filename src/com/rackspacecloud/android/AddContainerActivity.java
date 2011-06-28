@@ -28,6 +28,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rackspace.cloud.files.api.client.ContainerManager;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
@@ -75,6 +76,13 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 	    } }); 
 		alert.show();
 		hideActivityIndicators();
+    }
+    
+    private void showToast(String message) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, message, duration);
+		toast.show();
     }
 	
     private void setActivityIndicatorsVisibility(int visibility) {
@@ -157,7 +165,8 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 					if ("".equals(cse.getMessage())) {
 						startFileError("There was a problem creating your container.", bundle);
 					} else {
-						startFileError("There was a problem creating your container: " + cse.getMessage() + " Check container name and try again", bundle);
+						//if container with same name already exists
+						showToast("There was a problem creating your container: " + cse.getMessage() + " Check container name and try again");
 					}
 				}
 			} else if (exception != null) {
