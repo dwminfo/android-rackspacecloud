@@ -98,6 +98,7 @@
 		<activity android:name=".AddFileActivity"></activity>
 		<activity android:name=".ServerErrorActivity" android:theme="@android:style/Theme.Dialog" android:noHistory="true"></activity>
 		<activity android:name=".ErrorDetailsActivity"></activity>
+		<activity android:name=".ConfirmResizeActivity" android:theme="@android:style/Theme.Dialog"></activity>
 
 
 	</application>

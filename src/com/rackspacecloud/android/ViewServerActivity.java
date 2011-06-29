@@ -30,6 +30,9 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -66,7 +69,8 @@ public class ViewServerActivity extends Activity {
 	private boolean isPolling;
 	private PollServerTask pollServerTask;
 	private boolean canPoll;
-
+	private boolean noAskForConfirm;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -81,6 +85,7 @@ public class ViewServerActivity extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("server", server);
+		outState.putBoolean("noAskForConfirm", noAskForConfirm);
 		if(pollServerTask != null && isPolling){
 			pollServerTask.cancel(true);
 		}
@@ -88,6 +93,9 @@ public class ViewServerActivity extends Activity {
 	}
 
 	private void restoreState(Bundle state) {
+		if(state != null && state.containsKey("noAskForConfirm")){
+			noAskForConfirm = state.getBoolean("noAskForConfirm");
+		}
 		if(state != null && state.containsKey("wasPolling") && state.getBoolean("wasPolling") == true){
 			pollServerTask = new PollServerTask();
 			pollServerTask.execute((Void[]) null);
@@ -162,6 +170,16 @@ public class ViewServerActivity extends Activity {
 
 		TextView status = (TextView) findViewById(R.id.view_server_status);
 
+		if(noAskForConfirm == false){
+			if(status.getText().toString().contains("VERIFY_RESIZE")){
+				//show the confimresizeactivity
+				noAskForConfirm = true;
+				Intent viewIntent = new Intent(getApplicationContext(), ConfirmResizeActivity.class);
+				viewIntent.putExtra("server", server);
+				startActivity(viewIntent);
+			}
+		}
+		
 		// show status and possibly the progress, with polling
 		if (!"ACTIVE".equals(server.getStatus())) {
 			status.setText(server.getStatus() + " - " + server.getProgress() + "%");
@@ -331,6 +349,25 @@ public class ViewServerActivity extends Activity {
 	public void setServer(Server server) {
 		this.server = server;
 	}
+	
+	//setup menu for when menu button is pressed
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.view_server_activity_menu, menu);
+		return true;
+	} 
+    
+    @Override 
+    //in options menu, when add account is selected go to add account activity
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case R.id.refresh_server:
+    		loadServerData();
+    		return true;
+    	}	
+    	return false;
+    } 
 
 	private void startServerError(String message, HttpBundle bundle){
 		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
@@ -338,14 +375,6 @@ public class ViewServerActivity extends Activity {
 		viewIntent.putExtra("response", bundle.getResponseText());
 		viewIntent.putExtra("request", bundle.getCurlRequest());
 		startActivity(viewIntent);
-	}
-	
-	private String prints(Object[] arr){
-		String result = "";
-		for(int i = 0; i < arr.length; i++){
-			result += arr[i] + " ";
-		}
-		return result;
 	}
 
 	@Override
@@ -399,7 +428,6 @@ public class ViewServerActivity extends Activity {
 				})
 				.create();
 			case R.id.view_server_resize_button:
-				Log.d("info", "the flavor names are " + prints(flavorNames));
 				return new AlertDialog.Builder(ViewServerActivity.this)
 				.setItems(flavorNames, new ResizeClickListener())
 				.setIcon(R.drawable.alert_dialog_icon)
