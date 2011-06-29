@@ -265,7 +265,6 @@ public class ServerManager extends EntityManager {
 
 		StringEntity tmp = null;
 		try {
-			Log.d("info", "captin the flavor id is " + flavorId);
 			tmp = new StringEntity("<resize xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" flavorId=\"" + flavorId + "\"/>");
 		} catch (UnsupportedEncodingException e) {
 			CloudServersException cse = new CloudServersException();

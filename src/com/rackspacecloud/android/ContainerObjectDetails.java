@@ -42,6 +42,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.rackspace.cloud.files.api.client.ContainerObjectManager;
 import com.rackspace.cloud.files.api.client.ContainerObjects;
@@ -313,9 +314,15 @@ public class ContainerObjectDetails extends Activity {
 	    String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
 	    String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
 	    Log.d("info", "captin the file name is " + object.getName());
-	    Log.d("info", "captin the uri is " + Uri.fromFile(object).toString());
+	    Log.d("info", "captin the uri is " + Uri.decode(Uri.fromFile(object).toString()));
 	    myIntent.setDataAndType(Uri.fromFile(file),mimetype);
-	    startActivity(myIntent);
+	    //myIntent.setData(Uri.fromFile(file));
+	    try{
+	    	startActivity(myIntent);
+	    }
+	    catch(Exception e){
+	    	Toast.makeText(this, "Could not open file.", Toast.LENGTH_SHORT).show();
+	    }
 	}
 	
 	private boolean writeFile(byte[] data){

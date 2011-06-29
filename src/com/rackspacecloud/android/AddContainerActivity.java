@@ -171,7 +171,8 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 				}
 			} else if (exception != null) {
 				startFileError("There was a problem creating your container: " + exception.getMessage()+" Check container name and try again", bundle);				
-			}			
+			}
+			finish();
 		}
     }
 
