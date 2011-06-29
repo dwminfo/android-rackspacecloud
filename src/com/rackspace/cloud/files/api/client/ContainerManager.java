@@ -2,6 +2,9 @@ package com.rackspace.cloud.files.api.client;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -46,8 +49,11 @@ public class ContainerManager extends EntityManager {
 	public HttpBundle create(Editable editable) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPut put = new HttpPut(Account.getAccount().getStorageUrl() + "/" + editable);
-
+		
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), editable.toString());
+		HttpPut put = new HttpPut(url);
+		Log.d("info", "captin the url create " + url);
+		
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -134,8 +140,9 @@ public class ContainerManager extends EntityManager {
 			throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPut put = new HttpPut(Account.getAccount().getCdnManagementUrl() + "/"
-				+ container);
+		String url = getSafeURL(Account.getAccount().getCdnManagementUrl(), container);
+		HttpPut put = new HttpPut(url);
+		Log.d("info", "captin the url enable " + url);
 
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		put.addHeader("X-TTL", ttl);
@@ -168,9 +175,10 @@ public class ContainerManager extends EntityManager {
 	throws CloudServersException {
        HttpResponse resp = null;
  	    CustomHttpClient httpclient = new CustomHttpClient(context);
-       	HttpPost post = new HttpPost(Account.getAccount().getCdnManagementUrl() + "/"
-		+ container);
-
+ 	   String url = getSafeURL(Account.getAccount().getCdnManagementUrl(), container);
+       	HttpPost post = new HttpPost(url);
+       	Log.d("info", "captin the url disable " + url);
+       	
        	post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
        		post.addHeader("X-TTL", ttl);
        		post.addHeader("X-Log-Retention", logRet);
@@ -202,8 +210,10 @@ public class ContainerManager extends EntityManager {
 	public HttpBundle delete(String string) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpDelete put = new HttpDelete(Account.getAccount().getStorageUrl() + "/" + string);
-
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), string);
+		HttpDelete put = new HttpDelete(url);
+		Log.d("info", "captin the url delete " + url);
+		
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -287,6 +297,24 @@ public class ContainerManager extends EntityManager {
 		}
 
 		return containers;
+	}
+	
+	private String getSafeURL(String badURL, String name){
+		URI uri = null;
+		try {
+			uri = new URI("https", badURL.substring(8), "/" + name.toString()+"/", "");
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String url = null;
+		try {
+			url = uri.toURL().toString();
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return url.substring(0, url.length()-1);
 	}
 
 }

@@ -35,6 +35,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -311,6 +312,8 @@ public class ContainerObjectDetails extends Activity {
 	    File file = new File(object.getAbsolutePath()); 
 	    String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
 	    String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+	    Log.d("info", "captin the file name is " + object.getName());
+	    Log.d("info", "captin the uri is " + Uri.fromFile(object).toString());
 	    myIntent.setDataAndType(Uri.fromFile(file),mimetype);
 	    startActivity(myIntent);
 	}

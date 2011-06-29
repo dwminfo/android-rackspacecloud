@@ -2,6 +2,10 @@ package com.rackspace.cloud.files.api.client;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -14,6 +18,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.xml.sax.InputSource;
@@ -21,6 +26,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.rackspace.cloud.files.api.client.parsers.ContainerObjectXMLparser;
 import com.rackspace.cloud.servers.api.client.Account;
@@ -47,7 +53,9 @@ public class ContainerObjectManager extends EntityManager {
 	public ArrayList<ContainerObjects> createList(boolean detail, String passName) throws CloudServersException {
 		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet get = new HttpGet(Account.getAccount().getStorageUrl()+"/"+passName + "?format=xml");
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), passName) + "?format=xml";
+		Log.d("info", "captin the url creatlist: " + url);
+		HttpGet get = new HttpGet(url);
 		ArrayList<ContainerObjects> files = new ArrayList<ContainerObjects>();
 		
 		
@@ -107,7 +115,9 @@ public class ContainerObjectManager extends EntityManager {
 	public HttpBundle deleteObject(String Container, String Object) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpDelete deleteObject = new HttpDelete(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Object);
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), Container + "/" + Object);
+		HttpDelete deleteObject = new HttpDelete(url);
+		Log.d("info", "captin the url deleteobject: " + url);
 				
 		deleteObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
@@ -137,8 +147,9 @@ public class ContainerObjectManager extends EntityManager {
 	public HttpBundle getObject(String Container, String Object) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpGet getObject = new HttpGet(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Object);
-				
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), Container + "/" + Object);
+		HttpGet getObject = new HttpGet(url);
+		Log.d("info", "captin the url getobject: " + url);		
 		getObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -167,8 +178,10 @@ public class ContainerObjectManager extends EntityManager {
 	public HttpBundle addObject(String Container, String Path, String Object, String type) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPut addObject = new HttpPut(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Path + Object);
-				
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), Container + "/" + Path + Object);
+		HttpPut addObject = new HttpPut(url);
+		Log.d("info", "captin the url addobject: " + url);
+		
 		addObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		addObject.addHeader("Content-Type", type);
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
@@ -202,12 +215,24 @@ public class ContainerObjectManager extends EntityManager {
 	public HttpBundle addObject(String Container, String Path, String Object, String type, String data) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPut addObject = new HttpPut(Account.getAccount().getStorageUrl() + "/" + Container + "/" + Path + Object);
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), Container + "/" + Path + Object);
+		HttpPut addObject = new HttpPut(url);
+		Log.d("info", "captin the url addobject2: " + url);
 				
 		addObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		addObject.addHeader("Content-Type", type);
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity(data);
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		addObject.setEntity(tmp);
+		
 		HttpBundle bundle = new HttpBundle();
 		bundle.setCurlRequest(addObject);
 		
@@ -228,6 +253,24 @@ public class ContainerObjectManager extends EntityManager {
 			throw cse;
 		}	
 		return bundle;
+	}
+	
+	private String getSafeURL(String badURL, String name){
+		URI uri = null;
+		try {
+			uri = new URI("https", badURL.substring(8), "/" + name + "/", "");
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String url = null;
+		try {
+			url = uri.toURL().toString();
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return url.substring(0, url.length()-2);
 	}
 
 }

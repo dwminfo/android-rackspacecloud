@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -338,6 +339,14 @@ public class ViewServerActivity extends Activity {
 		viewIntent.putExtra("request", bundle.getCurlRequest());
 		startActivity(viewIntent);
 	}
+	
+	private String prints(Object[] arr){
+		String result = "";
+		for(int i = 0; i < arr.length; i++){
+			result += arr[i] + " ";
+		}
+		return result;
+	}
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
@@ -390,6 +399,7 @@ public class ViewServerActivity extends Activity {
 				})
 				.create();
 			case R.id.view_server_resize_button:
+				Log.d("info", "the flavor names are " + prints(flavorNames));
 				return new AlertDialog.Builder(ViewServerActivity.this)
 				.setItems(flavorNames, new ResizeClickListener())
 				.setIcon(R.drawable.alert_dialog_icon)
@@ -466,7 +476,8 @@ public class ViewServerActivity extends Activity {
 	private class ResizeClickListener implements android.content.DialogInterface.OnClickListener {
 
 		public void onClick(DialogInterface dialog, int which) {
-			selectedFlavorId = which + "";
+			//need to add one because server flavors state at index 1
+			selectedFlavorId = which + 1 + "";
 			new ResizeServerTask().execute((Void[]) null);
 		}
 

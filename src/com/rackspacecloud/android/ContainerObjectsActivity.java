@@ -235,7 +235,7 @@ public class ContainerObjectsActivity extends ListActivity {
 				fileNames[i] = file.getName();
 			}
 		}
-		
+				
 		displayCurrentFiles();
 	}
 	
@@ -612,6 +612,7 @@ public class ContainerObjectsActivity extends ListActivity {
 			if (exception != null) {
 				showAlert("Error", exception.getMessage());
 			}
+			Log.d("info", "captin the length of the fiels is " + result.size());
 			setFileList(result);
 			loadingFiles = false;
 		}

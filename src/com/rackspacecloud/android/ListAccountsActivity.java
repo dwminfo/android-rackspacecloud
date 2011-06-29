@@ -46,13 +46,17 @@ import android.widget.Toast;
 
 public class ListAccountsActivity extends ListActivity{
 
-	private ArrayList<Account> accounts;
+	private final int PASSWORD_PROMPT = 123;
 	private final String FILENAME = "accounts.data";
-	private Intent tabViewIntent;
+	
 	private boolean authenticating;
+	private ArrayList<Account> accounts;
+	private Intent tabViewIntent;
 	private ProgressDialog dialog;
 	private Context context;
-	private final int PASSWORD_PROMPT = 123;
+	
+	//need to store if the user has successfully logged in
+	private boolean loggedIn;
 
 
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,7 @@ public class ListAccountsActivity extends ListActivity{
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putBoolean("authenticating", authenticating);
+		outState.putBoolean("loggedIn", loggedIn);
 		//need to set authenticating back to true because it is set to false
 		//in hideDialog()
 		if(authenticating){
@@ -80,6 +85,12 @@ public class ListAccountsActivity extends ListActivity{
 	
 	@Override
 	protected void onRestoreInstanceState(Bundle state) {
+		if (state != null && state.containsKey("loggedIn")){
+			loggedIn = state.getBoolean("loggedIn");
+		}
+		else{
+			loggedIn = false;
+		}
 		if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
     		showDialog();
     	} else {
@@ -123,7 +134,7 @@ public class ListAccountsActivity extends ListActivity{
 	private void verifyPassword(){
 		PasswordManager pwManager = new PasswordManager(getSharedPreferences(
 				Preferences.SHARED_PREFERENCES_NAME, MODE_PRIVATE));
-		if(pwManager.hasPassword()){
+		if(pwManager.hasPassword() && !loggedIn){
 			createCustomDialog(PASSWORD_PROMPT);
 		}
 	}
@@ -153,9 +164,11 @@ public class ListAccountsActivity extends ListActivity{
 					if(!rightPassword(passwordText.getText().toString())){
 						passwordText.setText("");
 						showToast("Password was incorrect.");
+						loggedIn = false;
 					}
 					else{
 						dialog.dismiss();
+						loggedIn = true;
 					}
 				}
 				
