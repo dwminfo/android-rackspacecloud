@@ -45,7 +45,6 @@ import com.rackspace.cloud.files.api.client.ContainerObjects;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
-//import com.rackspacecloud.android.ViewServerActivity.RenameServerTask;
 
 /**
  * 
@@ -66,7 +65,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	public int kbConver = 1024;
 	private Context context;
 	private String currentPath;
-	private ContainerObjects[] curDirFiles;
+	private ArrayList<ContainerObjects> curDirFiles;
 	//private ProgressDialog dialog;
 	private boolean loadingFiles;
 	private FileAdapter adapter;
@@ -91,15 +90,13 @@ public class ContainerObjectsActivity extends ListActivity {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("container", files);
 		outState.putString("path", currentPath);
-		outState.putSerializable("curFiles", curDirFiles);
+		//outState.putSerializable("curFiles", curDirFiles);
 		outState.putBoolean("loadingFiles", loadingFiles);
 	}
 	
 	
 
 	private void restoreState(Bundle state) {
-		
-		adapter = (FileAdapter)getLastNonConfigurationInstance();
 		
 		if(state != null){
 			if(state.containsKey("path")){
@@ -113,18 +110,17 @@ public class ContainerObjectsActivity extends ListActivity {
 				loadFiles();
 			}
 			else{
-				if(state.containsKey("container") && state.containsKey("curFiles")){
+				if(state.containsKey("container")){// && state.containsKey("curFiles")){
 					files = (ContainerObjects[]) state.getSerializable("container");
-					curDirFiles = (ContainerObjects[]) state.getSerializable("curFiles");
-					if(curDirFiles != null){
-						if(curDirFiles.length == 0){
-							displayNoServersCell();
-						} else {
-							Log.d("info", "captin curDirFiles lenght is: " + curDirFiles.length);
-							getListView().setDividerHeight(1); //restore divider lines
-							setListAdapter(new FileAdapter());
-						}
+					//curDirFiles = (ArrayList<ContainerObjects>) state.getSerializable("curFiles");
+					
+					ArrayList<Object> container = (ArrayList<Object>) getLastNonConfigurationInstance();
+					adapter = (FileAdapter)container.get(0);
+					curDirFiles = (ArrayList<ContainerObjects>)container.get(1);
+					if(adapter == null){
+						adapter = new FileAdapter();
 					}
+					setListAdapter(adapter);
 				}
 			}
 		}
@@ -132,9 +128,14 @@ public class ContainerObjectsActivity extends ListActivity {
 			currentPath = "";
 			loadFiles();
 		}	
+		
+		
 	}
 	
 	public Object onRetainNonConfigurationInstance(){
+		ArrayList<Object> container = new ArrayList<Object>();
+		container.add(adapter);
+		container.add(curDirFiles);
 		return adapter;
 	}
 
@@ -156,7 +157,6 @@ public class ContainerObjectsActivity extends ListActivity {
 	 */
 	private void goUpDirectory(){
 		currentPath = currentPath.substring(0, currentPath.substring(0, currentPath.length()-2).lastIndexOf("/")+1);
-		loadCurrentDirectoryFiles();
 		displayCurrentFiles();
 	}
 
@@ -164,10 +164,11 @@ public class ContainerObjectsActivity extends ListActivity {
 	 * load all file that are in the container
 	 */
 	private void loadFiles() {
-		displayLoadingCell();
+		//displayLoadingCell();
 		new LoadFilesTask().execute();
 	}
 	
+	/*
 	private void displayLoadingCell() {
 		String a[] = new String[1];
 		a[0] = "Loading...";
@@ -178,6 +179,7 @@ public class ContainerObjectsActivity extends ListActivity {
 											// like a list row
 		getListView().setItemsCanFocus(false);
 	}
+	*/
 	
 	/* load only the files that should display for the 
 	 * current directory in the curDirFiles[]
@@ -192,9 +194,9 @@ public class ContainerObjectsActivity extends ListActivity {
 				}
 			}
 
-			curDirFiles = new ContainerObjects[curFiles.size()];
+			curDirFiles = new ArrayList<ContainerObjects>();
 			for(int i = 0; i < curFiles.size(); i++){
-				curDirFiles[i] = curFiles.get(i);
+				curDirFiles.add(i, curFiles.get(i));
 			}
 		}
 	}
@@ -235,18 +237,30 @@ public class ContainerObjectsActivity extends ListActivity {
 				fileNames[i] = file.getName();
 			}
 		}
-				
-		displayCurrentFiles();
 	}
 	
 	private void displayCurrentFiles(){
-		loadCurrentDirectoryFiles();
-		if (curDirFiles.length == 0) {
+		Log.d("info", "captin, display current files");
+		Log.d("info", "the size of curdirfiles is1 " + curDirFiles.size());
+		if (curDirFiles.size() == 0) {
 			displayNoServersCell();
 		} else {
-			getListView().setDividerHeight(1); // restore divider lines
-			adapter = new FileAdapter();
+			Log.d("info", "captin displaying curfiles");
+			if(adapter == null){
+				adapter = new FileAdapter();
+			}
+			ArrayList<ContainerObjects> tempList = new ArrayList<ContainerObjects>();
+			for(int i = 0; i < curDirFiles.size(); i++){
+				tempList.add(curDirFiles.get(i));
+			}
+			
+			adapter.clear();
+			for(int i = 0; i < tempList.size(); i++){
+				adapter.add(tempList.get(i));
+				Log.d("info", "the count is: " + adapter.getCount());
+			}
 			setListAdapter(adapter);
+			adapter.notifyDataSetChanged();
 		}
 	}
 
@@ -255,7 +269,10 @@ public class ContainerObjectsActivity extends ListActivity {
 	 * of if you are at top of container or
 	 * in a folder
 	 */
+	
 	private void displayNoServersCell() {
+		Log.d("info", "captin no files to display");
+		/*
 		String a[] = new String[1];
 		if(currentPath.equals("")){
 			a[0] = "Empty Container";
@@ -271,7 +288,9 @@ public class ContainerObjectsActivity extends ListActivity {
 		getListView().setDividerHeight(0); // hide the dividers so it won't look
 											// like a list row
 		getListView().setItemsCanFocus(false);
+		*/
 	}
+	
 
 	private void showAlert(String title, String message) {
 		// Can't create handler inside thread that has not called
@@ -323,17 +342,16 @@ public class ContainerObjectsActivity extends ListActivity {
 	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (curDirFiles != null && curDirFiles.length > 0) {
+		if (curDirFiles != null && curDirFiles.size() > 0) {
 			Intent viewIntent;
-			if(curDirFiles[position].getContentType().equals("application/directory")){			
-				currentPath = curDirFiles[position].getCName() + "/";
-				loadCurrentDirectoryFiles();
+			if(curDirFiles.get(position).getContentType().equals("application/directory")){			
+				currentPath = curDirFiles.get(position).getCName() + "/";
 				displayCurrentFiles();
 			}
 	
 			else{
 				viewIntent = new Intent(this, ContainerObjectDetails.class);
-				viewIntent.putExtra("container", curDirFiles[position]);
+				viewIntent.putExtra("container", curDirFiles.get(position));
 				viewIntent.putExtra("cdnUrl", container.getCdnUrl());
 				viewIntent.putExtra("containerNames", container.getName());
 				viewIntent.putExtra("isCdnEnabled", cdnEnabledIs);
@@ -394,7 +412,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case deleteContainer:
-			if(curDirFiles.length == 0){
+			if(curDirFiles.size() == 0){
 				return new AlertDialog.Builder(ContainerObjectsActivity.this)
 				.setIcon(R.drawable.alert_dialog_icon)
 				.setTitle("Delete Container")
@@ -431,7 +449,7 @@ public class ContainerObjectsActivity extends ListActivity {
 				}).create();
 			}
 		case deleteFolder:
-			if(curDirFiles.length == 0){
+			if(curDirFiles.size() == 0){
 				return new AlertDialog.Builder(ContainerObjectsActivity.this)
 				.setIcon(R.drawable.alert_dialog_icon)
 				.setTitle("Delete Folder")
@@ -552,14 +570,13 @@ public class ContainerObjectsActivity extends ListActivity {
 	class FileAdapter extends ArrayAdapter<ContainerObjects> {
 		FileAdapter() {
 			super(ContainerObjectsActivity.this,
-					R.layout.listcontainerobjectcell, curDirFiles);		
+					R.layout.listcontainerobjectcell, curDirFiles);	
 		}
 	
 		public View getView(int position, View convertView, ViewGroup parent) {
-	
-			Log.d("info", "captin updating position " + position);
 			
-			ContainerObjects file = curDirFiles[position];
+			Log.d("info", "at position " + position + " with length " + curDirFiles.size());
+			ContainerObjects file = curDirFiles.get(position);
 			LayoutInflater inflater = getLayoutInflater();
 			View row = inflater.inflate(R.layout.listcontainerobjectcell,
 					parent, false);
@@ -608,12 +625,13 @@ public class ContainerObjectsActivity extends ListActivity {
 	
 		@Override
 		protected void onPostExecute(ArrayList<ContainerObjects> result) {
-			//dialog.dismiss();
 			if (exception != null) {
 				showAlert("Error", exception.getMessage());
 			}
-			Log.d("info", "captin the length of the fiels is " + result.size());
+			
 			setFileList(result);
+			loadCurrentDirectoryFiles();
+			displayCurrentFiles();
 			loadingFiles = false;
 		}
 
@@ -691,7 +709,6 @@ public class ContainerObjectsActivity extends ListActivity {
 			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
-				Log.d("info", "captin the status code is " + statusCode);
 				if (statusCode == 201) {
 					setResult(Activity.RESULT_OK);
 					loadFiles();
