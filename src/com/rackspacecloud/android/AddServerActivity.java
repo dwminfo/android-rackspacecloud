@@ -18,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -42,6 +44,8 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 	private Spinner imageSpinner;
 	private Spinner flavorSpinner;
 	private Server server;
+	private SeekBar numberBar;
+	private TextView numberDisplay;
 	
     /** Called when the activity is first created. */
     @Override
@@ -52,6 +56,44 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
         ((Button) findViewById(R.id.save_button)).setOnClickListener(this);
         loadImageSpinner();
         loadFlavorSpinner();
+        loadServerCount();
+    }
+    
+    private void loadServerCount(){
+    	numberDisplay = (TextView)findViewById(R.id.server_count_text);
+    	numberBar = (SeekBar)findViewById(R.id.number_of_servers);
+    	numberBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				// TODO Auto-generated method stub
+				numberDisplay.setText(getCountText(progress));
+			}
+			
+			private String getCountText(int i){
+				if(i == 0){
+					return "1 Server";
+				}
+				else{
+					//count starts at 0
+					return i+1 + " Servers";
+				}
+			}
+		});
+    	
     }
 
     private void loadImageSpinner() {
@@ -157,7 +199,15 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		@Override
 		protected Server doInBackground(Void... arg0) {
 			try {
-				(new ServerManager()).create(server, getApplicationContext());
+				if(numberBar.getProgress() == 0){
+					(new ServerManager()).create(server, getApplicationContext());
+				}
+				else{
+					for(int i = 0; i < numberBar.getProgress() + 1; i++){
+						server.setName(serverName.getText().toString() + Integer.toString(i+1));
+						(new ServerManager()).create(server, getApplicationContext());
+					}
+				}
 			} catch (CloudServersException e) {
 				exception = e;
 			}
