@@ -31,6 +31,8 @@ import com.rackspace.cloud.servers.api.client.CloudServersException;
  */
 public class ListContainerActivity extends ListActivity {
 
+	protected static final int DELETE_ID = 0;
+	
 	private Container[] containers;
 	public Container container;
 	public Container cdnContainer;
@@ -39,7 +41,6 @@ public class ListContainerActivity extends ListActivity {
 	public Object kiloBytes;
 	public int bConver = 1048576;
 	public int kbConver = 1024;
-	protected static final int DELETE_ID = 0;
 	private Context context;
 	private boolean loading;
 	

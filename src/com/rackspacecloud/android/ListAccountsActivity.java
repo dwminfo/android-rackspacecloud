@@ -62,7 +62,6 @@ public class ListAccountsActivity extends ListActivity{
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         onRestoreInstanceState(savedInstanceState);
-        //restoreState(savedInstanceState);
         registerForContextMenu(getListView());
         context = getApplicationContext();
         tabViewIntent = new Intent(this, TabViewActivity.class);
@@ -74,6 +73,7 @@ public class ListAccountsActivity extends ListActivity{
 		super.onSaveInstanceState(outState);
 		outState.putBoolean("authenticating", authenticating);
 		outState.putBoolean("loggedIn", loggedIn);
+		
 		//need to set authenticating back to true because it is set to false
 		//in hideDialog()
 		if(authenticating){

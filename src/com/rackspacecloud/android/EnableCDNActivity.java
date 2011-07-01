@@ -185,7 +185,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 		}
 		return null;
 	}
-
+	/*
 	private void setActivityIndicatorsVisibility(int visibility) {
 		ProgressBar pb = (ProgressBar) findViewById(R.id.save_container_progress_bar);
 		TextView tv = (TextView) findViewById(R.id.saving_container_label);
@@ -193,7 +193,6 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 		tv.setVisibility(visibility);
 	}
 
-	@SuppressWarnings("unused")
 	private void showActivityIndicators() {
 		setActivityIndicatorsVisibility(View.VISIBLE);
 	}
@@ -201,6 +200,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 	private void hideActivityIndicators() {
 		setActivityIndicatorsVisibility(View.INVISIBLE);
 	}
+	*/
 
 	// using CloudServersException, it works for us too
 	private CloudServersException parseCloudServersException(

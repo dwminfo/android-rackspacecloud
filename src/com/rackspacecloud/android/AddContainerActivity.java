@@ -41,76 +41,91 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  */
 public class AddContainerActivity extends Activity implements  OnClickListener {
 
-	
+
 	private EditText fileName;
 	private Context context;	
-	
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        context = getApplicationContext();
-        setContentView(R.layout.createcontainer);
-        fileName = (EditText) findViewById(R.id.container_name);
-        ((Button) findViewById(R.id.save_button)).setOnClickListener(this);
-    }
+	private boolean isSaving;
 
-      
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		context = getApplicationContext();
+		setContentView(R.layout.createcontainer);
+		fileName = (EditText) findViewById(R.id.container_name);
+		((Button) findViewById(R.id.save_button)).setOnClickListener(this);
+		isSaving = savedInstanceState != null && savedInstanceState.containsKey("isSaving")
+			&& savedInstanceState.getBoolean("isSaving");
+		if(isSaving){
+			showActivityIndicators();
+		}
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState){
+		super.onSaveInstanceState(outState);
+		outState.putBoolean("isSaving", isSaving);
+		
+	}
+
+
 	public void onClick(View arg0) {
 		if ("".equals(fileName.getText().toString())) {
 			showAlert("Required Fields Missing", " Container name is required.");
 		} else {
 			showActivityIndicators();
-				new SaveFileTask().execute((Void[]) null);
+			new SaveFileTask().execute((Void[]) null);
 		}
 	}
-	
-	
-    private void showAlert(String title, String message) {
+
+
+	private void showAlert(String title, String message) {
 		AlertDialog alert = new AlertDialog.Builder(this).create();
 		alert.setTitle(title);
 		alert.setMessage(message);
 		alert.setButton("OK", new DialogInterface.OnClickListener() {
-	      public void onClick(DialogInterface dialog, int which) {
-	        return;
-	    } }); 
+			public void onClick(DialogInterface dialog, int which) {
+				return;
+			} }); 
 		alert.show();
 		hideActivityIndicators();
-    }
-    
-    private void showToast(String message) {
+	}
+
+	private void showToast(String message) {
 		Context context = getApplicationContext();
 		int duration = Toast.LENGTH_SHORT;
 		Toast toast = Toast.makeText(context, message, duration);
 		toast.show();
-    }
-	
-    private void setActivityIndicatorsVisibility(int visibility) {
-        ProgressBar pb = (ProgressBar) findViewById(R.id.save_container_progress_bar);
-    	TextView tv = (TextView) findViewById(R.id.saving_container_label);
-        pb.setVisibility(visibility);
-        tv.setVisibility(visibility);
-    }
+	}
 
-    private void showActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.VISIBLE);
-    }
-    
-    private void hideActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.INVISIBLE);
-    }
-    //using cloudServersException, it works for us too
-    private CloudServersException parseCloudServersException(HttpResponse response) {
+	private void setActivityIndicatorsVisibility(int visibility) {
+		ProgressBar pb = (ProgressBar) findViewById(R.id.save_container_progress_bar);
+		TextView tv = (TextView) findViewById(R.id.saving_container_label);
+		pb.setVisibility(visibility);
+		tv.setVisibility(visibility);
+	}
+
+	private void showActivityIndicators() {
+		isSaving = true;
+		setActivityIndicatorsVisibility(View.VISIBLE);
+	}
+
+	private void hideActivityIndicators() {
+		isSaving = false;
+		setActivityIndicatorsVisibility(View.INVISIBLE);
+	}
+	//using cloudServersException, it works for us too
+	private CloudServersException parseCloudServersException(HttpResponse response) {
 		CloudServersException cse = new CloudServersException();
 		try {
-		    BasicResponseHandler responseHandler = new BasicResponseHandler();
-		    String body = responseHandler.handleResponse(response);
-	    	CloudServersFaultXMLParser parser = new CloudServersFaultXMLParser();
-	    	SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-	    	XMLReader xmlReader = saxParser.getXMLReader();
-	    	xmlReader.setContentHandler(parser);
-	    	xmlReader.parse(new InputSource(new StringReader(body)));		    	
-	    	cse = parser.getException();		    	
+			BasicResponseHandler responseHandler = new BasicResponseHandler();
+			String body = responseHandler.handleResponse(response);
+			CloudServersFaultXMLParser parser = new CloudServersFaultXMLParser();
+			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+			XMLReader xmlReader = saxParser.getXMLReader();
+			xmlReader.setContentHandler(parser);
+			xmlReader.parse(new InputSource(new StringReader(body)));		    	
+			cse = parser.getException();		    	
 		} catch (ClientProtocolException e) {
 			cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -128,8 +143,8 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 			cse.setMessage(e.getLocalizedMessage());
 		}
 		return cse;
-    }
-    
+	}
+
 	private void startFileError(String message, HttpBundle bundle){
 		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
 		viewIntent.putExtra("errorMessage", message);
@@ -137,13 +152,13 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 		viewIntent.putExtra("request", bundle.getCurlRequest());
 		startActivity(viewIntent);
 	}
-    
-    private class SaveFileTask extends AsyncTask<Void, Void, HttpBundle> {
-    	private CloudServersException exception;
-    	
-    	@Override
+
+	private class SaveFileTask extends AsyncTask<Void, Void, HttpBundle> {
+		private CloudServersException exception;
+
+		@Override
 		protected HttpBundle doInBackground(Void... arg0) {
-    		HttpBundle bundle = null;
+			HttpBundle bundle = null;
 			try {
 				bundle = (new ContainerManager(context)).create(fileName.getText());
 			} catch (CloudServersException e) {
@@ -151,7 +166,7 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 			}
 			return bundle;
 		}
-    	
+
 		@Override
 		protected void onPostExecute(HttpBundle bundle) {
 			HttpResponse response = bundle.getResponse();
@@ -174,8 +189,8 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 			}
 			finish();
 		}
-    }
-
-
-
 	}
+
+
+
+}
