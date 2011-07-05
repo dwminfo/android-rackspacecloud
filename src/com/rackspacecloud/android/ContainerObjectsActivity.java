@@ -567,19 +567,21 @@ public class ContainerObjectsActivity extends ListActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
+		Log.d("info", "in containerobjactivity  result");
+			
 		if (resultCode == RESULT_OK) {
+			Log.d("info", "top called");
 			// a sub-activity kicked back, so we want to refresh the server list
 			loadFiles();
 		}
-		/*
-		if (requestCode == 56) {
+		if (requestCode == 55) {
+			Log.d("info", "bottom called");
 			if (resultCode == RESULT_OK) {
 				Intent viewIntent1 = new Intent(this,
 						ListContainerActivity.class);
-				startActivityForResult(viewIntent1, 56);
+				startActivityForResult(viewIntent1, 55);
 			}
 		}
-		 */
 	}
 
 	private CloudServersException parseCloudServersException(
@@ -933,7 +935,7 @@ public class ContainerObjectsActivity extends ListActivity {
 		@Override
 		protected Void doInBackground(Void... arg1) {
 
-			while(app.isDeletingObject()){
+			while(app.isDeletingContainer()){
 				// wait for process to finish
 				// or have it be canceled
 				if(deleteContainerTask.isCancelled()){
@@ -949,6 +951,7 @@ public class ContainerObjectsActivity extends ListActivity {
 		 */
 		@Override
 		protected void onPostExecute(Void arg1) {
+			setResult(RESULT_OK);
 			finish();
 		}
 	}

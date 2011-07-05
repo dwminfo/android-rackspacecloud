@@ -33,7 +33,7 @@ public class AndroidCloudApplication extends Application {
 		deletingContainerProcessing = processing;
 	}
 	
-	public boolean setDeletingContainer(){
+	public boolean isDeletingContainer(){
 		return deletingContainerProcessing;
 	}
 	
