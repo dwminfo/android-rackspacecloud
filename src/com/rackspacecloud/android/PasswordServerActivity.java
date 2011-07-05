@@ -120,7 +120,6 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 		protected HttpBundle doInBackground(Void... arg0) {
 			HttpBundle bundle = null;
 			try {
-				Log.d("info", "captin the password is: " + modifiedPassword);
 				bundle = (new ServerManager()).changePassword(server, modifiedPassword, getApplicationContext());
 			} catch (CloudServersException e) {
 				exception = e;

@@ -54,7 +54,6 @@ public class ContainerObjectManager extends EntityManager {
 		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		String url = getSafeURL(Account.getAccount().getStorageUrl(), passName) + "?format=xml";
-		Log.d("info", "captin the url creatlist: " + url);
 		HttpGet get = new HttpGet(url);
 		ArrayList<ContainerObjects> files = new ArrayList<ContainerObjects>();
 		
@@ -117,7 +116,6 @@ public class ContainerObjectManager extends EntityManager {
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		String url = getSafeURL(Account.getAccount().getStorageUrl(), Container + "/" + Object);
 		HttpDelete deleteObject = new HttpDelete(url);
-		Log.d("info", "captin the url deleteobject: " + url);
 				
 		deleteObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
@@ -149,7 +147,6 @@ public class ContainerObjectManager extends EntityManager {
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		String url = getSafeURL(Account.getAccount().getStorageUrl(), Container + "/" + Object);
 		HttpGet getObject = new HttpGet(url);
-		Log.d("info", "captin the url getobject: " + url);		
 		getObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
@@ -180,7 +177,6 @@ public class ContainerObjectManager extends EntityManager {
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		String url = getSafeURL(Account.getAccount().getStorageUrl(), Container + "/" + Path + Object);
 		HttpPut addObject = new HttpPut(url);
-		Log.d("info", "captin the url addobject: " + url);
 		
 		addObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		addObject.addHeader("Content-Type", type);
@@ -217,7 +213,6 @@ public class ContainerObjectManager extends EntityManager {
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		String url = getSafeURL(Account.getAccount().getStorageUrl(), Container + "/" + Path + Object);
 		HttpPut addObject = new HttpPut(url);
-		Log.d("info", "captin the url addobject2: " + url);
 				
 		addObject.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		addObject.addHeader("Content-Type", type);

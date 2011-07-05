@@ -566,14 +566,13 @@ public class ContainerObjectsActivity extends ListActivity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-
-		Log.d("info", "in containerobjactivity  result");
 			
-		if (resultCode == RESULT_OK) {
+		if (resultCode == RESULT_OK && requestCode == 56) {
 			Log.d("info", "top called");
 			// a sub-activity kicked back, so we want to refresh the server list
 			loadFiles();
 		}
+		/*
 		if (requestCode == 55) {
 			Log.d("info", "bottom called");
 			if (resultCode == RESULT_OK) {
@@ -582,6 +581,7 @@ public class ContainerObjectsActivity extends ListActivity {
 				startActivityForResult(viewIntent1, 55);
 			}
 		}
+		*/
 	}
 
 	private CloudServersException parseCloudServersException(

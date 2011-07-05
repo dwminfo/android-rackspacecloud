@@ -313,8 +313,6 @@ public class ContainerObjectDetails extends Activity {
 	    File file = new File(object.getAbsolutePath()); 
 	    String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
 	    String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-	    Log.d("info", "captin the file name is " + object.getName());
-	    Log.d("info", "captin the uri is " + Uri.decode(Uri.fromFile(object).toString()));
 	    myIntent.setDataAndType(Uri.fromFile(file),mimetype);
 	    //myIntent.setData(Uri.fromFile(file));
 	    try{
@@ -451,6 +449,7 @@ public class ContainerObjectDetails extends Activity {
 	    	    	
 	    			private CloudServersException exception;
 	    			
+	    			@Override
 	    			protected void onPreExecute(){
 	    				dialog = ProgressDialog.show(ContainerObjectDetails.this, "", "Downloading...", true);
 	    			}

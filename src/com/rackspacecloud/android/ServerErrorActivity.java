@@ -36,7 +36,6 @@ public class ServerErrorActivity extends Activity {
 	}
 
 	private void setUpInputs(){
-		Log.d("info", "captin inpusts set up");
 		okButton = ((Button) findViewById(R.id.server_error_ok_button));
 		okButton.setOnClickListener(new OnClickListener() {
 			@Override

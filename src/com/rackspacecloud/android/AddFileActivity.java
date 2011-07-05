@@ -22,6 +22,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -39,6 +40,8 @@ public class AddFileActivity extends Activity implements OnClickListener{
 	private EditText contents;
 	private String containerName;
 	private String path;
+	private boolean isAdding;
+	private ProgressDialog dialog;
 
 	/** Called when the activity is first created. */
     @Override
@@ -48,14 +51,34 @@ public class AddFileActivity extends Activity implements OnClickListener{
         context = getApplicationContext();
         containerName = (String) this.getIntent().getExtras().get("Cname");
         path = (String) this.getIntent().getExtras().get("curPath");
+        setUpDialog(savedInstanceState);
         setUpInputs();
     }
     
     private void setUpInputs(){
     	((Button) findViewById(R.id.new_file_button)).setOnClickListener(this);
     	fileName = ((EditText)findViewById(R.id.file_name_text));
+    	fileName.append(".txt");
     	contents = ((EditText)findViewById(R.id.new_file_text));
     }
+    
+    private void setUpDialog(Bundle savedInstanceState){
+        isAdding = savedInstanceState != null && savedInstanceState.containsKey("isAdding") 
+    		&& savedInstanceState.getBoolean("isAdding");
+        if(isAdding){
+        	showDialog();
+        }
+        
+    }
+    
+    @Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putBoolean("isAdding", isAdding);
+		if(isAdding){
+			hideDialog();
+		}
+	}
     
     public void onClick(View arg0) {
 		if ("".equals(fileName.getText().toString())) {
@@ -124,6 +147,12 @@ public class AddFileActivity extends Activity implements OnClickListener{
     	private CloudServersException exception;
     	
     	@Override
+		protected void onPreExecute(){
+			isAdding = true;
+			showDialog();
+		}
+    	
+    	@Override
 		protected HttpBundle doInBackground(Void... arg0) {
     		HttpBundle bundle = null;
 			try {
@@ -136,6 +165,8 @@ public class AddFileActivity extends Activity implements OnClickListener{
     	
 		@Override
 		protected void onPostExecute(HttpBundle bundle) {
+			isAdding = false;
+			hideDialog();
 			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
@@ -154,5 +185,17 @@ public class AddFileActivity extends Activity implements OnClickListener{
 				startFileError("There was a problem creating your file: " + exception.getMessage()+" Check file name and try again", bundle);				
 			}			
 		}
+    }
+	
+	private void showDialog() {
+		if(dialog == null || !dialog.isShowing()){
+			dialog = ProgressDialog.show(AddFileActivity.this, "", "Adding File...", true);
+		}
+    }
+    
+    private void hideDialog() {
+    	if(dialog != null){
+    		dialog.dismiss();
+    	}
     }
 }

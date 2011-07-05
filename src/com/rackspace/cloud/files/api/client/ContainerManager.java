@@ -52,7 +52,6 @@ public class ContainerManager extends EntityManager {
 		
 		String url = getSafeURL(Account.getAccount().getStorageUrl(), editable.toString());
 		HttpPut put = new HttpPut(url);
-		Log.d("info", "captin the url create " + url);
 		
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
@@ -142,7 +141,6 @@ public class ContainerManager extends EntityManager {
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		String url = getSafeURL(Account.getAccount().getCdnManagementUrl(), container);
 		HttpPut put = new HttpPut(url);
-		Log.d("info", "captin the url enable " + url);
 
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		put.addHeader("X-TTL", ttl);
@@ -177,7 +175,6 @@ public class ContainerManager extends EntityManager {
  	    CustomHttpClient httpclient = new CustomHttpClient(context);
  	   String url = getSafeURL(Account.getAccount().getCdnManagementUrl(), container);
        	HttpPost post = new HttpPost(url);
-       	Log.d("info", "captin the url disable " + url);
        	
        	post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
        		post.addHeader("X-TTL", ttl);
@@ -212,7 +209,6 @@ public class ContainerManager extends EntityManager {
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		String url = getSafeURL(Account.getAccount().getStorageUrl(), string);
 		HttpDelete put = new HttpDelete(url);
-		Log.d("info", "captin the url delete " + url);
 		
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);

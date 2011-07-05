@@ -288,8 +288,6 @@ public class ListContainerActivity extends ListActivity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-
-		Log.d("info", "captin in the list container activity result with code " + requestCode + " " + resultCode);
 		
 		if (resultCode == RESULT_OK) {
 			// a sub-activity kicked back, so we want to refresh the server list
