@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -45,7 +46,6 @@ import com.rackspace.cloud.files.api.client.ContainerObjects;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
-//import com.rackspacecloud.android.ViewServerActivity.RenameServerTask;
 
 /**
  * 
@@ -66,10 +66,13 @@ public class ContainerObjectsActivity extends ListActivity {
 	public int kbConver = 1024;
 	private Context context;
 	private String currentPath;
-	private ContainerObjects[] curDirFiles;
-	//private ProgressDialog dialog;
 	private boolean loadingFiles;
-	private FileAdapter adapter;
+	private boolean displayDialog;
+	private ProgressDialog dialog;
+	private AndroidCloudApplication app;
+	private AddObjectListenerTask task;
+	private DeleteObjectListenerTask deleteObjTask;
+	private DeleteContainerListenerTask deleteContainerTask;
 
 
 	@Override
@@ -77,7 +80,7 @@ public class ContainerObjectsActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		container = (Container) this.getIntent().getExtras().get("container");
 		Log.v(LOG, "CDNEnabled:" + container.isCdnEnabled());
-        context = getApplicationContext();
+		context = getApplicationContext();
 		if (container.isCdnEnabled() == true) {
 			cdnEnabledIs = "true";
 		} else {
@@ -85,21 +88,47 @@ public class ContainerObjectsActivity extends ListActivity {
 		}
 		restoreState(savedInstanceState);
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+		
+		//files stores all the files in the container
 		outState.putSerializable("container", files);
+		
+		//current path represents where you have "navigated" to
 		outState.putString("path", currentPath);
-		outState.putSerializable("curFiles", curDirFiles);
+		
+		//stores state if you are loading or not 
 		outState.putBoolean("loadingFiles", loadingFiles);
+		
+		//stores whether dialog is showing or not
+		outState.putBoolean("displayDialog", displayDialog);
+		
+		//need to set authenticating back to true because it is set to false
+		//in hideDialog()
+		if(displayDialog){
+			hideDialog();
+			displayDialog = true;
+		}
 	}
-	
-	
+
+
 
 	private void restoreState(Bundle state) {
 		
-		adapter = (FileAdapter)getLastNonConfigurationInstance();
+		
+		/*
+		 * need reference to the app so you can access curDirFiles
+		 * as well as processing status
+		 */
+		app = (AndroidCloudApplication)this.getApplication();
+
+		if (state != null && state.containsKey("displayDialog") && state.getBoolean("displayDialog")) {
+    		showDialog();
+    	} else {
+    		hideDialog();
+    	}
 		
 		if(state != null){
 			if(state.containsKey("path")){
@@ -108,22 +137,19 @@ public class ContainerObjectsActivity extends ListActivity {
 			else{
 				currentPath = "";
 			}
-			
+
 			if(state.containsKey("loadingFiles") && state.getBoolean("loadingFiles")){
 				loadFiles();
 			}
 			else{
-				if(state.containsKey("container") && state.containsKey("curFiles")){
+				if(state.containsKey("container")){
 					files = (ContainerObjects[]) state.getSerializable("container");
-					curDirFiles = (ContainerObjects[]) state.getSerializable("curFiles");
-					if(curDirFiles != null){
-						if(curDirFiles.length == 0){
-							displayNoServersCell();
-						} else {
-							Log.d("info", "captin curDirFiles lenght is: " + curDirFiles.length);
-							getListView().setDividerHeight(1); //restore divider lines
-							setListAdapter(new FileAdapter());
-						}
+					if (app.getCurFiles() == null) {
+						displayNoFilesCell();
+					} else {
+						getListView().setDividerHeight(1); // restore divider lines
+						setListAdapter(new FileAdapter());
+
 					}
 				}
 			}
@@ -132,10 +158,50 @@ public class ContainerObjectsActivity extends ListActivity {
 			currentPath = "";
 			loadFiles();
 		}	
+		
+		/*
+		 * if the app is process when we enter the activity
+		 * we must listen for the new curDirFiles list
+		 */
+		if(app.isAddingObject()){
+			task = new AddObjectListenerTask();
+			task.execute();
+		}
+		
+		if(app.isDeletingObject()){
+			displayNoFilesCell();
+			deleteObjTask = new DeleteObjectListenerTask();
+			deleteObjTask.execute();
+		}
+
+
 	}
 	
-	public Object onRetainNonConfigurationInstance(){
-		return adapter;
+	@Override
+	protected void onStart(){
+		super.onStart();
+		if(displayDialog){
+			showDialog();
+		}
+	}
+
+	
+	@Override
+	protected void onStop(){
+		super.onStop();
+
+		if(displayDialog){
+			hideDialog();
+			displayDialog = true;
+		}
+
+		/*
+		 * Need to stop running listener task
+		 * if we exit
+		 */
+		if(task != null){
+			task.cancel(true);
+		}
 	}
 
 	/*
@@ -150,7 +216,7 @@ public class ContainerObjectsActivity extends ListActivity {
 			goUpDirectory();
 		}
 	}
-	
+
 	/*
 	 * go to the current directory's parent and display that data
 	 */
@@ -164,10 +230,11 @@ public class ContainerObjectsActivity extends ListActivity {
 	 * load all file that are in the container
 	 */
 	private void loadFiles() {
-		displayLoadingCell();
+		//displayLoadingCell();
 		new LoadFilesTask().execute();
 	}
-	
+
+	/*
 	private void displayLoadingCell() {
 		String a[] = new String[1];
 		a[0] = "Loading...";
@@ -178,7 +245,8 @@ public class ContainerObjectsActivity extends ListActivity {
 											// like a list row
 		getListView().setItemsCanFocus(false);
 	}
-	
+	 */
+
 	/* load only the files that should display for the 
 	 * current directory in the curDirFiles[]
 	 */
@@ -191,14 +259,10 @@ public class ContainerObjectsActivity extends ListActivity {
 					curFiles.add(files[i]);
 				}
 			}
-
-			curDirFiles = new ContainerObjects[curFiles.size()];
-			for(int i = 0; i < curFiles.size(); i++){
-				curDirFiles[i] = curFiles.get(i);
-			}
+			app.setCurFiles(curFiles);
 		}
 	}
-	
+
 	/*
 	 * determines if a file should be displayed in current 
 	 * directory
@@ -214,7 +278,7 @@ public class ContainerObjectsActivity extends ListActivity {
 		}
 	}
 
-	
+
 	/*
 	 * loads all the files that are in the container
 	 * into one array
@@ -226,8 +290,8 @@ public class ContainerObjectsActivity extends ListActivity {
 		String[] fileNames = new String[files.size()];
 		this.files = new ContainerObjects[files.size()];
 
-		
-		
+
+
 		if (files != null) {
 			for (int i = 0; i < files.size(); i++) {
 				ContainerObjects file = files.get(i);
@@ -235,18 +299,25 @@ public class ContainerObjectsActivity extends ListActivity {
 				fileNames[i] = file.getName();
 			}
 		}
-				
-		displayCurrentFiles();
 	}
-	
+
 	private void displayCurrentFiles(){
-		loadCurrentDirectoryFiles();
-		if (curDirFiles.length == 0) {
-			displayNoServersCell();
+		if (app.getCurFiles().size() == 0) {
+			displayNoFilesCell();
 		} else {
+			ArrayList<ContainerObjects> tempList = new ArrayList<ContainerObjects>();
+			for(int i = 0; i < app.getCurFiles().size(); i++){
+				tempList.add(app.getCurFiles().get(i));
+			}
+			/*
+			adapter.clear();
+			for(int i = 0; i < tempList.size(); i++){
+				adapter.add(tempList.get(i));
+				Log.d("info", "the count is: " + adapter.getCount());
+			}
+			*/
 			getListView().setDividerHeight(1); // restore divider lines
-			adapter = new FileAdapter();
-			setListAdapter(adapter);
+			setListAdapter(new FileAdapter());
 		}
 	}
 
@@ -255,7 +326,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	 * of if you are at top of container or
 	 * in a folder
 	 */
-	private void displayNoServersCell() {
+	private void displayNoFilesCell() {
 		String a[] = new String[1];
 		if(currentPath.equals("")){
 			a[0] = "Empty Container";
@@ -272,6 +343,7 @@ public class ContainerObjectsActivity extends ListActivity {
 											// like a list row
 		getListView().setItemsCanFocus(false);
 	}
+
 
 	private void showAlert(String title, String message) {
 		// Can't create handler inside thread that has not called
@@ -294,7 +366,7 @@ public class ContainerObjectsActivity extends ListActivity {
 
 	/* just get the last part of the filename
 	 * so the entire file path does not show
-	*/
+	 */
 	private String getShortName(String longName){
 		String s = longName;
 		if(!s.contains("/")){
@@ -304,7 +376,7 @@ public class ContainerObjectsActivity extends ListActivity {
 			return s.substring(s.lastIndexOf('/')+1);
 		}
 	}
-	
+
 	/*
 	 * removed a specified object from the array of 
 	 * all the files in the container
@@ -323,17 +395,17 @@ public class ContainerObjectsActivity extends ListActivity {
 	}
 
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		if (curDirFiles != null && curDirFiles.length > 0) {
+		if (app.getCurFiles() != null && app.getCurFiles().size() > 0) {
 			Intent viewIntent;
-			if(curDirFiles[position].getContentType().equals("application/directory")){			
-				currentPath = curDirFiles[position].getCName() + "/";
+			if(app.getCurFiles().get(position).getContentType().equals("application/directory")){			
+				currentPath = app.getCurFiles().get(position).getCName() + "/";
 				loadCurrentDirectoryFiles();
 				displayCurrentFiles();
 			}
-	
+
 			else{
 				viewIntent = new Intent(this, ContainerObjectDetails.class);
-				viewIntent.putExtra("container", curDirFiles[position]);
+				viewIntent.putExtra("container", app.getCurFiles().get(position));
 				viewIntent.putExtra("cdnUrl", container.getCdnUrl());
 				viewIntent.putExtra("containerNames", container.getName());
 				viewIntent.putExtra("isCdnEnabled", cdnEnabledIs);
@@ -394,7 +466,7 @@ public class ContainerObjectsActivity extends ListActivity {
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case deleteContainer:
-			if(curDirFiles.length == 0){
+			if(app.getCurFiles().size() == 0){
 				return new AlertDialog.Builder(ContainerObjectsActivity.this)
 				.setIcon(R.drawable.alert_dialog_icon)
 				.setTitle("Delete Container")
@@ -431,7 +503,7 @@ public class ContainerObjectsActivity extends ListActivity {
 				}).create();
 			}
 		case deleteFolder:
-			if(curDirFiles.length == 0){
+			if(app.getCurFiles().size() == 0){
 				return new AlertDialog.Builder(ContainerObjectsActivity.this)
 				.setIcon(R.drawable.alert_dialog_icon)
 				.setTitle("Delete Folder")
@@ -469,24 +541,24 @@ public class ContainerObjectsActivity extends ListActivity {
 			}
 		case R.id.add_folder:
 			final EditText input = new EditText(this);
-            return new AlertDialog.Builder(ContainerObjectsActivity.this)
-        	.setIcon(R.drawable.alert_dialog_icon)
-            .setView(input)
-        	.setTitle("Add Folder")
-        	.setMessage("Enter new name for folder: ")        	         
-        	.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			//User clicked OK so do some stuff
-        			String[] info = {input.getText().toString(), "application/directory"};
-        			new AddFolderTask().execute(info);
-        		}
-        	})
-        	.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-        		public void onClick(DialogInterface dialog, int whichButton) {
-        			// User clicked Cancel so do some stuff
-        		}
-        	})
-        	.create();     
+			return new AlertDialog.Builder(ContainerObjectsActivity.this)
+			.setIcon(R.drawable.alert_dialog_icon)
+			.setView(input)
+			.setTitle("Add Folder")
+			.setMessage("Enter new name for folder: ")        	         
+			.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					//User clicked OK so do some stuff
+					String[] info = {input.getText().toString(), "application/directory"};
+					new AddFolderTask().execute(info);
+				}
+			})
+			.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {
+					// User clicked Cancel so do some stuff
+				}
+			})
+			.create();     
 		}
 		return null;
 	}
@@ -495,19 +567,21 @@ public class ContainerObjectsActivity extends ListActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
+		Log.d("info", "in containerobjactivity  result");
+			
 		if (resultCode == RESULT_OK) {
+			Log.d("info", "top called");
 			// a sub-activity kicked back, so we want to refresh the server list
 			loadFiles();
 		}
-		/*
-		if (requestCode == 56) {
+		if (requestCode == 55) {
+			Log.d("info", "bottom called");
 			if (resultCode == RESULT_OK) {
 				Intent viewIntent1 = new Intent(this,
 						ListContainerActivity.class);
-				startActivityForResult(viewIntent1, 56);
+				startActivityForResult(viewIntent1, 55);
 			}
 		}
-		*/
 	}
 
 	private CloudServersException parseCloudServersException(
@@ -540,7 +614,7 @@ public class ContainerObjectsActivity extends ListActivity {
 		}
 		return cse;
 	}
-	
+
 	private void startFileError(String message, HttpBundle bundle){
 		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
 		viewIntent.putExtra("errorMessage", message);
@@ -549,25 +623,36 @@ public class ContainerObjectsActivity extends ListActivity {
 		startActivity(viewIntent);
 	}
 	
+	private void showDialog() {
+		if(dialog == null || !dialog.isShowing()){
+			displayDialog = true;
+			dialog = ProgressDialog.show(ContainerObjectsActivity.this, "", "Loading...", true);
+		}
+    }
+    
+    private void hideDialog() {
+    	if(dialog != null){
+    		dialog.dismiss();
+    	}
+    	displayDialog = false;
+    }
+
 	class FileAdapter extends ArrayAdapter<ContainerObjects> {
 		FileAdapter() {
 			super(ContainerObjectsActivity.this,
-					R.layout.listcontainerobjectcell, curDirFiles);		
+					R.layout.listcontainerobjectcell, app.getCurFiles());	
 		}
-	
+
 		public View getView(int position, View convertView, ViewGroup parent) {
-	
-			Log.d("info", "captin updating position " + position);
-			
-			ContainerObjects file = curDirFiles[position];
+			ContainerObjects file = app.getCurFiles().get(position);
 			LayoutInflater inflater = getLayoutInflater();
 			View row = inflater.inflate(R.layout.listcontainerobjectcell,
 					parent, false);
-	
+
 			TextView label = (TextView) row.findViewById(R.id.label);
 			//label.setText(file.getCName());
 			label.setText(getShortName(file.getCName()));
-	
+
 			if (file.getBytes() >= bConver) {
 				megaBytes = Math.abs(file.getBytes() / bConver + 0.2);
 				TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
@@ -580,19 +665,20 @@ public class ContainerObjectsActivity extends ListActivity {
 				TextView sublabel = (TextView) row.findViewById(R.id.sublabel);
 				sublabel.setText(file.getBytes() + " B");
 			}
-	
+
 			return (row);
 		}
 	}
 
 	private class LoadFilesTask extends
-			AsyncTask<String, Void, ArrayList<ContainerObjects>> {
+	AsyncTask<String, Void, ArrayList<ContainerObjects>> {
 
 		private CloudServersException exception;
 		protected void onPreExecute(){
+			showDialog();
 			loadingFiles = true;
 		}
-		
+
 		@Override
 		protected ArrayList<ContainerObjects> doInBackground(String... path) {
 			ArrayList<ContainerObjects> files = null;
@@ -605,29 +691,88 @@ public class ContainerObjectsActivity extends ListActivity {
 			}
 			return files;
 		}
-	
+
 		@Override
 		protected void onPostExecute(ArrayList<ContainerObjects> result) {
-			//dialog.dismiss();
+			hideDialog();
+			
 			if (exception != null) {
 				showAlert("Error", exception.getMessage());
 			}
-			Log.d("info", "captin the length of the fiels is " + result.size());
+
 			setFileList(result);
+			loadCurrentDirectoryFiles();
+			displayCurrentFiles();
 			loadingFiles = false;
 		}
 
 	}
 
-	private class DeleteObjectTask extends
-	AsyncTask<Void, Void, HttpBundle> {
+	private class AddFolderTask extends
+	AsyncTask<String, Void, HttpBundle> {
 
 		private CloudServersException exception;
-		
+
+		@Override
 		protected void onPreExecute(){
-			//dialog = ProgressDialog.show(ContainerObjectsActivity.this, "", "Deleting...", true);
+			showDialog();
+			app.setAddingObject(true);
+			task = new AddObjectListenerTask();
+			task.execute();
 		}
-		
+
+		@Override
+		protected HttpBundle doInBackground(String... data) {
+			HttpBundle bundle = null;
+			try {
+				
+				bundle = (new ContainerObjectManager(context)).addObject(container.getName(), currentPath, data[0], data[1]);
+			} catch (CloudServersException e) {
+				exception = e;
+			}
+			return bundle;
+		}
+
+		@Override
+		protected void onPostExecute(HttpBundle bundle) {
+			app.setAddingObject(false);
+			HttpResponse response = bundle.getResponse();
+			if (response != null) {
+				int statusCode = response.getStatusLine().getStatusCode();
+				if (statusCode == 201) {
+					setResult(Activity.RESULT_OK);
+					//loading the new files is done by ListenerTask
+				} else {
+					hideDialog();
+					CloudServersException cse = parseCloudServersException(response);
+					if ("".equals(cse.getMessage())) {
+						startFileError("There was a problem deleting your folder.", bundle);
+					} else {
+						startFileError("There was a problem deleting your folder: "
+								+ cse.getMessage(), bundle);
+					}
+				}
+			} else if (exception != null) {
+				hideDialog();
+				startFileError("There was a problem deleting your folder: "
+						+ exception.getMessage(), bundle);
+			}
+		}
+	}
+
+	private class DeleteObjectTask extends
+	AsyncTask<Void, Void, HttpBundle> {
+	
+		private CloudServersException exception;
+	
+		@Override
+		protected void onPreExecute(){
+			showDialog();
+			app.setDeleteingObject(true);
+			deleteObjTask = new DeleteObjectListenerTask();
+			deleteObjTask.execute();
+		}
+	
 		@Override
 		protected HttpBundle doInBackground(Void... arg0) {
 			HttpBundle bundle = null;
@@ -639,72 +784,31 @@ public class ContainerObjectsActivity extends ListActivity {
 			}
 			return bundle;
 		}
-
+	
 		@Override
 		protected void onPostExecute(HttpBundle bundle) {
+			app.setDeleteingObject(false);
 			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 409) {
+					hideDialog();
 					showAlert("Error",
 					"Folder must be empty in order to delete");
 				}
 				if (statusCode == 204) {
 					setResult(Activity.RESULT_OK);
-					removeFromList(currentPath);
-					goUpDirectory();
-					
-				} else {
+				} else {hideDialog();
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
 						startFileError("There was a problem deleting your folder.", bundle);
 					} else {
 						startFileError("There was a problem deleting your folder: "
-									+ cse.getMessage(), bundle);
+								+ cse.getMessage(), bundle);
 					}
 				}
 			} else if (exception != null) {
-				startFileError("There was a problem deleting your folder: "
-						+ exception.getMessage(), bundle);
-			}
-		}
-	}
-	
-	private class AddFolderTask extends
-	AsyncTask<String, Void, HttpBundle> {
-	
-		private CloudServersException exception;
-		
-		@Override
-		protected HttpBundle doInBackground(String... data) {
-			HttpBundle bundle = null;
-			try {
-				bundle = (new ContainerObjectManager(context)).addObject(container.getName(), currentPath, data[0], data[1]);
-			} catch (CloudServersException e) {
-				exception = e;
-			}
-			return bundle;
-		}
-	
-		@Override
-		protected void onPostExecute(HttpBundle bundle) {
-			HttpResponse response = bundle.getResponse();
-			if (response != null) {
-				int statusCode = response.getStatusLine().getStatusCode();
-				Log.d("info", "captin the status code is " + statusCode);
-				if (statusCode == 201) {
-					setResult(Activity.RESULT_OK);
-					loadFiles();
-				} else {
-					CloudServersException cse = parseCloudServersException(response);
-					if ("".equals(cse.getMessage())) {
-						startFileError("There was a problem deleting your folder.", bundle);
-					} else {
-						startFileError("There was a problem deleting your folder: "
-									+ cse.getMessage(), bundle);
-					}
-				}
-			} else if (exception != null) {
+				hideDialog();
 				startFileError("There was a problem deleting your folder: "
 						+ exception.getMessage(), bundle);
 			}
@@ -717,9 +821,18 @@ public class ContainerObjectsActivity extends ListActivity {
 		private CloudServersException exception;
 
 		@Override
+		protected void onPreExecute(){
+			showDialog();
+			app.setDeletingContainer(true);
+			deleteContainerTask = new DeleteContainerListenerTask();
+			deleteContainerTask.execute();
+		}
+		
+		@Override
 		protected HttpBundle doInBackground(String... object) {
 			HttpBundle bundle = null;
 			try {
+				
 				bundle = (new ContainerManager(context)).delete(container.getName());
 			} catch (CloudServersException e) {
 				exception = e;
@@ -729,6 +842,8 @@ public class ContainerObjectsActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(HttpBundle bundle) {
+			hideDialog();
+			app.setDeletingContainer(false);
 			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
@@ -737,8 +852,6 @@ public class ContainerObjectsActivity extends ListActivity {
 				}
 				if (statusCode == 204) {
 					setResult(Activity.RESULT_OK);
-					loadFiles();
-					finish();
 
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
@@ -746,7 +859,7 @@ public class ContainerObjectsActivity extends ListActivity {
 						startFileError("There was a problem deleting your container.", bundle);
 					} else {
 						startFileError("There was a problem deleting your container: "
-									+ cse.getMessage(), bundle);
+								+ cse.getMessage(), bundle);
 					}
 				}
 			} else if (exception != null) {
@@ -756,4 +869,90 @@ public class ContainerObjectsActivity extends ListActivity {
 		}
 	}
 
+	/*
+	 * listens for the application to change isProcessing
+	 * listens so activity knows when it should display
+	 * the new curDirFiles
+	 */
+	private class AddObjectListenerTask extends
+	AsyncTask<Void, Void, Void> {
+		
+		@Override
+		protected Void doInBackground(Void... arg1) {
+
+			while(app.isAddingObject()){
+				// wait for process to finish
+				// or have it be canceled
+				if(task.isCancelled()){
+					return null;
+				}
+			}
+			return null;
+		}
+
+		/*
+		 * when no longer processing, time to load
+		 * the new files
+		 */
+		@Override
+		protected void onPostExecute(Void arg1) {
+			loadFiles();
+		}
+	}
+	
+	
+	private class DeleteObjectListenerTask extends
+	AsyncTask<Void, Void, Void> {
+		
+		@Override
+		protected Void doInBackground(Void... arg1) {
+
+			while(app.isDeletingObject()){
+				// wait for process to finish
+				// or have it be canceled
+				if(deleteObjTask.isCancelled()){
+					return null;
+				}
+			}
+			return null;
+		}
+
+		/*
+		 * when no longer processing, time to load
+		 * the new files
+		 */
+		@Override
+		protected void onPostExecute(Void arg1) {
+			hideDialog();
+			removeFromList(currentPath);
+			goUpDirectory();
+		}
+	}
+	
+	private class DeleteContainerListenerTask extends
+	AsyncTask<Void, Void, Void> {
+		
+		@Override
+		protected Void doInBackground(Void... arg1) {
+
+			while(app.isDeletingContainer()){
+				// wait for process to finish
+				// or have it be canceled
+				if(deleteContainerTask.isCancelled()){
+					return null;
+				}
+			}
+			return null;
+		}
+
+		/*
+		 * when no longer processing, time to load
+		 * the new files
+		 */
+		@Override
+		protected void onPostExecute(Void arg1) {
+			setResult(RESULT_OK);
+			finish();
+		}
+	}
 }
