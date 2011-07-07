@@ -202,6 +202,15 @@ public class ContainerObjectsActivity extends ListActivity {
 		if(task != null){
 			task.cancel(true);
 		}
+		
+		if(deleteObjTask != null){
+			deleteObjTask.cancel(true);
+		}
+		
+		if(deleteContainerTask != null){
+			deleteContainerTask.cancel(true);
+		}
+
 	}
 
 	/*
@@ -568,20 +577,15 @@ public class ContainerObjectsActivity extends ListActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 			
 		if (resultCode == RESULT_OK && requestCode == 56) {
-			Log.d("info", "top called");
 			// a sub-activity kicked back, so we want to refresh the server list
 			loadFiles();
 		}
-		/*
-		if (requestCode == 55) {
-			Log.d("info", "bottom called");
-			if (resultCode == RESULT_OK) {
-				Intent viewIntent1 = new Intent(this,
-						ListContainerActivity.class);
-				startActivityForResult(viewIntent1, 55);
-			}
+		
+		// deleted file so need to update the list
+		if (requestCode == 55 && resultCode == 99) {
+			loadFiles();
 		}
-		*/
+		
 	}
 
 	private CloudServersException parseCloudServersException(
@@ -798,7 +802,8 @@ public class ContainerObjectsActivity extends ListActivity {
 				}
 				if (statusCode == 204) {
 					setResult(Activity.RESULT_OK);
-				} else {hideDialog();
+				} else {
+					hideDialog();
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
 						startFileError("There was a problem deleting your folder.", bundle);
