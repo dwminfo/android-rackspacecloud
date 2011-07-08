@@ -657,6 +657,9 @@ public class ContainerObjectDetails extends Activity {
 			} catch (IOException e) {
 				showAlert("Error", "There was a problem downloading your file.");
 				e.printStackTrace();
+			} catch (Exception e) {
+				showAlert("Error", "There was a problem downloading your file.");
+				e.printStackTrace();
 			}
 		}
 	}
