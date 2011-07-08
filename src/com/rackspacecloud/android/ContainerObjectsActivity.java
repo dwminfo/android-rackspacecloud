@@ -173,6 +173,12 @@ public class ContainerObjectsActivity extends ListActivity {
 			deleteObjTask = new DeleteObjectListenerTask();
 			deleteObjTask.execute();
 		}
+		
+		if(app.isDeletingContainer()){
+			displayNoFilesCell();
+			deleteContainerTask = new DeleteContainerListenerTask();
+			deleteContainerTask.execute();
+		}
 
 
 	}
@@ -243,18 +249,6 @@ public class ContainerObjectsActivity extends ListActivity {
 		new LoadFilesTask().execute();
 	}
 
-	/*
-	private void displayLoadingCell() {
-		String a[] = new String[1];
-		a[0] = "Loading...";
-		setListAdapter(new ArrayAdapter<String>(this, R.layout.loadingcell,
-				R.id.loading_label, a));
-		getListView().setTextFilterEnabled(true);
-		getListView().setDividerHeight(0); // hide the dividers so it won't look
-											// like a list row
-		getListView().setItemsCanFocus(false);
-	}
-	 */
 
 	/* load only the files that should display for the 
 	 * current directory in the curDirFiles[]
@@ -318,13 +312,6 @@ public class ContainerObjectsActivity extends ListActivity {
 			for(int i = 0; i < app.getCurFiles().size(); i++){
 				tempList.add(app.getCurFiles().get(i));
 			}
-			/*
-			adapter.clear();
-			for(int i = 0; i < tempList.size(); i++){
-				adapter.add(tempList.get(i));
-				Log.d("info", "the count is: " + adapter.getCount());
-			}
-			*/
 			getListView().setDividerHeight(1); // restore divider lines
 			setListAdapter(new FileAdapter());
 		}
@@ -956,6 +943,8 @@ public class ContainerObjectsActivity extends ListActivity {
 		 */
 		@Override
 		protected void onPostExecute(Void arg1) {
+
+			hideDialog();
 			setResult(RESULT_OK);
 			finish();
 		}

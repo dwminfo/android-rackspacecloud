@@ -59,7 +59,11 @@ public class ListContainerActivity extends ListActivity {
 	}
 
 	private void restoreState(Bundle state) {
-		if (state != null && state.containsKey("container") && state.getSerializable("container") != null) {
+		if(state != null && state.containsKey("loading") && state.getBoolean("loading")){
+			loadContainers();
+			registerForContextMenu(getListView());
+		}
+		else if (state != null && state.containsKey("container") && state.getSerializable("container") != null) {
 			containers = (Container[]) state.getSerializable("container");
 			if (containers.length == 0) {
 				displayNoServersCell();

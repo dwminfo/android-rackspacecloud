@@ -220,6 +220,8 @@ public class ContainerObjectDetails extends Activity {
 
 		//Last Modification date
 		String strDate = objects.getLastMod();
+		strDate = strDate.substring(0, strDate.indexOf('T'));
+		/*
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.ssssss");
 		Date dateStr = null;
 		try {
@@ -228,6 +230,7 @@ public class ContainerObjectDetails extends Activity {
 			e1.printStackTrace();
 		}
 		String formattedDate = formatter.format(dateStr);
+
 		Date date1 = null;
 		try {
 			date1 = formatter.parse(formattedDate);
@@ -236,8 +239,9 @@ public class ContainerObjectDetails extends Activity {
 		}      
 		formatter = new SimpleDateFormat("MMM-dd-yyyy");
 		formattedDate = formatter.format(date1);
+		*/
 		TextView lastmod = (TextView) findViewById(R.id.view_file_modification);
-		lastmod.setText(formattedDate);    	  
+		lastmod.setText(strDate);    	  
 
 	}
 
