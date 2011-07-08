@@ -19,12 +19,14 @@ import com.rackspace.cloud.servers.api.client.Backup;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -82,9 +84,33 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 	private void setupCheckBox(){
 		enableCheckBox = (CheckBox) findViewById(R.id.enable_backup_checkbox);
 	}
+	
+	private void showAlert(String title, String message) {
+    	try {
+		AlertDialog alert = new AlertDialog.Builder(this).create();
+		alert.setTitle(title);
+		alert.setMessage(message);
+		alert.setButton("OK", new DialogInterface.OnClickListener() {
+	      public void onClick(DialogInterface dialog, int which) {
+	        return;
+	    } }); 
+		alert.show();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
 
 	public void onClick(View v) {
-		new BackupServerTask().execute((Void[]) null);
+		/*
+		 * server maybe null if another task is
+		 * currently processing
+		 */
+		if(server == null){
+			showAlert("Error", "Server is busy.");
+		}
+		else{
+			new BackupServerTask().execute((Void[]) null);
+		}
 	}
 
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -99,18 +125,6 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 
 	public void onNothingSelected(AdapterView<?> parent) {
 		//do nothing
-	}
-	
-	
-	private void showAlert(String title, String message) {
-		AlertDialog alert = new AlertDialog.Builder(this).create();
-		alert.setTitle(title);
-		alert.setMessage(message);
-		alert.setButton("OK", new DialogInterface.OnClickListener() {
-	      public void onClick(DialogInterface dialog, int which) {
-	        return;
-	    } }); 
-		alert.show();
 	}
 	
     private void showToast(String message) {
@@ -150,7 +164,15 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 		return cse;
     }
 	
-	private class BackupServerTask extends AsyncTask<Void, Void, HttpResponse> {
+	private void startServerError(String message, HttpBundle bundle){
+		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
+		viewIntent.putExtra("errorMessage", message);
+		viewIntent.putExtra("response", bundle.getResponseText());
+		viewIntent.putExtra("request", bundle.getCurlRequest());
+		startActivity(viewIntent);
+	}
+	
+	private class BackupServerTask extends AsyncTask<Void, Void, HttpBundle> {
     	
 		private CloudServersException exception;
 		
@@ -161,19 +183,19 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 		}
 		
 		@Override
-		protected HttpResponse doInBackground(Void... arg0) {
-			HttpResponse resp = null;
+		protected HttpBundle doInBackground(Void... arg0) {
+			HttpBundle bundle = null;
 			try {
-				resp = (new ServerManager()).backup(server, selectedWeeklyBackup, selectedDailyBackup, enableCheckBox.isChecked(), getApplicationContext());
+				bundle = (new ServerManager()).backup(server, selectedWeeklyBackup, selectedDailyBackup, enableCheckBox.isChecked(), getApplicationContext());
 			} catch (CloudServersException e) {
 				exception = e;
 			}
-			return resp;
+			return bundle;
 		}
     	
 		@Override
-		protected void onPostExecute(HttpResponse response) {
-
+		protected void onPostExecute(HttpBundle bundle) {
+			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();	
 				Log.d("statuscode", Integer.toString(statusCode));
@@ -184,14 +206,14 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 				else if (statusCode != 204 && statusCode != 202) {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem rebooting your server.");
+						startServerError("There was a problem changing the backup schedule.", bundle);
 					} else {
 						Log.d("info", "here");
-						showAlert("Error", "There was a problem rebooting your server: " + cse.getMessage() + " " + statusCode);
+						startServerError("There was a problem changing the backup schedule: " + cse.getMessage() + " " + statusCode, bundle);
 					}
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem rebooting your server: " + exception.getMessage());
+				startServerError("There was a problem changing the backup schedule: " + exception.getMessage(), bundle);
 				
 			}
 		}

@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -27,13 +28,13 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.rackspace.cloud.files.api.client.ContainerManager;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
 public class EnableCDNActivity extends Activity implements OnClickListener,
@@ -126,20 +127,14 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 	public void onNothingSelected(AdapterView<?> parent) {
 
 	}
-
-	private void showAlert(String title, String message) {
-		AlertDialog alert = new AlertDialog.Builder(this).create();
-		alert.setTitle(title);
-		alert.setMessage(message);
-		alert.setButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				return;
-			}
-		});
-		alert.show();
-		hideActivityIndicators();
-	}
-
+	
+	private void showToast(String message) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, message, duration);
+		toast.show();
+    }
+	
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
@@ -188,7 +183,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 		}
 		return null;
 	}
-
+	/*
 	private void setActivityIndicatorsVisibility(int visibility) {
 		ProgressBar pb = (ProgressBar) findViewById(R.id.save_container_progress_bar);
 		TextView tv = (TextView) findViewById(R.id.saving_container_label);
@@ -196,7 +191,6 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 		tv.setVisibility(visibility);
 	}
 
-	@SuppressWarnings("unused")
 	private void showActivityIndicators() {
 		setActivityIndicatorsVisibility(View.VISIBLE);
 	}
@@ -204,6 +198,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 	private void hideActivityIndicators() {
 		setActivityIndicatorsVisibility(View.INVISIBLE);
 	}
+	*/
 
 	// using CloudServersException, it works for us too
 	private CloudServersException parseCloudServersException(
@@ -236,70 +231,77 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 		}
 		return cse;
 	}
+	
+	private void startFileError(String message, HttpBundle bundle){
+		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
+		viewIntent.putExtra("errorMessage", message);
+		viewIntent.putExtra("response", bundle.getResponseText());
+		viewIntent.putExtra("request", bundle.getCurlRequest());
+		startActivity(viewIntent);
+	}
 
-	public class EnableCDNTask extends AsyncTask<Void, Void, HttpResponse> {
+	public class EnableCDNTask extends AsyncTask<Void, Void, HttpBundle> {
 		private CloudServersException exception;
 
 		@Override
-		protected HttpResponse doInBackground(Void... arg0) {
-			HttpResponse resp = null;
+		protected HttpBundle doInBackground(Void... arg0) {
+			HttpBundle bundle = null;
 			try {
-				resp = (new ContainerManager(context)).enable(containerName,
+				bundle = (new ContainerManager(context)).enable(containerName,
 						selectedTtlId, selectedLogRetId);
 			} catch (CloudServersException e) {
 				exception = e;
 			}
-			return resp;
+			return bundle;
 		}
 
 		@Override
-		protected void onPostExecute(HttpResponse response) {
+		protected void onPostExecute(HttpBundle bundle) {
+			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 201) {
 					setResult(Activity.RESULT_OK);
 					finish();
 				} else if (statusCode == 202) {
-					showAlert("Accepted", "Container is already cdn enabled");
+					showToast("Accepted, container is already cdn enabled");
 					finish();
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error",
-								"There was a problem creating your container.");
+						startFileError("There was a problem creating your container.", bundle);
 					} else {
-						showAlert("Error",
-								"There was a problem creating your container: "
+						startFileError("There was a problem creating your container: "
 										+ cse.getMessage()
-										+ " Check container name and try again");
+										+ " Check container name and try again", bundle);
 					}
 				}
 			} else if (exception != null) {
-				showAlert("Error",
-						"There was a problem creating your container: "
+				startFileError("There was a problem creating your container: "
 								+ exception.getMessage()
-								+ " Check container name and try again");
+								+ " Check container name and try again", bundle);
 			}
 		}
 	}
 
-	public class ChangeAttributesCDNTask extends AsyncTask<Void, Void, HttpResponse> {
+	public class ChangeAttributesCDNTask extends AsyncTask<Void, Void, HttpBundle> {
 		private CloudServersException exception;
 
 		@Override
-		protected HttpResponse doInBackground(Void... arg0) {
-			HttpResponse resp = null;
+		protected HttpBundle doInBackground(Void... arg0) {
+			HttpBundle bundle = null;
 			try {
-				resp = (new ContainerManager(context)).disable(containerName,
+				bundle = (new ContainerManager(context)).disable(containerName,
 						selectedCdnId, selectedTtlId, selectedLogRetId);
 			} catch (CloudServersException e) {
 				exception = e;
 			}
-			return resp;
+			return bundle;
 		}
 
 		@Override
-		protected void onPostExecute(HttpResponse response) {
+		protected void onPostExecute(HttpBundle bundle) {
+			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 202) {
@@ -308,20 +310,17 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 				} else {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error",
-								"There was a problem creating your container.");
+						startFileError("There was a problem creating your container.", bundle);
 					} else {
-						showAlert("Error",
-								"There was a problem creating your container: "
+						startFileError("There was a problem creating your container: "
 										+ cse.getMessage()
-										+ " Check container name and try again");
+										+ " Check container name and try again", bundle);
 					}
 				}
 			} else if (exception != null) {
-				showAlert("Error",
-						"There was a problem creating your container: "
+				startFileError("There was a problem creating your container: "
 								+ exception.getMessage()
-								+ " Check container name and try again");
+								+ " Check container name and try again", bundle);
 			}
 		}
 	}

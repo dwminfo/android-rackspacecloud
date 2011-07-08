@@ -31,6 +31,8 @@ import com.rackspace.cloud.servers.api.client.CloudServersException;
  */
 public class ListContainerActivity extends ListActivity {
 
+	protected static final int DELETE_ID = 0;
+	
 	private Container[] containers;
 	public Container container;
 	public Container cdnContainer;
@@ -39,8 +41,8 @@ public class ListContainerActivity extends ListActivity {
 	public Object kiloBytes;
 	public int bConver = 1048576;
 	public int kbConver = 1024;
-	protected static final int DELETE_ID = 0;
 	private Context context;
+	private boolean loading;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,10 +55,11 @@ public class ListContainerActivity extends ListActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putSerializable("container", containers);
+		outState.putBoolean("loading", loading);
 	}
 
 	private void restoreState(Bundle state) {
-		if (state != null && state.containsKey("container")) {
+		if (state != null && state.containsKey("container") && state.getSerializable("container") != null) {
 			containers = (Container[]) state.getSerializable("container");
 			if (containers.length == 0) {
 				displayNoServersCell();
@@ -75,9 +78,6 @@ public class ListContainerActivity extends ListActivity {
 			Intent viewIntent = new Intent(this, ContainerObjectsActivity.class);
 			viewIntent.putExtra("container", containers[position]);
 			startActivityForResult(viewIntent, 55);
-
-			// startActivityForResult(viewIntent, 55); // arbitrary number;
-			// never used again
 		}
 	}
 
@@ -142,6 +142,11 @@ public class ListContainerActivity extends ListActivity {
 		private CloudServersException exception;
 
 		@Override
+		protected void onPreExecute(){
+			loading = true;
+		}
+			
+		@Override
 		protected ArrayList<Container> doInBackground(Void... arg0) {
 			ArrayList<Container> containers = null;
 
@@ -168,7 +173,7 @@ public class ListContainerActivity extends ListActivity {
 					containerNames[i] = container.getName();
 				}
 			}
-
+			loading = false;
 			new LoadCDNContainersTask().execute((Void[]) null);
 		}
 	}
@@ -178,6 +183,11 @@ public class ListContainerActivity extends ListActivity {
 
 		private CloudServersException exception;
 
+		@Override
+		protected void onPreExecute(){
+			loading = true;
+		}
+		
 		@Override
 		protected ArrayList<Container> doInBackground(Void... arg0) {
 			ArrayList<Container> cdnContainers = null;
@@ -211,6 +221,7 @@ public class ListContainerActivity extends ListActivity {
 				}
 			}
 			setContainerList();
+			loading = false;
 		}
 	}
 
@@ -227,13 +238,10 @@ public class ListContainerActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case R.id.add_container:
 			startActivityForResult(
-					new Intent(this, AddContainerActivity.class), 56); // arbitrary
-																		// number;
-																		// never
-																		// used
-																		// again
+					new Intent(this, AddContainerActivity.class), 56); // arbitrary number never used again
 			return true;
 		case R.id.refresh:
+			containers = null;
 			loadContainers();
 			return true;
 		}
@@ -276,11 +284,11 @@ public class ListContainerActivity extends ListActivity {
 			return (row);
 		}
 	}
-
+	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-
+		
 		if (resultCode == RESULT_OK) {
 			// a sub-activity kicked back, so we want to refresh the server list
 			loadContainers();

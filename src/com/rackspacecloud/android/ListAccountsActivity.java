@@ -18,6 +18,7 @@ import com.rackspace.cloud.servers.api.client.ImageManager;
 import com.rackspace.cloud.servers.api.client.http.Authentication;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -25,7 +26,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -33,42 +33,68 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ListAccountsActivity extends ListActivity{
 
-	private ArrayList<Account> accounts;
+	private final int PASSWORD_PROMPT = 123;
 	private final String FILENAME = "accounts.data";
-	private Intent tabViewIntent;
+	
 	private boolean authenticating;
-	ProgressDialog dialog;
-	Context context;
+	private ArrayList<Account> accounts;
+	private Intent tabViewIntent;
+	private ProgressDialog dialog;
+	private Context context;
+	
+	//need to store if the user has successfully logged in
+	private boolean loggedIn;
+
 
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        restoreState(savedInstanceState);
+        onRestoreInstanceState(savedInstanceState);
         registerForContextMenu(getListView());
         context = getApplicationContext();
         tabViewIntent = new Intent(this, TabViewActivity.class);
+        verifyPassword();
     }
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putBoolean("authenticating", authenticating);
+		outState.putBoolean("loggedIn", loggedIn);
+		
+		//need to set authenticating back to true because it is set to false
+		//in hideDialog()
+		if(authenticating){
+			hideDialog();
+			authenticating = true;
+		}
 		writeAccounts();
 	}
 	
-	private void restoreState(Bundle state) {
+	@Override
+	protected void onRestoreInstanceState(Bundle state) {
+		if (state != null && state.containsKey("loggedIn")){
+			loggedIn = state.getBoolean("loggedIn");
+		}
+		else{
+			loggedIn = false;
+		}
 		if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
-    		showActivityIndicators();
+    		showDialog();
     	} else {
-    		hideActivityIndicators();
+    		hideDialog();
     	}
 		if (state != null && state.containsKey("accounts")) {
     		accounts = readAccounts();
@@ -83,9 +109,75 @@ public class ListAccountsActivity extends ListActivity{
     	} 	
     }
 	
+	@Override
+	protected void onStart(){
+		super.onStart();
+		if(authenticating){
+			showDialog();
+		}
+	}
+	
+	@Override
+	protected void onStop(){
+		super.onStop();
+		if(authenticating){
+			hideDialog();
+			authenticating = true;
+		}
+	}
+
+	/*
+	 * if the application is password protected,
+	 * the user must provide the password before
+	 * gaining access
+	 */
+	private void verifyPassword(){
+		PasswordManager pwManager = new PasswordManager(getSharedPreferences(
+				Preferences.SHARED_PREFERENCES_NAME, MODE_PRIVATE));
+		if(pwManager.hasPassword() && !loggedIn){
+			createCustomDialog(PASSWORD_PROMPT);
+		}
+	}
+	
+	private boolean rightPassword(String password){
+		PasswordManager pwManager = new PasswordManager(getSharedPreferences(
+				Preferences.SHARED_PREFERENCES_NAME, MODE_PRIVATE));
+		return pwManager.verifyEnteredPassword(password);
+	}
+	
+	
+	/*
+	 * forces the user to enter a correct password
+	 * before they gain access to application data
+	 */
+	private void createCustomDialog(int id) {
+		final Dialog dialog = new Dialog(ListAccountsActivity.this);
+		switch (id) {
+		case PASSWORD_PROMPT:
+			dialog.setContentView(R.layout.passworddialog);
+			dialog.setTitle("Enter your password:");
+			dialog.setCancelable(false);
+			Button button = (Button) dialog.findViewById(R.id.submit_password);
+			button.setOnClickListener(new OnClickListener() {
+				public void onClick(View v){
+					EditText passwordText = ((EditText)dialog.findViewById(R.id.submit_password_text));
+					if(!rightPassword(passwordText.getText().toString())){
+						passwordText.setText("");
+						showToast("Password was incorrect.");
+						loggedIn = false;
+					}
+					else{
+						dialog.dismiss();
+						loggedIn = true;
+					}
+				}
+				
+			});
+			dialog.show();
+		}
+	}
+	
 	private void loadAccounts() {
-		if(accounts != null)
-			Log.d("loadAccounts", "captin the lenght is: " + accounts.size());
 		//check and see if there are any in memory
 		if(accounts == null){
 			accounts = readAccounts();
@@ -94,7 +186,6 @@ public class ListAccountsActivity extends ListActivity{
 		if(accounts == null){
 			accounts = new ArrayList<Account>();
 		}
-		Log.d("loadAccounts2", "captin the lenght is: " + accounts.size());
 
 		setAccountList();
 	}
@@ -135,7 +226,6 @@ public class ListAccountsActivity extends ListActivity{
 			in = new ObjectInputStream(fis);
 			ArrayList<Account> file = (ArrayList<Account>)in.readObject();
 			in.close();
-			Log.d("captin", Boolean.toString(file == null));
 			return file;
 		} catch (FileNotFoundException e) {
 			//showAlert("Error", "Could not load accounts.");
@@ -166,7 +256,7 @@ public class ListAccountsActivity extends ListActivity{
 	
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		if (accounts != null && accounts.size() > 0) {
-			setActivityIndicatorsVisibility(View.VISIBLE, v);
+			//setActivityIndicatorsVisibility(View.VISIBLE, v);
 			Account.setAccount(accounts.get(position));
 			login();
 		}		
@@ -175,7 +265,6 @@ public class ListAccountsActivity extends ListActivity{
 	public void login() {
         //showActivityIndicators();
         //setLoginPreferences();
-		dialog = ProgressDialog.show(ListAccountsActivity.this, "", "Authenticating...", true);
         new AuthenticateTask().execute((Void[]) null);
     }
 	
@@ -190,13 +279,21 @@ public class ListAccountsActivity extends ListActivity{
     @Override 
     //in options menu, when add account is selected go to add account activity
     public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.add_account:
-			startActivityForResult(new Intent(this, AddAccountActivity.class), 78); // arbitrary number; never used again
-			return true;
-		}
-		return false;
-	} 
+    	switch (item.getItemId()) {
+    	case R.id.add_account:
+    		startActivityForResult(new Intent(this, AddAccountActivity.class), 78); // arbitrary number; never used again
+    		return true;
+
+    	case R.id.contact_rackspace:
+    		startActivity(new Intent(this, ContactActivity.class));
+    		return true;
+    		
+    	case R.id.add_password:
+    		startActivity(new Intent(this, CreatePasswordActivity.class));
+    		return true;
+    	}	
+    	return false;
+    } 
 
     //the context menu for a long press on an account
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -275,13 +372,12 @@ public class ListAccountsActivity extends ListActivity{
 			acc.setApiKey(b.getString("apiKey"));
 			acc.setUsername(b.getString("username"));
 			acc.setAuthServer(b.getString("server"));
-			Log.d("captin captin!", acc.getAuthServer());
 			accounts.add(acc);
 			writeAccounts();
 			loadAccounts();
 		}
 	}	
-
+/*
 	private void setActivityIndicatorsVisibility(int visibility) {
 		//FINISH THIS TO LET USER KNOW PROGRAM IS STILL WORKING
 		
@@ -299,33 +395,40 @@ public class ListAccountsActivity extends ListActivity{
         //pb.setVisibility(visibility);
         //tv.setVisibility(visibility);
     }
+*/
 	
-	private void showActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.VISIBLE);
+	private void showDialog() {
+		authenticating = true;
+		dialog = ProgressDialog.show(ListAccountsActivity.this, "", "Authenticating...", true);
     }
     
-    private void hideActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.INVISIBLE);
+    private void hideDialog() {
+    	if(dialog != null){
+    		dialog.dismiss();
+    	}
+    	authenticating = false;
     }
-	
+
 	private class AuthenticateTask extends AsyncTask<Void, Void, Boolean> {
     	
 		@Override
+		protected void onPreExecute(){
+			showDialog();
+		}
+		
+		@Override
 		protected Boolean doInBackground(Void... arg0) {
-
-			authenticating = true;
 			return new Boolean(Authentication.authenticate(context));
 			//return true;
 		}
     	
 		@Override
 		protected void onPostExecute(Boolean result) {
-			authenticating = false;
 			if (result.booleanValue()) {
 				//startActivity(tabViewIntent);
-	        	new LoadImagesTask().execute((Void[]) null);				
+	        	new LoadImagesTask().execute((Void[]) null);
 			} else {
-				dialog.dismiss();
+				hideDialog();
 				showAlert("Login Failure", "Authentication failed.  Please check your User Name and API Key.");
 			}
 		}
@@ -335,7 +438,6 @@ public class ListAccountsActivity extends ListActivity{
     	
 		@Override
 		protected ArrayList<Flavor> doInBackground(Void... arg0) {
-			Log.d("auth", "task2");
 			return (new FlavorManager()).createList(true, context);
 		}
     	
@@ -348,13 +450,12 @@ public class ListAccountsActivity extends ListActivity{
 					flavorMap.put(flavor.getId(), flavor);
 				}
 				Flavor.setFlavors(flavorMap);
-				dialog.dismiss();
+				hideDialog();
 				startActivity(tabViewIntent);
 			} else {
-				dialog.dismiss();
+				hideDialog();
 				showAlert("Login Failure", "There was a problem loading server flavors.  Please try again.");
 			}
-			hideActivityIndicators();
 		}
     }
 
@@ -362,7 +463,6 @@ public class ListAccountsActivity extends ListActivity{
     	
 		@Override
 		protected ArrayList<Image> doInBackground(Void... arg0) {
-			Log.d("auth", "task3");
 			return (new ImageManager()).createList(true, context);
 		}
     	
@@ -378,10 +478,9 @@ public class ListAccountsActivity extends ListActivity{
 				new LoadFlavorsTask().execute((Void[]) null);
 				//startActivity(tabViewIntent);
 			} else {
-				dialog.dismiss();
+				hideDialog();
 				showAlert("Login Failure", "There was a problem loading server images.  Please try again.");
 			}
-			hideActivityIndicators();
 		}
     }
     
@@ -394,8 +493,16 @@ public class ListAccountsActivity extends ListActivity{
 	        return;
 	    } }); 
 		alert.show();
-		hideActivityIndicators();
     }
+    
+    private void showToast(String message) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, message, duration);
+		toast.show();
+    }
+    
+    
 	
 		
 }

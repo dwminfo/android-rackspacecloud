@@ -34,7 +34,7 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
 public class ListServersActivity extends ListActivity {
 
 	private Server[] servers;
-	Context context;
+	private Context context;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class ListServersActivity extends ListActivity {
 	}
 
     private void restoreState(Bundle state) {
-    	if (state != null && state.containsKey("servers")) {
+    	if (state != null && state.containsKey("servers") && state.getSerializable("servers") != null) {
     		servers = (Server[]) state.getSerializable("servers");
     		if (servers.length == 0) {
     			displayNoServersCell();
@@ -174,6 +174,7 @@ public class ListServersActivity extends ListActivity {
 			startActivityForResult(new Intent(this, AddServerActivity.class), 56); // arbitrary number; never used again
 			return true;
 		case R.id.refresh:
+			servers = null;
 			loadServers();
 	        return true;
 		}

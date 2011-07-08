@@ -32,13 +32,11 @@ import com.rackspace.cloud.servers.api.client.parsers.FlavorsXMLParser;
 public class FlavorManager extends EntityManager {
 
 	public ArrayList<Flavor> createList(boolean detail, Context context) {
-		
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpGet get = new HttpGet(Account.getAccount().getServerUrl() + "/flavors/detail.xml?now=cache_time2");
 		ArrayList<Flavor> flavors = new ArrayList<Flavor>();
 		
 		get.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
-		
 		try {			
 			HttpResponse resp = httpclient.execute(get);
 		    BasicResponseHandler responseHandler = new BasicResponseHandler();

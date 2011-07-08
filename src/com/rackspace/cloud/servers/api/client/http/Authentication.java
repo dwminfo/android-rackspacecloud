@@ -29,7 +29,6 @@ public class Authentication {
 		
 		try {			
 			HttpResponse resp = httpclient.execute(get);
-		    			
 		    if (resp.getStatusLine().getStatusCode() == 204) {
 		    	Account.getAccount().setAuthToken(resp.getFirstHeader("X-Auth-Token").getValue());
 		    	Account.getAccount().setServerUrl(resp.getFirstHeader("X-Server-Management-Url").getValue());

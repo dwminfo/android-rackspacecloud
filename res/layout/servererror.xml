@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_height="wrap_content" android:layout_width="250dip">
+	<TextView android:textAppearance="?android:attr/textAppearanceLarge"
+		android:layout_height="wrap_content" android:id="@+id/textView1"
+		android:layout_width="wrap_content" android:layout_marginLeft="10dip"
+		android:layout_marginTop="10dip" android:text="Error"></TextView>
+	<TextView android:layout_marginLeft="20dip"
+		android:layout_marginTop="5dip" android:layout_height="wrap_content"
+		android:id="@+id/server_error_message" android:layout_width="wrap_content"
+		android:text="error message"></TextView>
+	<LinearLayout android:layout_height="wrap_content"
+		android:id="@+id/linearLayout1" android:layout_width="fill_parent"
+		android:gravity="center" android:layout_marginTop="10dip">
+		<Button android:id="@+id/server_error_ok_button"
+			android:layout_height="wrap_content" android:layout_width="100dip"
+			android:text="OK" android:layout_marginRight="5dip" android:clickable="true"></Button>
+		<Button android:layout_height="wrap_content"
+			android:layout_width="100dip" android:text="Details"
+			android:id="@+id/server_error_details_button" android:clickable="true"></Button>
+	</LinearLayout>
+
+</LinearLayout>

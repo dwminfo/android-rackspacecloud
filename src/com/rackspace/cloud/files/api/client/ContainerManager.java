@@ -2,6 +2,9 @@ package com.rackspace.cloud.files.api.client;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import javax.xml.parsers.FactoryConfigurationError;
@@ -29,6 +32,7 @@ import com.rackspace.cloud.files.api.client.parsers.ContainerXMLParser;
 import com.rackspace.cloud.servers.api.client.Account;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.EntityManager;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
 /**
@@ -42,16 +46,22 @@ public class ContainerManager extends EntityManager {
 		this.context = context;
 	}
 
-	public HttpResponse create(Editable editable) throws CloudServersException {
+	public HttpBundle create(Editable editable) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPut put = new HttpPut(Account.getAccount().getStorageUrl() + "/" + editable);
-
+		
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), editable.toString());
+		HttpPut put = new HttpPut(url);
+		
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(put);
+		
 		try {
 			resp = httpclient.execute(put);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -65,7 +75,7 @@ public class ContainerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}
-		return resp;
+		return bundle;
 	}
 
 	public ArrayList<Container> createCDNList(boolean detail) throws CloudServersException {
@@ -125,12 +135,12 @@ public class ContainerManager extends EntityManager {
 	}
 
 	
-	public HttpResponse enable(String container, String ttl, String logRet)
+	public HttpBundle enable(String container, String ttl, String logRet)
 			throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpPut put = new HttpPut(Account.getAccount().getCdnManagementUrl() + "/"
-				+ container);
+		String url = getSafeURL(Account.getAccount().getCdnManagementUrl(), container);
+		HttpPut put = new HttpPut(url);
 
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		put.addHeader("X-TTL", ttl);
@@ -138,8 +148,12 @@ public class ContainerManager extends EntityManager {
 		Log.v("cdn manager", ttl + container + logRet);
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(put);
+		
 		try {
 			resp = httpclient.execute(put);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -153,23 +167,27 @@ public class ContainerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}
-		return resp;
+		return bundle;
 	}
-	public HttpResponse disable(String container, String cdn, String ttl, String logRet)
+	public HttpBundle disable(String container, String cdn, String ttl, String logRet)
 	throws CloudServersException {
        HttpResponse resp = null;
  	    CustomHttpClient httpclient = new CustomHttpClient(context);
-       	HttpPost post = new HttpPost(Account.getAccount().getCdnManagementUrl() + "/"
-		+ container);
-
+ 	   String url = getSafeURL(Account.getAccount().getCdnManagementUrl(), container);
+       	HttpPost post = new HttpPost(url);
+       	
        	post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
        		post.addHeader("X-TTL", ttl);
        		post.addHeader("X-Log-Retention", logRet);
        		post.addHeader("X-CDN-Enabled", cdn);
        		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+       		HttpBundle bundle = new HttpBundle();
+    		bundle.setCurlRequest(post);
+       		
        		try {
        			resp = httpclient.execute(post);
+       			bundle.setHttpResponse(resp);
        		} catch (ClientProtocolException e) {
        			CloudServersException cse = new CloudServersException();
        			cse.setMessage(e.getLocalizedMessage());
@@ -183,19 +201,24 @@ public class ContainerManager extends EntityManager {
        			cse.setMessage(e.getLocalizedMessage());
        			throw cse;
        		}
-       		return resp;
+       		return bundle;
 	}
 
-	public HttpResponse delete(String string) throws CloudServersException {
+	public HttpBundle delete(String string) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
-		HttpDelete put = new HttpDelete(Account.getAccount().getStorageUrl() + "/" + string);
-
+		String url = getSafeURL(Account.getAccount().getStorageUrl(), string);
+		HttpDelete put = new HttpDelete(url);
+		
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(put);
+		
 		try {
 			resp = httpclient.execute(put);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -209,7 +232,7 @@ public class ContainerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}
-		return resp;
+		return bundle;
 	}
 
 	public ArrayList<Container> createList(boolean detail)
@@ -270,6 +293,24 @@ public class ContainerManager extends EntityManager {
 		}
 
 		return containers;
+	}
+	
+	private String getSafeURL(String badURL, String name){
+		URI uri = null;
+		try {
+			uri = new URI("https", badURL.substring(8), "/" + name.toString()+"/", "");
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		String url = null;
+		try {
+			url = uri.toURL().toString();
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return url.substring(0, url.length()-1);
 	}
 
 }

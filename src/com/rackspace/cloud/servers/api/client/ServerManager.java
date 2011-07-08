@@ -27,8 +27,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import android.content.Context;
-
 import com.rackspace.cloud.files.api.client.CustomHttpClient;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 import com.rackspace.cloud.servers.api.client.parsers.ServersXMLParser;
 
@@ -212,7 +212,7 @@ public class ServerManager extends EntityManager {
 		return server;
 	}
 
-	public HttpResponse reboot(Server server, String rebootType, Context context) throws CloudServersException {
+	public HttpBundle reboot(Server server, String rebootType, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");		
@@ -230,9 +230,13 @@ public class ServerManager extends EntityManager {
 		post.setEntity(tmp);
 		
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(post);
 
 		try {			
-			resp = httpclient.execute(post);			
+			resp = httpclient.execute(post);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -246,10 +250,10 @@ public class ServerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}	
-		return resp;
+		return bundle;
 	}
 
-	public HttpResponse resize(Server server, int flavorId, Context context) throws CloudServersException {
+	public HttpBundle resize(Server server, int flavorId, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");			
@@ -266,9 +270,13 @@ public class ServerManager extends EntityManager {
 			throw cse;
 		}
 		post.setEntity(tmp);
+		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(post);
 
 		try {			
 			resp = httpclient.execute(post);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -282,10 +290,10 @@ public class ServerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}	
-		return resp;
+		return bundle;
 	}
 	
-	public HttpResponse confirmResize(Server server, Context context) throws CloudServersException {
+	public HttpBundle confirmResize(Server server, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");			
@@ -295,16 +303,20 @@ public class ServerManager extends EntityManager {
 
 		StringEntity tmp = null;
 		try {
-			tmp = new StringEntity("<confirmResize xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\">");
+			tmp = new StringEntity("<confirmResize xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\"/>");
 		} catch (UnsupportedEncodingException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}
 		post.setEntity(tmp);
+		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(post);
 
 		try {			
 			resp = httpclient.execute(post);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -318,20 +330,63 @@ public class ServerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}	
-		return resp;
+		return bundle;
 	}
 
+	public HttpBundle revertResize(Server server, Context context) throws CloudServersException {
+		HttpResponse resp = null;
+		CustomHttpClient httpclient = new CustomHttpClient(context);
+		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");			
+		post.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
+		post.addHeader("Content-Type", "application/xml");
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
 
-	public HttpResponse delete(Server server, Context context) throws CloudServersException {
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity("<revertResize xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\"/>");
+		} catch (UnsupportedEncodingException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}
+		post.setEntity(tmp);
+		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(post);
+
+		try {			
+			resp = httpclient.execute(post);
+			bundle.setHttpResponse(resp);
+		} catch (ClientProtocolException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (IOException e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		} catch (FactoryConfigurationError e) {
+			CloudServersException cse = new CloudServersException();
+			cse.setMessage(e.getLocalizedMessage());
+			throw cse;
+		}	
+		return bundle;
+	}
+	
+	public HttpBundle delete(Server server, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpDelete delete = new HttpDelete(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");				
 		delete.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		delete.addHeader("Content-Type", "application/xml");
 		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);
+		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(delete);
 
 		try {			
 			resp = httpclient.execute(delete);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -345,18 +400,18 @@ public class ServerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}	
-		return resp;
+		return bundle;
 	}
 	
-	public HttpResponse rename(Server server, String name, Context context) throws CloudServersException{
+	public HttpBundle rename(Server server, String name, Context context) throws CloudServersException{
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPut put = new HttpPut(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");
 	
 		put.addHeader("X-Auth-Token", Account.getAccount().getAuthToken());
 		put.addHeader("Content-Type", "application/xml");
-		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class);  //*******FIND OUT WITH THIS DOES?
-	
+		httpclient.removeRequestInterceptorByClass(RequestExpectContinue.class); 
+		
 		StringEntity tmp = null;
 		try {
 			tmp = new StringEntity("<server xmlns=\"http://docs.rackspacecloud.com/servers/api/v1.0\" name=\"" + name + "\"/>");
@@ -367,8 +422,12 @@ public class ServerManager extends EntityManager {
 		}
 		put.setEntity(tmp);
 		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(put);
+		
 		try {			
 			resp = httpclient.execute(put);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -382,10 +441,10 @@ public class ServerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}	
-		return resp;
+		return bundle;
 	}
 	
-	public HttpResponse rebuild(Server server, int imageId, Context context) throws CloudServersException {
+	public HttpBundle rebuild(Server server, int imageId, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/action.xml");
@@ -403,9 +462,13 @@ public class ServerManager extends EntityManager {
 			throw cse;
 		}
 		post.setEntity(tmp);
+		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(post);
 
 		try {			
 			resp = httpclient.execute(post);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -419,10 +482,10 @@ public class ServerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}	
-		return resp;
+		return bundle;
 	}
 
-	public HttpResponse backup(Server server, String weeklyValue, String dailyValue, boolean enabled, Context context) throws CloudServersException {
+	public HttpBundle backup(Server server, String weeklyValue, String dailyValue, boolean enabled, Context context) throws CloudServersException {
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPost post = new HttpPost(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + "/backup_schedule.xml");
@@ -442,9 +505,13 @@ public class ServerManager extends EntityManager {
 			throw cse;
 		}
 		post.setEntity(tmp);
+		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(post);
 
 		try {			
 			resp = httpclient.execute(post);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -458,10 +525,10 @@ public class ServerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}	
-		return resp;
+		return bundle;
 	}
 	
-	public HttpResponse changePassword(Server server, String password, Context context) throws CloudServersException{
+	public HttpBundle changePassword(Server server, String password, Context context) throws CloudServersException{
 		HttpResponse resp = null;
 		CustomHttpClient httpclient = new CustomHttpClient(context);
 		HttpPut put = new HttpPut(Account.getAccount().getServerUrl() + "/servers/" + server.getId() + ".xml");
@@ -480,8 +547,12 @@ public class ServerManager extends EntityManager {
 		}
 		put.setEntity(tmp);
 		
+		HttpBundle bundle = new HttpBundle();
+		bundle.setCurlRequest(put);
+		
 		try {			
 			resp = httpclient.execute(put);
+			bundle.setHttpResponse(resp);
 		} catch (ClientProtocolException e) {
 			CloudServersException cse = new CloudServersException();
 			cse.setMessage(e.getLocalizedMessage());
@@ -495,7 +566,8 @@ public class ServerManager extends EntityManager {
 			cse.setMessage(e.getLocalizedMessage());
 			throw cse;
 		}	
-		return resp;
+		return bundle;
 	}
+
 	
 }

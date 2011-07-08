@@ -16,11 +16,11 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.Server;
 import com.rackspace.cloud.servers.api.client.ServerManager;
+import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
 public class PasswordServerActivity extends Activity implements OnClickListener{
@@ -54,22 +55,12 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 		String password = ((EditText)findViewById(R.id.password_edittext)).getText().toString();
 		String confirm = ((EditText)findViewById(R.id.password_confirm_edittext)).getText().toString();
 		if(password.equals(confirm)){
+			modifiedPassword = password;
 			new PasswordServerTask().execute((Void[]) null);	
 		}
 		else{
 			showToast("The password and confirmation do not match");
 		}
-	}
-	
-	private void showAlert(String title, String message) {
-		AlertDialog alert = new AlertDialog.Builder(this).create();
-		alert.setTitle(title);
-		alert.setMessage(message);
-		alert.setButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				return;
-			} }); 
-		alert.show();
 	}
 	
 	private void showToast(String message) {
@@ -109,7 +100,15 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 		return cse;
 	}
 
-	private class PasswordServerTask extends AsyncTask<Void, Void, HttpResponse> {
+	private void startServerError(String message, HttpBundle bundle){
+		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
+		viewIntent.putExtra("errorMessage", message);
+		viewIntent.putExtra("response", bundle.getResponseText());
+		viewIntent.putExtra("request", bundle.getCurlRequest());
+		startActivity(viewIntent);
+	}
+	
+	private class PasswordServerTask extends AsyncTask<Void, Void, HttpBundle> {
 
 		private CloudServersException exception;
 
@@ -118,18 +117,19 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 		}
 		
 		@Override
-		protected HttpResponse doInBackground(Void... arg0) {
-			HttpResponse resp = null;
+		protected HttpBundle doInBackground(Void... arg0) {
+			HttpBundle bundle = null;
 			try {
-				resp = (new ServerManager()).changePassword(server, modifiedPassword, getApplicationContext());
+				bundle = (new ServerManager()).changePassword(server, modifiedPassword, getApplicationContext());
 			} catch (CloudServersException e) {
 				exception = e;
 			}
-			return resp;
+			return bundle;
 		}
 
 		@Override
-		protected void onPostExecute(HttpResponse response) {
+		protected void onPostExecute(HttpBundle bundle) {
+			HttpResponse response = bundle.getResponse();
 			if (response != null) {
 				int statusCode = response.getStatusLine().getStatusCode();	
 				if(statusCode == 204){
@@ -141,13 +141,13 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 				if (statusCode != 204) {
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
-						showAlert("Error", "There was a problem changing your password.");
+						startServerError("There was a problem changing your password.", bundle);
 					} else {
-						showAlert("Error", "There was a problem changing your password: " + cse.getMessage() + " " + statusCode);
+						startServerError("There was a problem changing your password: " + cse.getMessage() + " " + statusCode, bundle);
 					}
 				}
 			} else if (exception != null) {
-				showAlert("Error", "There was a problem changing your password: " + exception.getMessage());
+				startServerError("There was a problem changing your password: " + exception.getMessage(), bundle);
 				
 			}
 		}
