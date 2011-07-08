@@ -2,6 +2,8 @@ package com.rackspacecloud.android;
 
 import java.util.ArrayList;
 
+import org.apache.http.HttpEntity;
+
 import com.rackspace.cloud.files.api.client.ContainerObjects;
 
 import android.app.Application;
@@ -11,6 +13,8 @@ public class AndroidCloudApplication extends Application {
 	private boolean taskProcessing;
 	private boolean deletingObjectProcessing;
 	private boolean deletingContainerProcessing;
+	private boolean downloadingObject;
+	private HttpEntity downloadedObject;
 	private ArrayList<ContainerObjects> curDirFiles;
 	
 	public void setAddingObject(boolean processing){
@@ -19,6 +23,22 @@ public class AndroidCloudApplication extends Application {
 	
 	public boolean isAddingObject(){
 		return taskProcessing;
+	}
+	
+	public void setDownloadedEntity(HttpEntity obj){
+		downloadedObject = obj;
+	}
+	
+	public HttpEntity getDownloadedEntity(){
+		return downloadedObject;
+	}
+	
+	public void setDownloadingObject(boolean processing){
+		downloadingObject = processing;
+	}
+	
+	public boolean isDownloadingObject(){
+		return downloadingObject;
 	}
 	
 	public void setDeleteingObject(boolean processing){

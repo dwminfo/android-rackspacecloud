@@ -173,6 +173,12 @@ public class ContainerObjectsActivity extends ListActivity {
 			deleteObjTask = new DeleteObjectListenerTask();
 			deleteObjTask.execute();
 		}
+		
+		if(app.isDeletingContainer()){
+			displayNoFilesCell();
+			deleteContainerTask = new DeleteContainerListenerTask();
+			deleteContainerTask.execute();
+		}
 
 
 	}
@@ -202,6 +208,15 @@ public class ContainerObjectsActivity extends ListActivity {
 		if(task != null){
 			task.cancel(true);
 		}
+		
+		if(deleteObjTask != null){
+			deleteObjTask.cancel(true);
+		}
+		
+		if(deleteContainerTask != null){
+			deleteContainerTask.cancel(true);
+		}
+
 	}
 
 	/*
@@ -234,18 +249,6 @@ public class ContainerObjectsActivity extends ListActivity {
 		new LoadFilesTask().execute();
 	}
 
-	/*
-	private void displayLoadingCell() {
-		String a[] = new String[1];
-		a[0] = "Loading...";
-		setListAdapter(new ArrayAdapter<String>(this, R.layout.loadingcell,
-				R.id.loading_label, a));
-		getListView().setTextFilterEnabled(true);
-		getListView().setDividerHeight(0); // hide the dividers so it won't look
-											// like a list row
-		getListView().setItemsCanFocus(false);
-	}
-	 */
 
 	/* load only the files that should display for the 
 	 * current directory in the curDirFiles[]
@@ -309,13 +312,6 @@ public class ContainerObjectsActivity extends ListActivity {
 			for(int i = 0; i < app.getCurFiles().size(); i++){
 				tempList.add(app.getCurFiles().get(i));
 			}
-			/*
-			adapter.clear();
-			for(int i = 0; i < tempList.size(); i++){
-				adapter.add(tempList.get(i));
-				Log.d("info", "the count is: " + adapter.getCount());
-			}
-			*/
 			getListView().setDividerHeight(1); // restore divider lines
 			setListAdapter(new FileAdapter());
 		}
@@ -568,20 +564,15 @@ public class ContainerObjectsActivity extends ListActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 			
 		if (resultCode == RESULT_OK && requestCode == 56) {
-			Log.d("info", "top called");
 			// a sub-activity kicked back, so we want to refresh the server list
 			loadFiles();
 		}
-		/*
-		if (requestCode == 55) {
-			Log.d("info", "bottom called");
-			if (resultCode == RESULT_OK) {
-				Intent viewIntent1 = new Intent(this,
-						ListContainerActivity.class);
-				startActivityForResult(viewIntent1, 55);
-			}
+		
+		// deleted file so need to update the list
+		if (requestCode == 55 && resultCode == 99) {
+			loadFiles();
 		}
-		*/
+		
 	}
 
 	private CloudServersException parseCloudServersException(
@@ -798,7 +789,8 @@ public class ContainerObjectsActivity extends ListActivity {
 				}
 				if (statusCode == 204) {
 					setResult(Activity.RESULT_OK);
-				} else {hideDialog();
+				} else {
+					hideDialog();
 					CloudServersException cse = parseCloudServersException(response);
 					if ("".equals(cse.getMessage())) {
 						startFileError("There was a problem deleting your folder.", bundle);
@@ -951,6 +943,8 @@ public class ContainerObjectsActivity extends ListActivity {
 		 */
 		@Override
 		protected void onPostExecute(Void arg1) {
+
+			hideDialog();
 			setResult(RESULT_OK);
 			finish();
 		}

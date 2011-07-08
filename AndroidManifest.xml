@@ -102,7 +102,7 @@
 
 
 	</application>
-	<uses-sdk android:minSdkVersion="4" android:targetSdkVersion="11" />
+	<uses-sdk android:minSdkVersion="4" />
 
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest> 

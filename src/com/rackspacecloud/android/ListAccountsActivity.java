@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -92,6 +93,7 @@ public class ListAccountsActivity extends ListActivity{
 			loggedIn = false;
 		}
 		if (state != null && state.containsKey("authenticating") && state.getBoolean("authenticating")) {
+			Log.d("info", "captin on restore show");
     		showDialog();
     	} else {
     		hideDialog();
@@ -108,7 +110,7 @@ public class ListAccountsActivity extends ListActivity{
             loadAccounts();        
     	} 	
     }
-	
+
 	@Override
 	protected void onStart(){
 		super.onStart();
@@ -121,10 +123,12 @@ public class ListAccountsActivity extends ListActivity{
 	protected void onStop(){
 		super.onStop();
 		if(authenticating){
+			Log.d("info", "captin onstop called");
 			hideDialog();
 			authenticating = true;
 		}
 	}
+	
 
 	/*
 	 * if the application is password protected,
@@ -366,6 +370,10 @@ public class ListAccountsActivity extends ListActivity{
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		
+		if(requestCode == 187){
+			hideDialog(); 
+		}
+		
 		if (resultCode == RESULT_OK && requestCode == 78) {	  
 			Account acc = new Account();
 			Bundle b = data.getBundleExtra("accountInfo");
@@ -399,7 +407,9 @@ public class ListAccountsActivity extends ListActivity{
 	
 	private void showDialog() {
 		authenticating = true;
-		dialog = ProgressDialog.show(ListAccountsActivity.this, "", "Authenticating...", true);
+		if(dialog == null || !dialog.isShowing()){
+			dialog = ProgressDialog.show(ListAccountsActivity.this, "", "Authenticating...", true);
+		}
     }
     
     private void hideDialog() {
@@ -413,6 +423,7 @@ public class ListAccountsActivity extends ListActivity{
     	
 		@Override
 		protected void onPreExecute(){
+			Log.d("info", "auth show called");
 			showDialog();
 		}
 		
@@ -451,7 +462,7 @@ public class ListAccountsActivity extends ListActivity{
 				}
 				Flavor.setFlavors(flavorMap);
 				hideDialog();
-				startActivity(tabViewIntent);
+				startActivityForResult(tabViewIntent, 187);
 			} else {
 				hideDialog();
 				showAlert("Login Failure", "There was a problem loading server flavors.  Please try again.");
