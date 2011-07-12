@@ -81,6 +81,13 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 					boolean fromUser) {
 				// TODO Auto-generated method stub
 				numberDisplay.setText(getCountText(progress));
+				TextView number = (TextView)findViewById(R.id.server_name_number);
+				if(progress == 0){
+					number.setText("");
+				}
+				else{
+					number.setText("[1.." + (progress+1) + "]");
+				}
 			}
 			
 			private String getCountText(int i){
