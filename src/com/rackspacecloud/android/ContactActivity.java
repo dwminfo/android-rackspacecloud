@@ -2,8 +2,6 @@ package com.rackspacecloud.android;
 
 import java.util.ArrayList;
 
-
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,15 +9,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-public class ContactActivity extends Activity{
+public class ContactActivity extends GaActivity{
 	
 	ArrayList<String[]> contacts;
 	private final String USNUMBER = "1-877-934-0407";
 	private final String UKNUMBER = "0800-083-3012";
 	private final String twitterAddress = "twitter.com/rackspace";
-	
+		
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackPageView(PAGE_CONTACT);
         setContentView(R.layout.contactrackspace);
         setUpButtons();
     }

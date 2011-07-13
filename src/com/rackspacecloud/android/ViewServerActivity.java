@@ -52,7 +52,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
-public class ViewServerActivity extends Activity {
+public class ViewServerActivity extends GaActivity {
 
 	private Server server;
 	private boolean ipAddressesLoaded; // to prevent polling from loading tons of duplicates
@@ -69,11 +69,12 @@ public class ViewServerActivity extends Activity {
 	private PollServerTask pollServerTask;
 	private boolean canPoll;
 	private boolean noAskForConfirm;
-	
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		trackPageView(PAGE_SERVER);
 		server = (Server) this.getIntent().getExtras().get("server");
 		context = getApplicationContext();
 		setContentView(R.layout.viewserver);
@@ -109,6 +110,8 @@ public class ViewServerActivity extends Activity {
 		loadFlavors();
 		loadImages();
 	}
+
+
 	/*
     private void loadImage() {
     	// hate to do this, but devices run out of memory after a few rotations
@@ -178,7 +181,7 @@ public class ViewServerActivity extends Activity {
 				startActivity(viewIntent);
 			}
 		}
-		
+
 		// show status and possibly the progress, with polling
 		if (!"ACTIVE".equals(server.getStatus())) {
 			status.setText(server.getStatus() + " - " + server.getProgress() + "%");
@@ -316,9 +319,10 @@ public class ViewServerActivity extends Activity {
 
 		setupButton(R.id.view_server_ping_button, new OnClickListener() {
 			public void onClick(View v) {
-				Intent viewIntent = new Intent(v.getContext(), PingServerActivity.class);
+				trackEvent(CATEGORY_SERVER, EVENT_PING, "", -1);
 
 				//ping the first public ip
+				Intent viewIntent = new Intent(v.getContext(), PingServerActivity.class);
 				viewIntent.putExtra("ipAddress", server.getPublicIpAddresses()[0]);
 				startActivity(viewIntent);
 
@@ -348,7 +352,7 @@ public class ViewServerActivity extends Activity {
 	public void setServer(Server server) {
 		this.server = server;
 	}
-	
+
 	//setup menu for when menu button is pressed
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -356,17 +360,17 @@ public class ViewServerActivity extends Activity {
 		inflater.inflate(R.menu.view_server_activity_menu, menu);
 		return true;
 	} 
-    
-    @Override 
-    //in options menu, when add account is selected go to add account activity
-    public boolean onOptionsItemSelected(MenuItem item) {
-    	switch (item.getItemId()) {
-    	case R.id.refresh_server:
-    		loadServerData();
-    		return true;
-    	}	
-    	return false;
-    } 
+
+	@Override 
+	//in options menu, when add account is selected go to add account activity
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.refresh_server:
+			loadServerData();
+			return true;
+		}	
+		return false;
+	} 
 
 	private void startServerError(String message, HttpBundle bundle){
 		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
@@ -399,7 +403,7 @@ public class ViewServerActivity extends Activity {
 				.setMessage("Are you sure you want to perform a soft reboot?")
 				.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_SERVER, EVENT_REBOOT, "", -1);
 						new SoftRebootServerTask().execute((Void[]) null);
 					}
 				})
@@ -416,7 +420,7 @@ public class ViewServerActivity extends Activity {
 				.setMessage("Are you sure you want to perform a hard reboot?")
 				.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_SERVER, EVENT_REBOOT, "", -1);
 						new HardRebootServerTask().execute((Void[]) null);
 					}
 				})
@@ -444,7 +448,7 @@ public class ViewServerActivity extends Activity {
 				.setMessage("Are you sure you want to delete this server?  This operation cannot be undone and all backups will be deleted.")
 				.setPositiveButton("Delete Server", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_SERVER, EVENT_DELETE, "", -1);
 						new DeleteServerTask().execute((Void[]) null);
 					}
 				})
@@ -464,7 +468,7 @@ public class ViewServerActivity extends Activity {
 				.setMessage("Enter new name for server: ")        	         
 				.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_SERVER, EVENT_RENAME, "", -1);
 						modifiedServerName = input.getText().toString();
 						new RenameServerTask().execute((Void[]) null);
 					}
@@ -503,7 +507,7 @@ public class ViewServerActivity extends Activity {
 	private class ResizeClickListener implements android.content.DialogInterface.OnClickListener {
 
 		public void onClick(DialogInterface dialog, int which) {
-			//need to add one because server flavors state at index 1
+			trackEvent(CATEGORY_SERVER, EVENT_RESIZE, "", -1);
 			selectedFlavorId = which + 1 + "";
 			new ResizeServerTask().execute((Void[]) null);
 		}
@@ -513,6 +517,7 @@ public class ViewServerActivity extends Activity {
 	private class RebuildClickListener implements android.content.DialogInterface.OnClickListener {
 
 		public void onClick(DialogInterface dialog, int which) {
+			trackEvent(CATEGORY_SERVER, EVENT_REBUILD, "", -1);
 			selectedImageId = images[which].getId() + "";
 			new RebuildServerTask().execute((Void[]) null);
 		}
