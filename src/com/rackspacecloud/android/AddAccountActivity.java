@@ -16,7 +16,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-public class AddAccountActivity extends Activity implements OnClickListener{
+public class AddAccountActivity extends GaActivity implements OnClickListener{
 	
 	EditText usernameText;
 	EditText apiKeyText;
@@ -27,6 +27,7 @@ public class AddAccountActivity extends Activity implements OnClickListener{
 	
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackPageView(PAGE_PROVIDERS);
         setContentView(R.layout.createaccount);
         usernameText = (EditText) findViewById(R.id.username);
         apiKeyText = (EditText) findViewById(R.id.addaccount_apikey);

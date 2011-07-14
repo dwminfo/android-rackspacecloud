@@ -23,6 +23,10 @@ public class GaListActivity extends ListActivity {
 	protected static final String PAGE_ADD_SERVER = "/AddServer";
 	protected static final String PAGE_CONTACT = "/ContactInformation";
 	protected static final String PAGE_ADD_CONTAINER = "/AddContainer";
+	protected static final String PAGE_PASSCODE = "/Passcode";
+	protected static final String PAGE_PROVIDERS = "/Providers";
+	protected static final String PAGE_CONTAINER_DETAILS = "/ContainerDetail";
+	protected static final String PAGE_ADD_OBJECT = "/AddObject";
 
 	protected static final String EVENT_CREATE = "created";
 	protected static final String EVENT_DELETE = "deleted";

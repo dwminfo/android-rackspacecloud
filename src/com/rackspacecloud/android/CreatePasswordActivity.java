@@ -1,6 +1,5 @@
 package com.rackspacecloud.android;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -13,7 +12,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class CreatePasswordActivity extends Activity {
+public class CreatePasswordActivity extends GaActivity {
 
 	private PasswordManager pwManager;
 	private EditText passwordText;

@@ -47,6 +47,7 @@ public class AddFileActivity extends GaActivity implements OnClickListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackPageView(PAGE_ADD_OBJECT);
         setContentView(R.layout.addtextfile);
         context = getApplicationContext();
         containerName = (String) this.getIntent().getExtras().get("Cname");

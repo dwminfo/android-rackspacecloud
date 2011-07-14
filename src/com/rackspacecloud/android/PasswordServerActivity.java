@@ -38,6 +38,7 @@ public class PasswordServerActivity extends GaActivity implements OnClickListene
 	
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackPageView(PAGE_PASSCODE);
         setContentView(R.layout.viewchangepassword); 
         server = (Server) this.getIntent().getExtras().get("server");
     	setupButtons();  
