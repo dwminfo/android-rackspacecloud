@@ -228,6 +228,7 @@ public class ListAccountsActivity extends ListActivity{
 		try {
 			fis = openFileInput(FILENAME);
 			in = new ObjectInputStream(fis);
+			@SuppressWarnings("unchecked")
 			ArrayList<Account> file = (ArrayList<Account>)in.readObject();
 			in.close();
 			return file;
