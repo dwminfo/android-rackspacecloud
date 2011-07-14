@@ -660,14 +660,14 @@ public class ContainerObjectsActivity extends ListActivity {
 			return (row);
 		}
 	}
-
+		
 	private class LoadFilesTask extends
 	AsyncTask<String, Void, ArrayList<ContainerObjects>> {
 
 		private CloudServersException exception;
 		protected void onPreExecute(){
 			showDialog();
-			loadingFiles = true;
+			loadingFiles = true; 
 		}
 
 		@Override
@@ -686,7 +686,6 @@ public class ContainerObjectsActivity extends ListActivity {
 		@Override
 		protected void onPostExecute(ArrayList<ContainerObjects> result) {
 			hideDialog();
-			
 			if (exception != null) {
 				showAlert("Error", exception.getMessage());
 			}

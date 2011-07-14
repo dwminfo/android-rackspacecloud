@@ -133,8 +133,7 @@ public class ListServersActivity extends ListActivity {
     		e.printStackTrace();
     	}
     }
-    
-    
+            
     private class LoadServersTask extends AsyncTask<Void, Void, ArrayList<Server>> {
     	
     	private CloudServersException exception;

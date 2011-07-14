@@ -139,7 +139,8 @@ public class ListContainerActivity extends ListActivity {
 			e.printStackTrace();
 		}
 	}
-
+	
+	
 	private class LoadContainersTask extends
 			AsyncTask<Void, Void, ArrayList<Container>> {
 
@@ -206,7 +207,6 @@ public class ListContainerActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(ArrayList<Container> result) {
-			Log.v("listcontainerActivity", "onPostExecute loadCDNcontainerTask");
 			if (exception != null) {
 				showAlert("Error", exception.getMessage());
 			}

@@ -419,12 +419,11 @@ public class ListAccountsActivity extends ListActivity{
     	}
     	authenticating = false;
     }
-
+       
 	private class AuthenticateTask extends AsyncTask<Void, Void, Boolean> {
     	
 		@Override
 		protected void onPreExecute(){
-			Log.d("info", "auth show called");
 			showDialog();
 		}
 		

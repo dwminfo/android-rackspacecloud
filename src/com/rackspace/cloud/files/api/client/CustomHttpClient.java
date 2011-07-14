@@ -1,6 +1,8 @@
 package com.rackspace.cloud.files.api.client;
 
 import android.content.Context;
+import android.util.Log;
+
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -14,6 +16,7 @@ import com.rackspacecloud.android.R;
 import java.io.InputStream;
 import java.security.KeyStore;
 
+
 /**
  * 
  * @author Chmouel Boudjnah <chmouel.boudjnah@rackspace.co.uk>
@@ -24,31 +27,34 @@ import java.security.KeyStore;
  *         other version than 2.3.1.
  */
 public class CustomHttpClient extends DefaultHttpClient {
-
-	final Context context;
-
+	
+	private static KeyStore trusted;
+	final Context context; 
+	 
 	public CustomHttpClient(Context context) {
+		super();
 		this.context = context;
 	}
-
+	
 	@Override
 	protected ClientConnectionManager createClientConnectionManager() {
 		SchemeRegistry registry = new SchemeRegistry();
-		registry.register(new Scheme("http", PlainSocketFactory
-				.getSocketFactory(), 80));
+		registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		registry.register(new Scheme("https", newSslSocketFactory(), 443));
-		return new SingleClientConnManager(getParams(), registry);
+		ClientConnectionManager m =  new SingleClientConnManager(getParams(), registry);
+		return m;
 	}
 
 	private SSLSocketFactory newSslSocketFactory() {
 		try {
-			KeyStore trusted = KeyStore.getInstance("BKS");
-			InputStream in = context.getResources().openRawResource(
-					R.raw.android231);
-			try {
-				trusted.load(in, "changeit".toCharArray());
-			} finally {
-				in.close();
+			if (trusted == null) {
+				trusted = KeyStore.getInstance("BKS");
+				InputStream in = context.getResources().openRawResource(R.raw.android231); 
+				try {
+					trusted.load(in, "changeit".toCharArray());
+				} finally {
+					in.close();
+				}
 			}
 			return new SSLSocketFactory(trusted);
 		} catch (Exception e) {
