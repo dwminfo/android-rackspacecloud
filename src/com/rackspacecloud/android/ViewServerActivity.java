@@ -158,67 +158,69 @@ public class ViewServerActivity extends GaActivity {
 	}
 
 	private void loadServerData() {
-		TextView name = (TextView) findViewById(R.id.view_server_name);
-		name.setText(server.getName());
+		if(server != null){
+			TextView name = (TextView) findViewById(R.id.view_server_name);
+			name.setText(server.getName());
 
-		TextView os = (TextView) findViewById(R.id.view_server_os);
-		os.setText(server.getImage().getName());
+			TextView os = (TextView) findViewById(R.id.view_server_os);
+			os.setText(server.getImage().getName());
 
-		TextView memory = (TextView) findViewById(R.id.view_server_memory);
-		memory.setText(server.getFlavor().getRam() + " MB");
+			TextView memory = (TextView) findViewById(R.id.view_server_memory);
+			memory.setText(server.getFlavor().getRam() + " MB");
 
-		TextView disk = (TextView) findViewById(R.id.view_server_disk);
-		disk.setText(server.getFlavor().getDisk() + " GB");
+			TextView disk = (TextView) findViewById(R.id.view_server_disk);
+			disk.setText(server.getFlavor().getDisk() + " GB");
 
-		TextView status = (TextView) findViewById(R.id.view_server_status);
+			TextView status = (TextView) findViewById(R.id.view_server_status);
 
-		if(noAskForConfirm == false){
-			if(status.getText().toString().contains("VERIFY_RESIZE")){
-				//show the confimresizeactivity
-				noAskForConfirm = true;
-				Intent viewIntent = new Intent(getApplicationContext(), ConfirmResizeActivity.class);
-				viewIntent.putExtra("server", server);
-				startActivity(viewIntent);
-			}
-		}
-
-		// show status and possibly the progress, with polling
-		if (!"ACTIVE".equals(server.getStatus())) {
-			status.setText(server.getStatus() + " - " + server.getProgress() + "%");
-			pollServerTask = new PollServerTask();
-			pollServerTask.execute((Void[]) null);
-		} else {
-			status.setText(server.getStatus());
-		}
-
-		if (!ipAddressesLoaded) {
-			// public IPs
-			int layoutIndex = 12; // public IPs start here
-			LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
-			String publicIps[] = server.getPublicIpAddresses();
-			for (int i = 0; i < publicIps.length; i++) {
-				TextView tv = new TextView(this.getBaseContext());
-				tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
-				tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
-				tv.setTextSize(os.getTextSize());
-				tv.setTextColor(Color.WHITE);
-				tv.setText(publicIps[i]);
-				layout.addView(tv, layoutIndex++);
+			if(noAskForConfirm == false){
+				if(status.getText().toString().contains("VERIFY_RESIZE")){
+					//show the confimresizeactivity
+					noAskForConfirm = true;
+					Intent viewIntent = new Intent(getApplicationContext(), ConfirmResizeActivity.class);
+					viewIntent.putExtra("server", server);
+					startActivity(viewIntent);
+				}
 			}
 
-			// private IPs
-			layoutIndex++; // skip over the Private IPs label
-			String privateIps[] = server.getPrivateIpAddresses();
-			for (int i = 0; i < privateIps.length; i++) {
-				TextView tv = new TextView(this.getBaseContext());
-				tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
-				tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
-				tv.setTextSize(os.getTextSize());
-				tv.setTextColor(Color.WHITE);
-				tv.setText(privateIps[i]);
-				layout.addView(tv, layoutIndex++);
+			// show status and possibly the progress, with polling
+			if (!"ACTIVE".equals(server.getStatus())) {
+				status.setText(server.getStatus() + " - " + server.getProgress() + "%");
+				pollServerTask = new PollServerTask();
+				pollServerTask.execute((Void[]) null);
+			} else {
+				status.setText(server.getStatus());
 			}
-			ipAddressesLoaded = true;
+
+			if (!ipAddressesLoaded) {
+				// public IPs
+				int layoutIndex = 12; // public IPs start here
+				LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
+				String publicIps[] = server.getPublicIpAddresses();
+				for (int i = 0; i < publicIps.length; i++) {
+					TextView tv = new TextView(this.getBaseContext());
+					tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+					tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+					tv.setTextSize(os.getTextSize());
+					tv.setTextColor(Color.WHITE);
+					tv.setText(publicIps[i]);
+					layout.addView(tv, layoutIndex++);
+				}
+
+				// private IPs
+				layoutIndex++; // skip over the Private IPs label
+				String privateIps[] = server.getPrivateIpAddresses();
+				for (int i = 0; i < privateIps.length; i++) {
+					TextView tv = new TextView(this.getBaseContext());
+					tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+					tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+					tv.setTextSize(os.getTextSize());
+					tv.setTextColor(Color.WHITE);
+					tv.setText(privateIps[i]);
+					layout.addView(tv, layoutIndex++);
+				}
+				ipAddressesLoaded = true;
+			}
 		}
 
 		//loadImage();
