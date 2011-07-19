@@ -29,9 +29,6 @@ public class Preferences extends PreferenceActivity{
     public static final String COUNTRY_US_AUTH_SERVER = "https://auth.api.rackspacecloud.com/v1.0";
     public static final String COUNTRY_UK_AUTH_SERVER = "https://lon.auth.api.rackspacecloud.com/v1.0";
     
-    //Define web property ID
-    public static final String WEB_PROPERTY_ID = "enter you id here";
-    
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
         getPreferenceManager().setSharedPreferencesName(SHARED_PREFERENCES_NAME);

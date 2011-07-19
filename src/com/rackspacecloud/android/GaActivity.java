@@ -51,7 +51,7 @@ public class GaActivity extends Activity {
 		if(!"google_sdk".equals(Build.PRODUCT) && !"sdk".equals(Build.PRODUCT)){
 			Log.d("tracker", "Creating Tracker");
 			tracker = GoogleAnalyticsTracker.getInstance();
-			tracker.start(Preferences.WEB_PROPERTY_ID, 20, this);
+			tracker.start(Config.WEB_PROPERTY_ID, 20, this);
 		}
 		else{
 			Log.d("tracker", "Not Creating Tracker");
