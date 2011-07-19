@@ -39,20 +39,20 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  * @author Phillip Toohill
  *
  */
-public class AddContainerActivity extends Activity implements  OnClickListener {
+public class AddContainerActivity extends GaActivity implements  OnClickListener {
 
-
-	private EditText fileName;
+	private EditText containerName;
 	private Context context;	
 	private boolean isSaving;
-
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		trackPageView(PAGE_ADD_CONTAINER);
 		context = getApplicationContext();
 		setContentView(R.layout.createcontainer);
-		fileName = (EditText) findViewById(R.id.container_name);
+		containerName = (EditText) findViewById(R.id.container_name);
 		((Button) findViewById(R.id.save_button)).setOnClickListener(this);
 		isSaving = savedInstanceState != null && savedInstanceState.containsKey("isSaving")
 			&& savedInstanceState.getBoolean("isSaving");
@@ -67,14 +67,14 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 		outState.putBoolean("isSaving", isSaving);
 		
 	}
-
-
+	
 	public void onClick(View arg0) {
-		if ("".equals(fileName.getText().toString())) {
+		if ("".equals(containerName.getText().toString())) {
 			showAlert("Required Fields Missing", " Container name is required.");
 		} else {
 			showActivityIndicators();
-			new SaveFileTask().execute((Void[]) null);
+			trackEvent(CATEGORY_CONTAINER, EVENT_CREATE, "", -1);
+			new CreateContainerTask().execute((Void[]) null);
 		}
 	}
 
@@ -153,14 +153,14 @@ public class AddContainerActivity extends Activity implements  OnClickListener {
 		startActivity(viewIntent);
 	}
 
-	private class SaveFileTask extends AsyncTask<Void, Void, HttpBundle> {
+	private class CreateContainerTask extends AsyncTask<Void, Void, HttpBundle> {
 		private CloudServersException exception;
 
 		@Override
 		protected HttpBundle doInBackground(Void... arg0) {
 			HttpBundle bundle = null;
 			try {
-				bundle = (new ContainerManager(context)).create(fileName.getText());
+				bundle = (new ContainerManager(context)).create(containerName.getText());
 			} catch (CloudServersException e) {
 				exception = e;
 			}

@@ -6,7 +6,6 @@ package com.rackspacecloud.android;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -31,14 +30,16 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
-public class ListServersActivity extends ListActivity {
-
+public class ListServersActivity extends GaListActivity {
+	
 	private Server[] servers;
 	private Context context;
+	
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackPageView(PAGE_SERVERS);
         context = getApplicationContext();
         restoreState(savedInstanceState);
     }
@@ -62,7 +63,7 @@ public class ListServersActivity extends ListActivity {
             loadServers();        
     	}
     }
-    
+        
     protected void onListItemClick(ListView l, View v, int position, long id) {
     	if (servers != null && servers.length > 0) {
 	    	Intent viewIntent = new Intent(this, ViewServerActivity.class);
@@ -133,8 +134,7 @@ public class ListServersActivity extends ListActivity {
     		e.printStackTrace();
     	}
     }
-    
-    
+            
     private class LoadServersTask extends AsyncTask<Void, Void, ArrayList<Server>> {
     	
     	private CloudServersException exception;

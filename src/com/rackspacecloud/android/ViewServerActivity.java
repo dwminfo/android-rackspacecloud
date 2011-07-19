@@ -52,7 +52,7 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
-public class ViewServerActivity extends Activity {
+public class ViewServerActivity extends GaActivity {
 
 	private Server server;
 	private boolean ipAddressesLoaded; // to prevent polling from loading tons of duplicates
@@ -69,11 +69,12 @@ public class ViewServerActivity extends Activity {
 	private PollServerTask pollServerTask;
 	private boolean canPoll;
 	private boolean noAskForConfirm;
-	
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		trackPageView(PAGE_SERVER);
 		server = (Server) this.getIntent().getExtras().get("server");
 		context = getApplicationContext();
 		setContentView(R.layout.viewserver);
@@ -109,6 +110,8 @@ public class ViewServerActivity extends Activity {
 		loadFlavors();
 		loadImages();
 	}
+
+
 	/*
     private void loadImage() {
     	// hate to do this, but devices run out of memory after a few rotations
@@ -155,67 +158,69 @@ public class ViewServerActivity extends Activity {
 	}
 
 	private void loadServerData() {
-		TextView name = (TextView) findViewById(R.id.view_server_name);
-		name.setText(server.getName());
+		if(server != null){
+			TextView name = (TextView) findViewById(R.id.view_server_name);
+			name.setText(server.getName());
 
-		TextView os = (TextView) findViewById(R.id.view_server_os);
-		os.setText(server.getImage().getName());
+			TextView os = (TextView) findViewById(R.id.view_server_os);
+			os.setText(server.getImage().getName());
 
-		TextView memory = (TextView) findViewById(R.id.view_server_memory);
-		memory.setText(server.getFlavor().getRam() + " MB");
+			TextView memory = (TextView) findViewById(R.id.view_server_memory);
+			memory.setText(server.getFlavor().getRam() + " MB");
 
-		TextView disk = (TextView) findViewById(R.id.view_server_disk);
-		disk.setText(server.getFlavor().getDisk() + " GB");
+			TextView disk = (TextView) findViewById(R.id.view_server_disk);
+			disk.setText(server.getFlavor().getDisk() + " GB");
 
-		TextView status = (TextView) findViewById(R.id.view_server_status);
+			TextView status = (TextView) findViewById(R.id.view_server_status);
 
-		if(noAskForConfirm == false){
-			if(status.getText().toString().contains("VERIFY_RESIZE")){
-				//show the confimresizeactivity
-				noAskForConfirm = true;
-				Intent viewIntent = new Intent(getApplicationContext(), ConfirmResizeActivity.class);
-				viewIntent.putExtra("server", server);
-				startActivity(viewIntent);
-			}
-		}
-		
-		// show status and possibly the progress, with polling
-		if (!"ACTIVE".equals(server.getStatus())) {
-			status.setText(server.getStatus() + " - " + server.getProgress() + "%");
-			pollServerTask = new PollServerTask();
-			pollServerTask.execute((Void[]) null);
-		} else {
-			status.setText(server.getStatus());
-		}
-
-		if (!ipAddressesLoaded) {
-			// public IPs
-			int layoutIndex = 12; // public IPs start here
-			LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
-			String publicIps[] = server.getPublicIpAddresses();
-			for (int i = 0; i < publicIps.length; i++) {
-				TextView tv = new TextView(this.getBaseContext());
-				tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
-				tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
-				tv.setTextSize(os.getTextSize());
-				tv.setTextColor(Color.WHITE);
-				tv.setText(publicIps[i]);
-				layout.addView(tv, layoutIndex++);
+			if(noAskForConfirm == false){
+				if(status.getText().toString().contains("VERIFY_RESIZE")){
+					//show the confimresizeactivity
+					noAskForConfirm = true;
+					Intent viewIntent = new Intent(getApplicationContext(), ConfirmResizeActivity.class);
+					viewIntent.putExtra("server", server);
+					startActivity(viewIntent);
+				}
 			}
 
-			// private IPs
-			layoutIndex++; // skip over the Private IPs label
-			String privateIps[] = server.getPrivateIpAddresses();
-			for (int i = 0; i < privateIps.length; i++) {
-				TextView tv = new TextView(this.getBaseContext());
-				tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
-				tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
-				tv.setTextSize(os.getTextSize());
-				tv.setTextColor(Color.WHITE);
-				tv.setText(privateIps[i]);
-				layout.addView(tv, layoutIndex++);
+			// show status and possibly the progress, with polling
+			if (!"ACTIVE".equals(server.getStatus())) {
+				status.setText(server.getStatus() + " - " + server.getProgress() + "%");
+				pollServerTask = new PollServerTask();
+				pollServerTask.execute((Void[]) null);
+			} else {
+				status.setText(server.getStatus());
 			}
-			ipAddressesLoaded = true;
+
+			if (!ipAddressesLoaded) {
+				// public IPs
+				int layoutIndex = 12; // public IPs start here
+				LinearLayout layout = (LinearLayout) this.findViewById(R.id.view_server_layout);    	
+				String publicIps[] = server.getPublicIpAddresses();
+				for (int i = 0; i < publicIps.length; i++) {
+					TextView tv = new TextView(this.getBaseContext());
+					tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+					tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+					tv.setTextSize(os.getTextSize());
+					tv.setTextColor(Color.WHITE);
+					tv.setText(publicIps[i]);
+					layout.addView(tv, layoutIndex++);
+				}
+
+				// private IPs
+				layoutIndex++; // skip over the Private IPs label
+				String privateIps[] = server.getPrivateIpAddresses();
+				for (int i = 0; i < privateIps.length; i++) {
+					TextView tv = new TextView(this.getBaseContext());
+					tv.setLayoutParams(os.getLayoutParams()); // easy quick styling! :)
+					tv.setTypeface(tv.getTypeface(), 1); // 1 == bold
+					tv.setTextSize(os.getTextSize());
+					tv.setTextColor(Color.WHITE);
+					tv.setText(privateIps[i]);
+					layout.addView(tv, layoutIndex++);
+				}
+				ipAddressesLoaded = true;
+			}
 		}
 
 		//loadImage();
@@ -316,9 +321,10 @@ public class ViewServerActivity extends Activity {
 
 		setupButton(R.id.view_server_ping_button, new OnClickListener() {
 			public void onClick(View v) {
-				Intent viewIntent = new Intent(v.getContext(), PingServerActivity.class);
+				trackEvent(CATEGORY_SERVER, EVENT_PING, "", -1);
 
 				//ping the first public ip
+				Intent viewIntent = new Intent(v.getContext(), PingServerActivity.class);
 				viewIntent.putExtra("ipAddress", server.getPublicIpAddresses()[0]);
 				startActivity(viewIntent);
 
@@ -348,7 +354,7 @@ public class ViewServerActivity extends Activity {
 	public void setServer(Server server) {
 		this.server = server;
 	}
-	
+
 	//setup menu for when menu button is pressed
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -356,17 +362,17 @@ public class ViewServerActivity extends Activity {
 		inflater.inflate(R.menu.view_server_activity_menu, menu);
 		return true;
 	} 
-    
-    @Override 
-    //in options menu, when add account is selected go to add account activity
-    public boolean onOptionsItemSelected(MenuItem item) {
-    	switch (item.getItemId()) {
-    	case R.id.refresh_server:
-    		loadServerData();
-    		return true;
-    	}	
-    	return false;
-    } 
+
+	@Override 
+	//in options menu, when add account is selected go to add account activity
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.refresh_server:
+			loadServerData();
+			return true;
+		}	
+		return false;
+	} 
 
 	private void startServerError(String message, HttpBundle bundle){
 		Intent viewIntent = new Intent(getApplicationContext(), ServerErrorActivity.class);
@@ -399,7 +405,7 @@ public class ViewServerActivity extends Activity {
 				.setMessage("Are you sure you want to perform a soft reboot?")
 				.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_SERVER, EVENT_REBOOT, "", -1);
 						new SoftRebootServerTask().execute((Void[]) null);
 					}
 				})
@@ -416,7 +422,7 @@ public class ViewServerActivity extends Activity {
 				.setMessage("Are you sure you want to perform a hard reboot?")
 				.setPositiveButton("Reboot Server", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_SERVER, EVENT_REBOOT, "", -1);
 						new HardRebootServerTask().execute((Void[]) null);
 					}
 				})
@@ -444,7 +450,7 @@ public class ViewServerActivity extends Activity {
 				.setMessage("Are you sure you want to delete this server?  This operation cannot be undone and all backups will be deleted.")
 				.setPositiveButton("Delete Server", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_SERVER, EVENT_DELETE, "", -1);
 						new DeleteServerTask().execute((Void[]) null);
 					}
 				})
@@ -464,7 +470,7 @@ public class ViewServerActivity extends Activity {
 				.setMessage("Enter new name for server: ")        	         
 				.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_SERVER, EVENT_RENAME, "", -1);
 						modifiedServerName = input.getText().toString();
 						new RenameServerTask().execute((Void[]) null);
 					}
@@ -503,7 +509,7 @@ public class ViewServerActivity extends Activity {
 	private class ResizeClickListener implements android.content.DialogInterface.OnClickListener {
 
 		public void onClick(DialogInterface dialog, int which) {
-			//need to add one because server flavors state at index 1
+			trackEvent(CATEGORY_SERVER, EVENT_RESIZE, "", -1);
 			selectedFlavorId = which + 1 + "";
 			new ResizeServerTask().execute((Void[]) null);
 		}
@@ -513,6 +519,7 @@ public class ViewServerActivity extends Activity {
 	private class RebuildClickListener implements android.content.DialogInterface.OnClickListener {
 
 		public void onClick(DialogInterface dialog, int which) {
+			trackEvent(CATEGORY_SERVER, EVENT_REBUILD, "", -1);
 			selectedImageId = images[which].getId() + "";
 			new RebuildServerTask().execute((Void[]) null);
 		}

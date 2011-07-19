@@ -34,7 +34,7 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
  * @author Mike Mayo - mike.mayo@rackspace.com - twitter.com/greenisus
  *
  */
-public class AddServerActivity extends Activity implements OnItemSelectedListener, OnClickListener {
+public class AddServerActivity extends GaActivity implements OnItemSelectedListener, OnClickListener {
 
 	private Image[] images;
 	private Flavor[] flavors;
@@ -46,36 +46,37 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 	private Server server;
 	private SeekBar numberBar;
 	private TextView numberDisplay;
-	
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.createserver);
-        serverName = (EditText) findViewById(R.id.server_name);
-        ((Button) findViewById(R.id.save_button)).setOnClickListener(this);
-        loadImageSpinner();
-        loadFlavorSpinner();
-        loadServerCount();
-    }
-    
-    private void loadServerCount(){
-    	numberDisplay = (TextView)findViewById(R.id.server_count_text);
-    	numberBar = (SeekBar)findViewById(R.id.number_of_servers);
-    	numberBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-			
+
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		trackPageView(PAGE_ADD_SERVER);	
+		setContentView(R.layout.createserver);
+		serverName = (EditText) findViewById(R.id.server_name);
+		((Button) findViewById(R.id.save_button)).setOnClickListener(this);
+		loadImageSpinner();
+		loadFlavorSpinner();
+		loadServerCount();
+	}
+
+	private void loadServerCount(){
+		numberDisplay = (TextView)findViewById(R.id.server_count_text);
+		numberBar = (SeekBar)findViewById(R.id.number_of_servers);
+		numberBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
@@ -89,7 +90,7 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 					number.setText("[1.." + (progress+1) + "]");
 				}
 			}
-			
+
 			private String getCountText(int i){
 				if(i == 0){
 					return "1 Server";
@@ -100,10 +101,10 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 				}
 			}
 		});
-    	
-    }
 
-    private void loadImageSpinner() {
+	}
+
+	private void loadImageSpinner() {
 		imageSpinner = (Spinner) findViewById(R.id.image_spinner);
 		imageSpinner.setOnItemSelectedListener(this);
 		String imageNames[] = new String[Image.getImages().size()]; 
@@ -117,18 +118,18 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 			imageNames[i] = image.getName();
 			i++;
 		}
-		
+
 		//Sort so they display better in the spinner
 		Arrays.sort(images);
 		Arrays.sort(imageNames);
-		
+
 		selectedImageId = images[0].getId();
 		ArrayAdapter<String> imageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, imageNames);
 		imageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		imageSpinner.setAdapter(imageAdapter);
-    }
-    
-    private void loadFlavorSpinner() {
+	}
+
+	private void loadFlavorSpinner() {
 		flavorSpinner = (Spinner) findViewById(R.id.flavor_spinner);
 		flavorSpinner.setOnItemSelectedListener(this);
 		String flavorNames[] = new String[Flavor.getFlavors().size()]; 
@@ -146,7 +147,7 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		ArrayAdapter<String> flavorAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, flavorNames);
 		flavorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		flavorSpinner.setAdapter(flavorAdapter);
-    }
+	}
 
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		if (parent == imageSpinner) {
@@ -163,46 +164,47 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 		if ("".equals(serverName.getText().toString())) {
 			showAlert("Required Fields Missing", "Server name is required.");
 		} else {
+			trackEvent(CATEGORY_SERVER, EVENT_CREATE, "", numberBar.getProgress()+1);
 			showActivityIndicators();
 			server = new Server();
-			server.setName(serverName.getText().toString());
+			server.setName(serverName.getText().toString()); 
 			server.setImageId(selectedImageId);
 			server.setFlavorId(selectedFlavorId);
 			new SaveServerTask().execute((Void[]) null);
 		}
 	}
-	
-    private void showAlert(String title, String message) {
+
+	private void showAlert(String title, String message) {
 		AlertDialog alert = new AlertDialog.Builder(this).create();
 		alert.setTitle(title);
 		alert.setMessage(message);
 		alert.setButton("OK", new DialogInterface.OnClickListener() {
-	      public void onClick(DialogInterface dialog, int which) {
-	        return;
-	    } }); 
+			public void onClick(DialogInterface dialog, int which) {
+				return;
+			} }); 
 		alert.show();
 		hideActivityIndicators();
-    }
-	
-    private void setActivityIndicatorsVisibility(int visibility) {
-        ProgressBar pb = (ProgressBar) findViewById(R.id.save_server_progress_bar);
-    	TextView tv = (TextView) findViewById(R.id.saving_server_label);
-        pb.setVisibility(visibility);
-        tv.setVisibility(visibility);
-    }
+	}
 
-    private void showActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.VISIBLE);
-    }
-    
-    private void hideActivityIndicators() {
-    	setActivityIndicatorsVisibility(View.INVISIBLE);
-    }
-        
-    private class SaveServerTask extends AsyncTask<Void, Void, Server> {
-    	
+	private void setActivityIndicatorsVisibility(int visibility) {
+		ProgressBar pb = (ProgressBar) findViewById(R.id.save_server_progress_bar);
+		TextView tv = (TextView) findViewById(R.id.saving_server_label);
+		pb.setVisibility(visibility);
+		tv.setVisibility(visibility);
+	}
+
+	private void showActivityIndicators() {
+		setActivityIndicatorsVisibility(View.VISIBLE);
+	}
+
+	private void hideActivityIndicators() {
+		setActivityIndicatorsVisibility(View.INVISIBLE);
+	}
+
+	private class SaveServerTask extends AsyncTask<Void, Void, Server> {
+
 		private CloudServersException exception;
-    	
+
 		@Override
 		protected Server doInBackground(Void... arg0) {
 			try {
@@ -220,7 +222,7 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 			}
 			return server;
 		}
-    	
+
 		@Override
 		protected void onPostExecute(Server result) {
 			if (exception != null) {
@@ -231,6 +233,6 @@ public class AddServerActivity extends Activity implements OnItemSelectedListene
 				finish();
 			}
 		}
-    }
-	
+	}
+
 }

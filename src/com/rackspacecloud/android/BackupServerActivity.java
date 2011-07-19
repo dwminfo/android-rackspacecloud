@@ -22,7 +22,6 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
 import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -41,15 +40,15 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class BackupServerActivity extends Activity implements OnItemSelectedListener, OnClickListener {
-		
+public class BackupServerActivity extends GaActivity implements OnItemSelectedListener, OnClickListener {
+	
 	private Server server;
 	private Spinner weeklyBackupSpinner;
 	private Spinner dailyBackupSpinner;
 	private CheckBox enableCheckBox;
 	private String selectedWeeklyBackup;
 	private String selectedDailyBackup;
-
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,7 +57,7 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
         setContentView(R.layout.viewbackup); 
         setupSpinners();
     	setupButtons();
-    	setupCheckBox();        
+    	setupCheckBox(); 
     }
 
     private void setupSpinners(){
@@ -109,6 +108,7 @@ public class BackupServerActivity extends Activity implements OnItemSelectedList
 			showAlert("Error", "Server is busy.");
 		}
 		else{
+			trackEvent(CATEGORY_SERVER, EVENT_BACKUP, "", -1);
 			new BackupServerTask().execute((Void[]) null);
 		}
 	}

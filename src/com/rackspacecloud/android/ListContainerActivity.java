@@ -3,7 +3,6 @@ package com.rackspacecloud.android;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,7 +28,7 @@ import com.rackspace.cloud.servers.api.client.CloudServersException;
  * @author Phillip Toohill
  * 
  */
-public class ListContainerActivity extends ListActivity {
+public class ListContainerActivity extends GaListActivity {
 
 	protected static final int DELETE_ID = 0;
 	
@@ -43,10 +42,11 @@ public class ListContainerActivity extends ListActivity {
 	public int kbConver = 1024;
 	private Context context;
 	private boolean loading;
-	
+		
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		trackPageView(PAGE_CONTAINERS);
 		context = getApplicationContext();
 		restoreState(savedInstanceState);
 	}
@@ -139,7 +139,8 @@ public class ListContainerActivity extends ListActivity {
 			e.printStackTrace();
 		}
 	}
-
+	
+	
 	private class LoadContainersTask extends
 			AsyncTask<Void, Void, ArrayList<Container>> {
 
@@ -206,7 +207,6 @@ public class ListContainerActivity extends ListActivity {
 
 		@Override
 		protected void onPostExecute(ArrayList<Container> result) {
-			Log.v("listcontainerActivity", "onPostExecute loadCDNcontainerTask");
 			if (exception != null) {
 				showAlert("Error", exception.getMessage());
 			}

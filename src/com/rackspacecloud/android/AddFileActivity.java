@@ -33,7 +33,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class AddFileActivity extends Activity implements OnClickListener{
+public class AddFileActivity extends GaActivity implements OnClickListener{
 	
 	private Context context;	
 	private EditText fileName;
@@ -47,6 +47,7 @@ public class AddFileActivity extends Activity implements OnClickListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackPageView(PAGE_ADD_OBJECT);
         setContentView(R.layout.addtextfile);
         context = getApplicationContext();
         containerName = (String) this.getIntent().getExtras().get("Cname");
@@ -85,6 +86,7 @@ public class AddFileActivity extends Activity implements OnClickListener{
 			showAlert("Required Fields Missing", " File name is required.");
 		} else {
 			//showActivityIndicators();
+			trackEvent(CATEGORY_FILE, EVENT_CREATE, "", -1);
 			new SaveFileTask().execute((Void[]) null);
 		}
 	}

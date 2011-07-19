@@ -15,7 +15,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -32,16 +31,17 @@ import com.rackspace.cloud.servers.api.client.ServerManager;
 import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
-public class PasswordServerActivity extends Activity implements OnClickListener{
+public class PasswordServerActivity extends GaActivity implements OnClickListener{
 	
 	private Server server;
 	private String modifiedPassword;
 	
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackPageView(PAGE_PASSCODE);
         setContentView(R.layout.viewchangepassword); 
         server = (Server) this.getIntent().getExtras().get("server");
-    	setupButtons();       
+    	setupButtons();  
     }
 
 	private void setupButtons() {
@@ -54,6 +54,7 @@ public class PasswordServerActivity extends Activity implements OnClickListener{
 		String password = ((EditText)findViewById(R.id.password_edittext)).getText().toString();
 		String confirm = ((EditText)findViewById(R.id.password_confirm_edittext)).getText().toString();
 		if(password.equals(confirm)){
+			trackEvent(CATEGORY_SERVER, EVENT_PASSWORD, "", -1);
 			modifiedPassword = password;
 			new PasswordServerTask().execute((Void[]) null);	
 		}
