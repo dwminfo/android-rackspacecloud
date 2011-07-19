@@ -20,7 +20,6 @@ import org.xml.sax.XMLReader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -52,10 +51,11 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  * @author Phillip Toohill
  * 
  */
-public class ContainerObjectsActivity extends ListActivity {
+public class ContainerObjectsActivity extends GaListActivity {
 
 	private static final int deleteContainer = 0;
 	private static final int deleteFolder = 1;
+	
 	private ContainerObjects[] files;
 	private static Container container;
 	public String LOG = "viewFilesActivity";
@@ -73,11 +73,11 @@ public class ContainerObjectsActivity extends ListActivity {
 	private AddObjectListenerTask task;
 	private DeleteObjectListenerTask deleteObjTask;
 	private DeleteContainerListenerTask deleteContainerTask;
-
-
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		trackPageView(PAGE_FOLDER);
 		container = (Container) this.getIntent().getExtras().get("container");
 		Log.v(LOG, "CDNEnabled:" + container.isCdnEnabled());
 		context = getApplicationContext();
@@ -473,6 +473,7 @@ public class ContainerObjectsActivity extends ListActivity {
 					public void onClick(DialogInterface dialog,
 							int whichButton) {
 						// User clicked OK so do some stuff
+						trackEvent(CATEGORY_CONTAINER, EVENT_DELETE, "", -1);
 						new DeleteContainerTask()
 						.execute(currentPath);
 					}

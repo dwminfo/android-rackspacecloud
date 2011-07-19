@@ -37,7 +37,7 @@ import com.rackspace.cloud.servers.api.client.CloudServersException;
 import com.rackspace.cloud.servers.api.client.http.HttpBundle;
 import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser;
 
-public class EnableCDNActivity extends Activity implements OnClickListener,
+public class EnableCDNActivity extends GaActivity implements OnClickListener,
 		OnItemSelectedListener {
 
 	public static String containerName = null;
@@ -53,6 +53,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		trackPageView(PAGE_CONTAINER_DETAILS);
 		setContentView(R.layout.enable_cdn_container);
 		context = getApplicationContext();
 		containerName = (String) this.getIntent().getExtras().get("Cname");
@@ -149,6 +150,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
 									// User clicked OK so do some stuff
+									trackEvent(CATEGORY_CONTAINER, EVENT_UPDATED, "", -1);
 									new EnableCDNTask().execute((Void[]) null);
 								}
 							})
@@ -170,6 +172,7 @@ public class EnableCDNActivity extends Activity implements OnClickListener,
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
 									// User clicked OK so do some stuff
+									trackEvent(CATEGORY_CONTAINER, EVENT_UPDATED, "", -1);
 									new ChangeAttributesCDNTask().execute((Void[]) null);
 								}
 							})

@@ -53,10 +53,11 @@ import com.rackspace.cloud.servers.api.client.parsers.CloudServersFaultXMLParser
  *
  */
 
-public class ContainerObjectDetails extends Activity {
+public class ContainerObjectDetails extends GaActivity {
 
 	private static final int deleteObject = 0;
 	private final String DOWNLOAD_DIRECTORY = "/RackspaceCloud";
+	
 	private ContainerObjects objects;
 	private String containerNames;
 	private String cdnURL;
@@ -75,12 +76,13 @@ public class ContainerObjectDetails extends Activity {
 	private AndroidCloudApplication app;
 	private DeleteObjectListenerTask deleteObjTask;
 	private DownloadObjectListenerTask downloadObjTask;
-	
+		
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		trackPageView(PAGE_STORAGE_OBJECT);
+		
 		context = getApplicationContext();
 
 		objects = (ContainerObjects) this.getIntent().getExtras().get("container");
@@ -158,7 +160,6 @@ public class ContainerObjectDetails extends Activity {
 			downloadObjTask.execute();
 		}
 	}
-	
 	
 	@Override
 	protected void onStart(){
@@ -312,6 +313,7 @@ public class ContainerObjectDetails extends Activity {
 			.setPositiveButton("Delete File", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
 					// User clicked OK so do some stuff
+					trackEvent(CATEGORY_FILE, EVENT_DELETE, "", -1);
 					new ContainerObjectDeleteTask().execute((Void[]) null);
 				}
 			})
