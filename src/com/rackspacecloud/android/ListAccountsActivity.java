@@ -309,11 +309,16 @@ public class ListAccountsActivity extends GaListActivity{
 
 	//removes the selected account from account list if remove is clicked
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-		accounts.remove(info.position);
-		writeAccounts();
-		loadAccounts();
-		return true;
+		if (accounts.size() == 0) {
+			displayNoAccountsCell();
+			return true;
+		} else {
+			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+			accounts.remove(info.position);
+			writeAccounts();
+			loadAccounts();
+			return true;
+		}
 	}
 
 	class AccountAdapter extends ArrayAdapter<Account> {
